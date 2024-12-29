@@ -88,7 +88,7 @@ def extract_locs(override=False):
 
     header = ("\"\"\"\n"
               "Generated file, do not edit manually.\n\n"
-              "See https://github.com/Satisha10/AP_world_wotw_extractors for the code.\n"
+              "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
               "Generated with `extract_items.py` by running `extract_locs()`.\n"
               "\"\"\"\n\n\n")
 
