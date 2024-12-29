@@ -1,0 +1,37 @@
+name: Kii
+description: Ori and the Will of the Wisps .yaml file for Kii preset.
+game: Ori and the Will of the Wisps
+requires:
+  version: 0.5.0
+
+Ori and the Will of the Wisps:
+  progression_balancing: normal
+  accessibility: items
+
+  difficulty: kii
+  glitches: 'false'
+  spawn: random
+  goal: trees
+  hard_mode: 'false'
+  qol: 'true'
+  hints: 'true'
+
+  tp: 'true'
+  extratp: 'false'
+  bonus: 'true'
+  extra_bonus: 'false'
+  skill_upgrade: 'false'
+
+  better_spawn: 'false'
+  better_wellspring: 'false'
+  no_rain: 'false'
+  no_combat: 'false'
+  no_trials: 'false'
+  no_hearts: 'false'
+  no_quests: 'false'
+  no_ks: 'false'
+  glades_done: 'false'
+  open_mode: 'false'
+
+  sword: 'false'
+  vanilla_shop_upgrades: 'false'

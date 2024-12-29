@@ -1,0 +1,117 @@
+Name,Amount,Classification,Type,Group,Value
+Sword,1,progression,item,24,100
+Double Jump,1,progression,item,24,5
+Regenerate,1,progression,item,24,77
+Bow,1,progression,item,24,97
+Dash,1,progression,item,24,102
+Bash,1,progression,item,24,0
+Grapple,1,progression,item,24,57
+Glide,1,progression,item,24,14
+Flap,1,progression,item,24,118
+Grenade,1,progression,item,24,51
+Flash,1,progression,item,24,62
+Water Dash,1,progression,item,24,104
+Burrow,1,progression,item,24,101
+Launch,1,progression,item,24,8
+Water,1,progression,item,6,2000
+Hammer,1,progression,item,1,98
+Sentry,1,progression,item,1,116
+Shuriken,1,progression,item,1,106
+Spear,1,progression,item,1,74
+Blaze,1,progression,item,1,115
+Water Breath,1,progression,item,1,23
+Ancestral Light 1,1,useful,item,24,120
+Ancestral Light 2,1,useful,item,24,121
+Overcharge,1,useful,item,25,1
+Triple Jump,1,progression,item,25,2
+Wingclip,1,useful,item,25,3
+Bounty,1,useful,item,25,4
+Swap,1,useful,item,25,5
+Magnet,1,progression,item,25,8
+Splinter,1,useful,item,25,9
+Reckless,1,useful,item,25,13
+Quickshot,1,useful,item,25,14
+Resilience,1,useful,item,25,18
+Light Harvest,1,useful,item,25,19
+Vitality,1,useful,item,25,22
+Life Harvest,1,useful,item,25,23
+Energy Harvest,1,useful,item,25,25
+Energy (Shard),1,useful,item,25,26
+Life Pact,1,useful,item,25,27
+Last Stand,1,useful,item,25,28
+Sense,1,useful,item,25,30
+Ultra Bash,1,useful,item,25,32
+Ultra Grapple,1,useful,item,25,33
+Overflow,1,useful,item,25,34
+Thorn,1,useful,item,25,35
+Catalyst,1,useful,item,25,36
+Turmoil,1,useful,item,25,38
+Sticky,1,useful,item,25,39
+Finesse,1,useful,item,25,40
+Spirit Surge,1,useful,item,25,41
+Lifeforce,1,useful,item,25,43
+Deflector,1,progression,item,25,44
+Fracture,1,useful,item,25,46
+Arcing,1,useful,item,25,47
+Midnight Burrows TP,1,progression,item,24922,42531
+Howl's Den TP,1,progression,item,11666,61594
+Central Luma TP,1,progression,item,945,58183
+Mouldwood Depths TP,1,progression,item,18793,38871
+Wellspring TP,1,progression,item,53632,18181
+Baur's Reach TP,1,progression,item,28895,54235
+Kwolok's Hollow TP,1,progression,item,937,26601
+Woods Entrance TP,1,progression,item,58674,7071
+Woods Exit TP,1,progression,item,58674,1965
+Feeding Grounds TP,1,progression,item,58674,10029
+Central Wastes TP,1,progression,item,20120,49994
+Outer Ruins TP,1,progression,item,20120,41398
+Willow's End TP,1,progression,item,16155,41465
+Inkwater Marsh TP,1,progression,item,21786,10185
+Glades TP,1,progression,item,42178,42096
+Luma Boss TP,1,progression,item,945,1370
+Inner Ruins TP,1,progression,item,10289,4928
+Shriek TP,1,progression,item,16155,50867
+Health Regeneration,1,useful,item,11,30
+Energy Regeneration,1,useful,item,11,31
+Extra Double Jump,1,useful,item,11,35
+Extra Air Dash,1,useful,item,11,36
+Blaze Efficiency,1,useful,item,11,52
+Spear Efficiency,1,useful,item,11,53
+Shuriken Efficiency,1,useful,item,11,54
+Sentry Efficiency,1,useful,item,11,55
+Bow Efficiency,1,useful,item,11,56
+Regenerate Efficiency,1,useful,item,11,57
+Flash Efficiency,1,useful,item,11,58
+Grenade Efficiency,1,useful,item,11,59
+Rapid Sword,1,useful,item,11,51
+Rapid Hammer,1,useful,item,11,50
+Rapid Spear,1,useful,item,11,11
+Quickshot Upgrade,1,useful,item,11,10
+Melting Bow,1,useful,item,11,70
+Melting Blaze,1,useful,item,11,71
+Melting Sword,1,useful,item,11,72
+Melting Hammer,1,useful,item,11,73
+Melting Spear,1,useful,item,11,74
+Melting Shuriken,1,useful,item,11,75
+Uncharged Bashnades,1,useful,item,11,42
+Extra Grenade,1,useful,item,11,40
+Splinter Grenade,1,useful,item,11,45
+Unlimited Sentries,1,useful,item,11,37
+Sentry Fire Rate,1,useful,item,11,47
+Bashable Shuriken,1,useful,item,11,95
+Exploding Spear,1,useful,item,3440,5687
+Hammer Shockwave,1,useful,item,3440,46488
+Static Shuriken,1,useful,item,3440,10776
+Charge Blaze,1,useful,item,3440,61898
+Rapid Sentry,1,useful,item,3440,57376
+Jumpgrade,1,useful,item,11,87
+Skill Velocity,1,useful,item,11,80
+200 Spirit Light,20,progression_skip_balancing,resource,1,200
+100 Spirit Light,20,filler,resource,1,100
+50 Spirit Light,108,filler,resource,1,50
+1 Spirit Light,1,filler,resource,1,1
+Ore,40,progression,resource,2,0
+Keystone,40,progression,resource,3,0
+Shard Slot,5,useful,resource,4,0
+Health,24,progression,resource,5,0
+Energy,24,progression,resource,6,0
