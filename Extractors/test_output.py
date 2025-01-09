@@ -127,7 +127,12 @@ def generate_test() -> None:
             f",\"tricks\":[{tricks}],\"hard\":{hard},\"goals\":[],\"headers\":[]"
             ",\"headerConfig\":[],\"inlineHeaders\":[]}],\"disableLogicFilter\":false,"
             "\"online\":false,\"createGame\":\"None\"}\n\n")
-    output = f"Seed: {seed}\nAPSlot: {name}\n\n"
+
+    output = ("APAddress:archipelago.gg\n"
+              "APPort:38281\n"
+              "APPassword:\n"
+              f"APSlot:{name}\n\n"
+              f"APSeed:{seed}\n")
 
     output += r"Spawn: " + coord[spawn] + "\n\n"
     output += h_core
