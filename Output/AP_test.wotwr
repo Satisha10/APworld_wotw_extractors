@@ -2,9 +2,12 @@ Flags: AP, Moki, All Trees, Glitches, Teleporters, No Quests, No Willow Hearts, 
 // Format Version: 1.0.0
 // Config: {"seed":"0","worldSettings":[{"spawn":"Random","difficulty":"Moki","tricks":["SwordSentryJump","GlideHammerJump","SentryRedirect","HammerJump","BlazeSwap","LaunchSwap","SpearBreak","ShurikenBreak","GlideJump","GrenadeRedirect","GrenadeJump","FlashSwap","RemoveKillPlane","HammerBreak","HammerSentryJump","SpearJump","PauseHover","SwordJump","WaveDash","SentrySwap","SentryBurn","SentryBreak"],"hard":true,"goals":[],"headers":[],"headerConfig":[],"inlineHeaders":[]}],"disableLogicFilter":false,"online":false,"createGame":"None"}
 
-Seed: 0
-APSlot: test
+APAddress:archipelago.gg
+APPort:38281
+APPassword:
+APSlot:test
 
+APSeed:0
 Spawn: -799, -4310  // MarshSpawn.Main
 
 // Seed Core

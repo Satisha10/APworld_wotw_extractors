@@ -58,7 +58,7 @@ def extract_items(override=False):
                  '                    "Wellspring TP", "Baur\'s Reach TP", "Kwolok\'s Hollow TP", "Woods Entrance TP", "Woods Exit TP",\n'
                  '                    "Feeding Grounds TP", "Central Wastes TP", "Outer Ruins TP", "Willow\'s End TP",\n'
                  '                    "Inkwater Marsh TP", "Glades TP"],\n'
-                 '    "extratp": ["Luma Boss TP", "Inner Ruins TP", "Shriek TP"],\n'
+                 '    "extra_tp": ["Luma Boss TP", "Inner Ruins TP", "Shriek TP"],\n'
                  '    "weapon_upgrades": ["Exploding Spear", "Hammer Shockwave", "Static Shuriken", "Charge Blaze", "Rapid Sentry"],\n'
                  '    "bonus": ["Health Regeneration", "Energy Regeneration", "Extra Double Jump", "Extra Air Dash", "Blaze Efficiency",\n'
                  '              "Spear Efficiency", "Shuriken Efficiency", "Sentry Efficiency", "Bow Efficiency", "Regenerate Efficiency",\n'
@@ -67,7 +67,7 @@ def extract_items(override=False):
                  '               "Melting Blaze", "Melting Sword", "Melting Hammer", "Melting Spear", "Melting Shuriken",\n'
                  '               "Uncharged Bashnades", "Extra Grenade", "Splinter Grenade", "Unlimited Sentries",\n'
                  '               "Sentry Fire Rate", "Bashable Shuriken"],\n'
-                 '    "skillup": ["Jumpgrade", "Skill Velocity"]\n'
+                 '    "skill_upgrades": ["Jumpgrade", "Skill Velocity"]\n'
                  '    }\n')
 
     with open("Items.py", "w") as file:
@@ -134,6 +134,9 @@ def compute_id(pre, item_type, group, state, value=""):
         value = ""
     elif item_type == "resource":
         b_item_type = "10"
+        value = ""
+    elif item_type == "upgrade":
+        b_item_type = "11"
         value = ""
     else:
         raise ValueError(f"{item_type} is not a valid type of item (must be location, item or resource).")
