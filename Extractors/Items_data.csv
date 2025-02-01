@@ -14,12 +14,12 @@ Water Dash,1,progression,item,24,104
 Burrow,1,progression,item,24,101
 Launch,1,progression,item,24,8
 Water,1,progression,item,6,2000
-Hammer,1,progression,item,1,98
-Sentry,1,progression,item,1,116
-Shuriken,1,progression,item,1,106
-Spear,1,progression,item,1,74
-Blaze,1,progression,item,1,115
-Water Breath,1,progression,item,1,23
+Hammer,1,progression,item,24,98
+Sentry,1,progression,item,24,116
+Shuriken,1,progression,item,24,106
+Spear,1,progression,item,24,74
+Blaze,1,progression,item,24,115
+Water Breath,1,progression,item,24,23
 Ancestral Light 1,1,useful,item,24,120
 Ancestral Light 2,1,useful,item,24,121
 Overcharge,1,useful,item,25,1

@@ -128,7 +128,7 @@ def compute_id(pre, item_type, group, state, value=""):
     if item_type == "location":
         b_item_type = "00"
         if not value:
-            value = "0"
+            value = "1"
     elif item_type == "item":
         b_item_type = "01"
         value = ""
