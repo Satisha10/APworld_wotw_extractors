@@ -47,6 +47,7 @@ name_convert: Dict[str, str] = {  # Translation of the item names
     "WaterDash": "Water Dash",
     "WaterBreath": "Water Breath",
     "TripleJump": "Triple Jump",
+    "Water": "Clean Water",
     "BurrowsTP": "Midnight Burrows TP",
     "DenTP": "Howl's Den TP",
     "EastPoolsTP": "Central Luma TP",
@@ -86,7 +87,7 @@ combat_name = ["BreakWall", "Combat", "Boss"]
 
 # Skills that can be used infinitely (note: Regenerate is here because of how the logic is written)
 inf_skills = ["Sword", "Double Jump", "Regenerate", "Dash", "Bash", "Grapple", "Glide", "Flap", "Water Dash",
-              "Burrow", "Launch", "Water", "Water Breath", "Hammer", "free"]
+              "Burrow", "Launch", "Clean Water", "Water Breath", "Hammer", "free"]
 
 # Glitches that use resources
 glitches = {"ShurikenBreak": ["Shuriken"],

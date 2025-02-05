@@ -13,7 +13,7 @@ Flash,1,progression,item,24,62
 Water Dash,1,progression,item,24,104
 Burrow,1,progression,item,24,101
 Launch,1,progression,item,24,8
-Water,1,progression,item,6,2000
+Clean Water,1,progression,item,6,2000
 Hammer,1,progression,item,24,98
 Sentry,1,progression,item,24,116
 Shuriken,1,progression,item,24,106
@@ -112,11 +112,11 @@ Bashable Shurikens,1,useful,upgrade,4,95
 Jumpgrade,3,useful,upgrade,4,87
 Skill Velocity,3,useful,upgrade,4,80
 200 Spirit Light,20,progression_skip_balancing,resource,1,200
-100 Spirit Light,20,filler,resource,1,100
-50 Spirit Light,92,filler,resource,1,50
+100 Spirit Light,0,filler,resource,1,100
+50 Spirit Light,0,filler,resource,1,50
 1 Spirit Light,1,filler,resource,1,1
 Ore,40,progression,resource,2,0
 Keystone,40,progression,resource,3,0
 Shard Slot,5,useful,resource,4,0
-Health,24,progression,resource,5,0
-Energy,24,progression,resource,6,0
+Health Fragment,24,progression,resource,5,0
+Energy Fragment,24,progression,resource,6,0

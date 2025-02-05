@@ -46,9 +46,10 @@ def extract_items(override=False):
 
     item_txt += ('group_table = {\n'
                  '    "skills": ["Sword", "Double Jump", "Regenerate", "Bow", "Dash", "Bash", "Grapple", "Glide", "Flap", "Grenade",\n'
-                 '               "Flash", "Water Dash", "Burrow", "Launch", "Water", "Water Breath", "Hammer", "Sentry", "Shuriken",\n'
-                 '               "Spear", "Blaze"],\n'
-                 '    "collectibles": ["Health", "Energy", "Keystone", "Ore", "Shard Slot", "Ancestral Light 1", "Ancestral Light 2"],\n'
+                 '               "Flash", "Water Dash", "Burrow", "Launch", "Clean Water", "Water Breath", "Hammer", "Sentry",\n'
+                 '               "Shuriken", "Spear", "Blaze"],\n'
+                 '    "collectibles": ["Health Fragment", "Energy Fragment", "Keystone", "Ore", "Shard Slot", "Ancestral Light 1",\n'
+                 '               "Ancestral Light 2"],\n'
                  '    "spirit_light": ["1 Spirit Light", "50 Spirit Light", "100 Spirit Light", "200 Spirit Light"],\n'
                  '    "shards": ["Overcharge", "Triple Jump", "Wingclip", "Bounty", "Swap", "Magnet", "Splinter", "Reckless", "Quickshot",\n'
                  '               "Resilience", "Light Harvest", "Vitality", "Life Harvest", "Energy Harvest", "Energy (Shard)",\n'
@@ -63,10 +64,10 @@ def extract_items(override=False):
                  '    "bonus": ["Health Regeneration", "Energy Regeneration", "Extra Double Jump", "Extra Air Dash", "Blaze Efficiency",\n'
                  '              "Spear Efficiency", "Shuriken Efficiency", "Sentry Efficiency", "Bow Efficiency", "Regenerate Efficiency",\n'
                  '              "Flash Efficiency", "Grenade Efficiency"],\n'
-                 '    "bonus+": ["Rapid Sword", "Rapid Hammer", "Rapid Spear", "Quickshot Upgrade", "Melting Bow",\n'
-                 '               "Melting Blaze", "Melting Sword", "Melting Hammer", "Melting Spear", "Melting Shuriken",\n'
-                 '               "Uncharged Bashnades", "Extra Grenade", "Splinter Grenade", "Unlimited Sentries",\n'
-                 '               "Sentry Fire Rate", "Bashable Shuriken"],\n'
+                 '    "bonus+": ["Rapid Sword", "Rapid Hammer", "Rapid Spear", "Rapid Grenade", "Quickshot Upgrade", "Rapid Regenerate",\n'
+                 '               "Melting Bow", "Melting Blaze", "Melting Sword", "Melting Hammer", "Melting Spear", "Melting Shuriken",\n'
+                 '               "Uncharged Bashnades", "Extra Grenade", "Splinter Grenade", "Unlimited Sentries", "Sentry Burst Upgrade",\n'
+                 '               "Sentry Fire Rate", "Extra Shurikens", "Splinter Shurikens", "Bashable Shurikens"],\n'
                  '    "skill_upgrades": ["Jumpgrade", "Skill Velocity"]\n'
                  '    }\n')
 
