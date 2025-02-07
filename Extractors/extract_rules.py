@@ -734,7 +734,7 @@ def append_rule(and_requirements: List[List], or_skills0: str | List[str], or_sk
         # temp_txt = (f"cost_all(s, player, ref_resource, options, \"{anc}\", \"{arrival}\", {damage_and}, {energy}, "
         #             f"{combat_and}, {or_costs}, \"{refill_type}\"")
         temp_txt = (f"cost_all(s, player, options, \"{anc}\", {damage_and}, {energy}, "
-                    f"{combat_and}, {or_costs})")
+                    f"{combat_and}, {or_costs}, {diff})")
         # if p_type in ("conn", "refill"):
         #     temp_txt += ", True)"  # Indicates if the resource table has to be updated
         # else:
