@@ -154,19 +154,19 @@ def parse_rules(override=False):
 
     # Moki, Gorlek, Kii and Unsafe rules respectively
     M = (header + imports + "from worlds.generic.Rules import add_rule\n\n\n"
-         "def set_moki_rules(world, player, options, ref_resource):\n"
+         "def set_moki_rules(world, player, options):\n"
          "    \"\"\"Moki (or easy, default) rules.\"\"\"\n")
-    G = ("\n\ndef set_gorlek_rules(world, player, options, ref_resource):\n"
+    G = ("\n\ndef set_gorlek_rules(world, player, options):\n"
          "    \"\"\"Gorlek (or medium) rules.\"\"\"\n")
-    Gg = ("\n\ndef set_gorlek_glitched_rules(world, player, options, ref_resource):\n"
+    Gg = ("\n\ndef set_gorlek_glitched_rules(world, player, options):\n"
           "    \"\"\"Gorlek (or medium) rules with glitches\"\"\"\n")
-    K = ("\n\ndef set_kii_rules(world, player, options, ref_resource):\n"
+    K = ("\n\ndef set_kii_rules(world, player, options):\n"
          "    \"\"\"Kii (or hard) rules\"\"\"\n")
-    Kg = ("\n\ndef set_kii_glitched_rules(world, player, options, ref_resource):\n"
+    Kg = ("\n\ndef set_kii_glitched_rules(world, player, options):\n"
           "    \"\"\"Kii (or hard) rules with glitches.\"\"\"\n")
-    U = ("\n\ndef set_unsafe_rules(world, player, options, ref_resource):\n"
+    U = ("\n\ndef set_unsafe_rules(world, player, options):\n"
          "    \"\"\"Unsafe rules.\"\"\"\n")
-    Ug = ("\n\ndef set_unsafe_glitched_rules(world, player, options, ref_resource):\n"
+    Ug = ("\n\ndef set_unsafe_glitched_rules(world, player, options):\n"
           "    \"\"\"Unsafe rules with glitches.\"\"\"\n")
 
     L_rules: List[str] = [M, G, Gg, K, Kg, U, Ug]
@@ -625,11 +625,11 @@ def append_rule(and_requirements: List[List], or_skills0: str | List[str], or_sk
     req_txt = ""
 
     if p_type == "refill":
-        refill_type = arrival[0]
+        # refill_type = arrival[0]
         arrival = anc
 
-    else:
-        refill_type = ""
+    # else:
+    #     refill_type = ""
 
     if and_skills:
         temp_txt = ""
@@ -731,22 +731,24 @@ def append_rule(and_requirements: List[List], or_skills0: str | List[str], or_sk
             or_costs.append([2, int(value)])
 
     if damage_and or combat_and or en_and or or_costs:
-        temp_txt = (f"cost_all(s, player, ref_resource, options, \"{anc}\", \"{arrival}\", {damage_and}, {energy}, "
-                    f"{combat_and}, {or_costs}, \"{refill_type}\"")
-        if p_type in ("conn", "refill"):
-            temp_txt += ", True)"  # Indicates if the resource table has to be updated
-        else:
-            temp_txt += ", False)"
+        # temp_txt = (f"cost_all(s, player, ref_resource, options, \"{anc}\", \"{arrival}\", {damage_and}, {energy}, "
+        #             f"{combat_and}, {or_costs}, \"{refill_type}\"")
+        temp_txt = (f"cost_all(s, player, options, \"{anc}\", {damage_and}, {energy}, "
+                    f"{combat_and}, {or_costs})")
+        # if p_type in ("conn", "refill"):
+        #     temp_txt += ", True)"  # Indicates if the resource table has to be updated
+        # else:
+        #     temp_txt += ", False)"
         if req_txt:
             req_txt += " and " + temp_txt
         else:
             req_txt += temp_txt
 
-    elif p_type in ("conn", "refill"):
-        if req_txt:  # Indicates that the resource table has to be updated, but the path does not consume resource
-            req_txt += " and " + f"no_cost(\"{anc}\", \"{arrival}\", s, player, ref_resource, \"{refill_type}\")"
-        else:
-            req_txt += f"no_cost(\"{anc}\", \"{arrival}\", s, player, ref_resource, \"{refill_type}\")"
+    # elif p_type in ("conn", "refill"):
+    #     if req_txt:  # Indicates that the resource table has to be updated, but the path does not consume resource
+    #         req_txt += " and " + f"no_cost(\"{anc}\", \"{arrival}\", s, player, ref_resource, \"{refill_type}\")"
+    #     else:
+    #         req_txt += f"no_cost(\"{anc}\", \"{arrival}\", s, player, ref_resource, \"{refill_type}\")"
 
     if req_txt:
         tot_txt = start_txt + req_txt + ", \"or\")\n"
