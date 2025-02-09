@@ -6,18 +6,40 @@ requires:
 
 Ori and the Will of the Wisps:
   progression_balancing: normal
-  accessibility: items
+  # Using minimal is recommanded, as it greatly increses the probability that the generation is successful.
+  accessibility: minimal
 
+  # Difficulty of the logic.
+  # - moki (or easy): Recommended for beginners, who only played the game casually.
+  # - gorlek (or medium): Harder paths that can use sword and hammer as movement options, and damage boosts.
+  # - kii (or hard): Hard and precise paths that use energy weapons as movement.
+  # - unsafe: Very hard and unverified paths. Warning: some paths are extremely hard.
   difficulty: moki
+
   glitches: 'false'
+
+  # Spawn options: random, marsh, burrows, howlsden, hollow, glades, wellspring, westwoods,
+  # eastwoods, reach, depths, eastpools, westpools, westwastes, eastwastes, outerruins, innerruins, willow
   spawn: marsh
+
+  # Set a condition for entering the final boss. Use the rando wheel (with V) to check goal progress.
+  # - trees: All trees must be collected.
+  # - wisps: All wisps must be collected.
+  # - quests: All quests have to be finished.
+  # - nothing: No goal.
   goal: trees
+
+  # Play the game in hard difficulty.
   hard_mode: 'false'
+
   qol: 'true'
   hints: 'true'
-
   tp: 'true'
+
+  # Add Ruins, West Pools and Shriek teleporters to the pool.
   extratp: 'false'
+
+  # Add to the pool items specific to the randomizer.
   bonus: 'true'
   extra_bonus: 'false'
   skill_upgrade: 'false'
@@ -30,8 +52,15 @@ Ori and the Will of the Wisps:
   no_hearts: 'false'
   no_quests: 'true'
   no_ks: 'false'
-  glades_done: 'false'
+
+  # Start with Glades rebuilt and regrown.
+  glades_done: 'true'
+
+  # Open most of the doors and obstacles.
   open_mode: 'false'
 
+  # Spawn with sword.
   sword: 'true'
+
+  # Weapon upgrades and shards in shops are not randomized.
   vanilla_shop_upgrades: 'false'
