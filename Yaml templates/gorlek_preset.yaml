@@ -47,7 +47,15 @@ Ori and the Will of the Wisps:
   better_spawn: 'false'
   better_wellspring: 'false'
   no_rain: 'false'
-  no_combat: ''
+
+  # Skip all combat heavy parts.
+  # - Everything: the same as if you include all the following
+  # - Shrines: Shrine have their pickup floating above them before the fight
+  # - Arenas: the arenas start as completed
+  # - Demi Bosses: Demi Bosses like Howl, Beetle and Rock boss start as defeated
+  # - Bosses: Bosses like Kwolok, Mora and Shriek's combat phases are skipped
+  no_combat:
+
   no_trials: 'false'
   no_hearts: 'false'
   no_quests: 'false'
