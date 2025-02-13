@@ -22,12 +22,12 @@ Ori and the Will of the Wisps:
   # eastwoods, reach, depths, eastpools, westpools, westwastes, eastwastes, outerruins, innerruins, willow
   spawn: marsh
 
-  # Set a condition for entering the final boss. Use the rando wheel (with V) to check goal progress.
+  # Set conditions for entering the final boss. Use the rando wheel (with V) to check goal progress.
   # - trees: All trees must be collected.
   # - wisps: All wisps must be collected.
   # - quests: All quests have to be finished.
-  # - nothing: No goal.
-  goal: trees
+  goal:
+  - trees
 
   # Play the game in hard difficulty.
   hard_mode: 'false'
@@ -47,7 +47,7 @@ Ori and the Will of the Wisps:
   better_spawn: 'false'
   better_wellspring: 'false'
   no_rain: 'false'
-  no_combat: 'false'
+  no_combat: ''
   no_trials: 'false'
   no_hearts: 'false'
   no_quests: 'false'
