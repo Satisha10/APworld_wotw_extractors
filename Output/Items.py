@@ -125,7 +125,7 @@ item_table = {  # The tuple contains the amount, the classification, the ID
     "100 Spirit Light": (0, ItemClassification.filler, 3363019522375780),
     "50 Spirit Light": (0, ItemClassification.filler, 3363019522375730),
     "1 Spirit Light": (1, ItemClassification.filler, 3363019522375681),
-    "Ore": (40, ItemClassification.progression_skip_balancing, 3363019522441216),
+    "Gorlek Ore": (40, ItemClassification.progression_skip_balancing, 3363019522441216),
     "Keystone": (40, ItemClassification.progression_skip_balancing, 3363019522506752),
     "Shard Slot": (5, ItemClassification.useful, 3363019522572288),
     "Health Fragment": (24, ItemClassification.progression_skip_balancing, 3363019522637824),

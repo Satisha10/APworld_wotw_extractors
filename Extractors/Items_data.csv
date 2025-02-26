@@ -115,7 +115,7 @@ Skill Velocity,3,useful,upgrade,4,80
 100 Spirit Light,0,filler,resource,1,100
 50 Spirit Light,0,filler,resource,1,50
 1 Spirit Light,1,filler,resource,1,1
-Ore,40,progression_skip_balancing,resource,2,0
+Gorlek Ore,40,progression_skip_balancing,resource,2,0
 Keystone,40,progression_skip_balancing,resource,3,0
 Shard Slot,5,useful,resource,4,0
 Health Fragment,24,progression_skip_balancing,resource,5,0

@@ -66,6 +66,7 @@ name_convert: Dict[str, str] = {  # Translation of the item names
     "WestPoolsTP": "Luma Boss TP",
     "InnerRuinsTP": "Inner Ruins TP",
     "ShriekTP": "Shriek TP",
+    "Ore": "Gorlek Ore",
 }
 
 
@@ -662,7 +663,7 @@ def append_rule(and_requirements: List[List], or_skills0: str | List[str], or_sk
                     else:  # Case of a map from Lupo
                         temp_txt = "can_buy_map(s, player)"
                 elif name == "Ore":
-                    temp_txt = f"s.count(\"Ore\", player) >= {amount}"
+                    temp_txt = f"s.count(\"Gorlek Ore\", player) >= {amount}"
                 else:
                     raise ValueError(f"Invalid input: {elem}")
             else:
