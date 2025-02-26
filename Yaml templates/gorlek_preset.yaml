@@ -34,6 +34,7 @@ Ori and the Will of the Wisps:
 
   qol: 'true'
   hints: 'true'
+  knowledge_hints: 'true'
   tp: 'true'
 
   # Add Ruins, West Pools and Shriek teleporters to the pool.
@@ -58,7 +59,11 @@ Ori and the Will of the Wisps:
 
   no_trials: 'false'
   no_hearts: 'false'
-  no_quests: 'false'
+
+  # Remove locations that involve talking to NPCs, and locations locked behind them are accessible.
+  # Possible options: none (remove the quests), all (keep all quests), no_hand (which only remove the Hand to Hand questline).
+  quests: 'all'
+
   no_ks: 'false'
 
   # Start with Glades rebuilt and regrown.
@@ -72,3 +77,4 @@ Ori and the Will of the Wisps:
 
   # Weapon upgrades and shards in shops are not randomized.
   vanilla_shop_upgrades: 'false'
+  launch_on_seir: 'false'
