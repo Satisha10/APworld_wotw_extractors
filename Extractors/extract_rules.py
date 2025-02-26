@@ -654,7 +654,7 @@ def append_rule(and_requirements: List[List], or_skills0: str | List[str], or_sk
 
     if and_other:
         for elem in and_other:
-            if "Keystone" in elem:
+            if "Keystone=" in elem:
                 temp_txt = "can_keystones(s, player)"
             elif "=" in elem:
                 name, amount = elem.split("=")
