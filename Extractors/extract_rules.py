@@ -86,8 +86,10 @@ en_skills = ["Bow", "Grenade", "Flash", "Sentry", "Shuriken", "Spear", "Blaze"] 
 combat_name = ["BreakWall", "Combat", "Boss"]
 
 # Skills that can be used infinitely (note: Regenerate is here because of how the logic is written)
+# The energy skills are also there because they are sometimes without a number of uses specified
 inf_skills = ["Sword", "Double Jump", "Regenerate", "Dash", "Bash", "Grapple", "Glide", "Flap", "Water Dash",
-              "Burrow", "Launch", "Clean Water", "Water Breath", "Hammer", "free"]
+              "Burrow", "Launch", "Clean Water", "Water Breath", "Hammer", "free", "Bow", "Grenade", "Flash", "Sentry",
+              "Shuriken", "Spear", "Blaze"]
 
 # Glitches that use resources
 glitches = {"ShurikenBreak": ["Shuriken"],
@@ -557,15 +559,12 @@ def parse_and(and_req: List[str], diff: int) -> (List, bool):
                     if req not in and_skills and req != "free":
                         and_skills.append(req)
 
-        elif elem in inf_skills:
-            if elem not in and_skills and elem != "free":
-                and_skills.append(elem)
+        elif requirement in inf_skills:  # Check on requirement to catch the energy skills without the =
+            if requirement not in and_skills and requirement != "free":
+                and_skills.append(requirement)
         elif elem in en_skills:
             value = int(value)
-            if elem == "Flash" and value == 0:  # Flash is particular because it can be an infinite and energy skill
-                and_skills.append(elem)
-            else:
-                en_and += [elem] * value
+            en_and += [elem] * value
         elif elem == "Damage":
             value = int(value)
             damage_and.append(value)
@@ -595,9 +594,7 @@ def order_or(or_chain: List[str]) -> (List[str], List[str], List[str]):
         if elem in other_glitches or elem in inf_glitches.keys() or elem in glitches.keys():  # Handle the glitches
             or_glitch.append(requirement)
 
-        elif elem in inf_skills:
-            or_skills.append(requirement)
-        elif requirement == "Flash":  # Flash is particular because it can be an infinite and energy skill
+        elif requirement in inf_skills:  # Check on requirement to catch the energy skills without the =
             or_skills.append(requirement)
         elif elem in en_skills or elem in combat_name or elem == "Damage":
             or_resource.append(requirement)
