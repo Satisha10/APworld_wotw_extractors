@@ -1,7 +1,7 @@
 """
 Generated file, do not edit manually.
 
-See https://github.com/Satisha10/AP_world_wotw_extractors for the code.
+See https://github.com/Satisha10/APworld_wotw_extractors for the code.
 Generated with `extract_items.py` by running `extract_items()`.
 """
 
@@ -125,11 +125,11 @@ item_table = {  # The tuple contains the amount, the classification, the ID
     "100 Spirit Light": (0, ItemClassification.filler, 3363019522375780),
     "50 Spirit Light": (0, ItemClassification.filler, 3363019522375730),
     "1 Spirit Light": (1, ItemClassification.filler, 3363019522375681),
-    "Ore": (40, ItemClassification.progression, 3363019522441216),
-    "Keystone": (40, ItemClassification.progression, 3363019522506752),
+    "Ore": (40, ItemClassification.progression_skip_balancing, 3363019522441216),
+    "Keystone": (40, ItemClassification.progression_skip_balancing, 3363019522506752),
     "Shard Slot": (5, ItemClassification.useful, 3363019522572288),
-    "Health Fragment": (24, ItemClassification.progression, 3363019522637824),
-    "Energy Fragment": (24, ItemClassification.progression, 3363019522703360)
+    "Health Fragment": (24, ItemClassification.progression_skip_balancing, 3363019522637824),
+    "Energy Fragment": (24, ItemClassification.progression_skip_balancing, 3363019522703360)
     }
 
 

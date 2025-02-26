@@ -562,7 +562,10 @@ def parse_and(and_req: List[str], diff: int) -> (List, bool):
                 and_skills.append(elem)
         elif elem in en_skills:
             value = int(value)
-            en_and += [elem] * value
+            if elem == "Flash" and value == 0:  # Flash is particular because it can be an infinite and energy skill
+                and_skills.append(elem)
+            else:
+                en_and += [elem] * value
         elif elem == "Damage":
             value = int(value)
             damage_and.append(value)
@@ -593,6 +596,8 @@ def order_or(or_chain: List[str]) -> (List[str], List[str], List[str]):
             or_glitch.append(requirement)
 
         elif elem in inf_skills:
+            or_skills.append(requirement)
+        elif requirement == "Flash":  # Flash is particular because it can be an infinite and energy skill
             or_skills.append(requirement)
         elif elem in en_skills or elem in combat_name or elem == "Damage":
             or_resource.append(requirement)
