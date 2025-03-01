@@ -16,6 +16,10 @@ Ori and the Will of the Wisps:
   # - unsafe: Very hard and unverified paths. Warning: some paths are extremely hard.
   difficulty: moki
 
+  # Whether the logic includes paths with glitches.
+  # - Gorlek: includes grounded sentry jumps, sentry as a fire source, breaking walls with Shuriken, and removing the kill plane in Feeding Grounds.
+  # - Kii: glitches are not included in Kii logic yet.
+  # - Unsafe: everything else.
   glitches: 'false'
 
   # Spawn options: random, marsh, burrows, howlsden, hollow, glades, wellspring, westwoods,
@@ -32,21 +36,37 @@ Ori and the Will of the Wisps:
   # Play the game in hard difficulty.
   hard_mode: 'false'
 
+  # Activate QOL features and gameplay improvements.
   qol: 'true'
+
+  # Display the reward for shrines and trials when activating them.
   hints: 'true'
+
+  # Display useful hints on randomizer knowledge while playing the seed.
   knowledge_hints: 'true'
+
+  # Add most teleporters to the item pool.
   tp: 'true'
 
   # Add Ruins, West Pools and Shriek teleporters to the pool.
   extratp: 'false'
 
-  # Add to the pool items specific to the randomizer.
+  # Add to the pool items specific to the randomizer (e.g. health renegeneration, extra dash).
   bonus: 'true'
+
+  # Add to the pool powerful items specific to the randomizer.
   extra_bonus: 'false'
+
+  # Add to the pool upgrades to skills specific to the randomizer (to make them go really fast).
   skill_upgrade: 'false'
 
+  # Open some doors so random spawn works better.
   better_spawn: 'false'
+
+  # The top door of Wellspring Glades is opened by default.
   better_wellspring: 'false'
+
+  # Remove the rain in Marsh, and remove Howl.
   no_rain: 'false'
 
   # Skip all combat heavy parts.
@@ -57,13 +77,17 @@ Ori and the Will of the Wisps:
   # - Bosses: Bosses like Kwolok, Mora and Shriek's combat phases are skipped
   no_combat: []
 
+  # Trials are already completed.
   no_trials: 'false'
+
+  # Willow hearts are already destroyed.
   no_hearts: 'false'
 
   # Remove locations that involve talking to NPCs, and locations locked behind them are accessible.
   # Possible options: none (remove the quests), all (keep all quests), no_hand (which only remove the Hand to Hand questline).
   quests: none
 
+  # Open keystone doors by default (and remove keystones from the pool).
   no_ks: 'false'
 
   # Start with Glades rebuilt and regrown.
@@ -72,9 +96,14 @@ Ori and the Will of the Wisps:
   # Open most of the doors and obstacles.
   open_mode: 'false'
 
+  # Change the shop icons for some non local items.
+  shop_keywords: 'false'
+
   # Spawn with sword.
   sword: 'true'
 
   # Weapon upgrades and shards in shops are not randomized.
   vanilla_shop_upgrades: 'false'
+
+  # Place launch on Seir (i.e. the wisp in the ruins).
   launch_on_seir: 'false'
