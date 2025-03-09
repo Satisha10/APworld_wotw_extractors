@@ -49,7 +49,7 @@ def extract_items(override=False):
                  '               "Flash", "Water Dash", "Burrow", "Launch", "Clean Water", "Water Breath", "Hammer", "Sentry",\n'
                  '               "Shuriken", "Spear", "Blaze"],\n'
                  '    "collectibles": ["Health Fragment", "Energy Fragment", "Keystone", "Ore", "Shard Slot", "Ancestral Light 1",\n'
-                 '               "Ancestral Light 2"],\n'
+                 '                     "Ancestral Light 2"],\n'
                  '    "spirit_light": ["1 Spirit Light", "50 Spirit Light", "100 Spirit Light", "200 Spirit Light"],\n'
                  '    "shards": ["Overcharge", "Triple Jump", "Wingclip", "Bounty", "Swap", "Magnet", "Splinter", "Reckless", "Quickshot",\n'
                  '               "Resilience", "Light Harvest", "Vitality", "Life Harvest", "Energy Harvest", "Energy (Shard)",\n'

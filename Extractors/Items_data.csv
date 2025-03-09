@@ -120,3 +120,4 @@ Keystone,40,progression_skip_balancing,resource,3,0
 Shard Slot,5,useful,resource,4,0
 Health Fragment,24,progression_skip_balancing,resource,5,0
 Energy Fragment,24,progression_skip_balancing,resource,6,0
+Nothing,0,filler,resource,0,0
