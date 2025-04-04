@@ -109,8 +109,8 @@ Sentry Fire Rate,1,useful,upgrade,4,47
 Extra Shurikens,1,useful,upgrade,4,38
 Splinter Shurikens,2,useful,upgrade,4,48
 Bashable Shurikens,1,useful,upgrade,4,95
-Jumpgrade,3,useful,upgrade,4,87
-Skill Velocity,3,useful,upgrade,4,80
+Jumpgrade,3,useful,upgrade,9,8
+Skill Velocity,3,useful,upgrade,9,5
 200 Spirit Light,20,progression_skip_balancing,resource,1,200
 100 Spirit Light,0,filler,resource,1,100
 50 Spirit Light,0,filler,resource,1,50
