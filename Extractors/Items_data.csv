@@ -88,9 +88,9 @@ Bow Efficiency,1,useful,upgrade,4,6
 Regenerate Efficiency,1,useful,upgrade,4,7
 Flash Efficiency,1,useful,upgrade,4,8
 Grenade Efficiency,1,useful,upgrade,4,9
-Rapid Hammer,3,useful,upgrade,4,0
-Rapid Sword,0,useful,upgrade,4,1
-Rapid Spear,2,useful,upgrade,4,11
+Rapid Hammer,3,useful,upgrade,4,50
+Rapid Sword,0,useful,upgrade,4,51
+Rapid Spear,2,useful,upgrade,9,12
 Rapid Grenade,2,useful,upgrade,4,44
 Quickshot Upgrade,2,useful,upgrade,4,10
 Rapid Regenerate,1,useful,upgrade,4,91
