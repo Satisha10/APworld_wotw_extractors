@@ -30,6 +30,9 @@ Ori and the Will of the Wisps:
   # - trees: All trees must be collected.
   # - wisps: All wisps must be collected.
   # - quests: All quests have to be finished.
+  # - random: Choose one goal at random among the other selected ones.
+  #   e.g. [random, trees, wisps] will give trees or wisps.
+  #   If only random is selected, it will choose among all goals.
   goal:
   - trees
 
