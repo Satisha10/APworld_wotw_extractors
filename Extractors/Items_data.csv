@@ -94,13 +94,13 @@ Rapid Spear,2,useful,upgrade,9,12
 Rapid Grenade,2,useful,upgrade,4,44
 Quickshot Upgrade,2,useful,upgrade,4,10
 Rapid Regenerate,1,useful,upgrade,4,91
-Melting Blaze,1,useful,upgrade,4,71
-Melting Sword,1,useful,upgrade,4,72
-Melting Bow,1,useful,upgrade,4,70
-Melting Shuriken,1,useful,upgrade,4,75
-Melting Hammer,0,useful,upgrade,4,73
-Melting Spear,0,useful,upgrade,4,74
-Uncharged Bashnades,1,useful,upgrade,4,42
+Melting Blaze,1,useful,item,4,71
+Melting Sword,1,useful,item,4,72
+Melting Bow,1,useful,item,4,70
+Melting Shuriken,1,useful,item,4,75
+Melting Hammer,0,useful,item,4,73
+Melting Spear,0,useful,item,4,74
+Uncharged Bashnades,1,useful,item,4,42
 Extra Grenade,1,useful,upgrade,4,40
 Splinter Grenade,1,useful,upgrade,4,45
 Unlimited Sentries,1,useful,upgrade,4,37
@@ -108,7 +108,7 @@ Sentry Burst Upgrade,1,useful,upgrade,4,46
 Sentry Fire Rate,1,useful,upgrade,4,47
 Extra Shurikens,1,useful,upgrade,4,38
 Splinter Shurikens,2,useful,upgrade,4,48
-Bashable Shurikens,1,useful,upgrade,4,95
+Bashable Shurikens,1,useful,item,4,95
 Jumpgrade,3,useful,upgrade,9,8
 Skill Velocity,3,useful,upgrade,9,5
 200 Spirit Light,20,progression_skip_balancing,resource,1,200
