@@ -86,8 +86,10 @@ Ori and the Will of the Wisps:
   # Willow hearts are already destroyed.
   no_hearts: 'false'
 
-  # Remove locations that involve talking to NPCs, and locations locked behind them are accessible.
-  # Possible options: none (remove the quests), all (keep all quests), no_hand (which only remove the Hand to Hand questline).
+  # Change which quests are in the location pool.
+  # - all: All quests are present.
+  # - no_hand: Remove the Hand-to-hand questline from the locations.
+  # - none: Remove all quests that involve talking to NPCs. Main quests (e.g. wisps) or rebuilding Glades are still in the pool.
   quests: all
 
   # Open keystone doors by default (and remove keystones from the pool).
