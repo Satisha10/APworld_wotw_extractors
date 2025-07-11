@@ -5,12 +5,17 @@ Run `parse_rules()` to extract the rules from the `areas.wotw` file.
 See https://github.com/ori-community/wotw-seedgen/tree/main/wotw_seedgen to get this file.
 """
 
-from typing import Dict, List
 import os
 import re
 from collections import Counter
 
 # %% Data and global variables
+
+# TODO probably best to just rework the whole code for better quality
+# TODO fix typing
+# TODO add function for regex with error handling
+# TODO entrance rando
+# TODO rename glitches, can_open_door, change combat, change resource function
 
 # Enemy data
 ref_en = {"Mantis": (32, ["Free"]),
@@ -42,7 +47,7 @@ ref_en = {"Mantis": (32, ["Free"]),
           "Spiderling": (12, ["Free"]),
           }
 
-name_convert: Dict[str, str] = {  # Translation of the item names
+name_convert: dict[str, str] = {  # Translation of the item names
     "DoubleJump": "Double Jump",
     "WaterDash": "Water Dash",
     "WaterBreath": "Water Breath",
@@ -134,7 +139,7 @@ imports = "from .Rules_Functions import *\n\n"
 # %% Functions for extracting rules
 
 
-def parse_rules(override=False):
+def parse_rules(override=False) -> None:
     """Parse an areas.wotw file, and creates `Rules.py` containing the rules, and `Entrances.py` for the entrances."""
     if os.path.exists("./Rules.py"):
         if override:
@@ -172,10 +177,10 @@ def parse_rules(override=False):
     Ug = ("\n\ndef set_unsafe_glitched_rules(world, player, options):\n"
           "    \"\"\"Unsafe rules with glitches.\"\"\"\n")
 
-    L_rules: List[str] = [M, G, Gg, K, Kg, U, Ug]
-    entrances = []
-    refills = {}  # Contains the refill info per region as a list: [health, energy, type]
-    refill_events = []  # Stores all the names given to the refill events.
+    L_rules: list[str] = [M, G, Gg, K, Kg, U, Ug]
+    entrances: list[str] = []
+    refills: dict[str, list] = {}  # Contains the refill info per region as a list: [health, energy, type]
+    refill_events: list[str] = []  # Stores all the names given to the refill events.
 
     # Variables
     anc = ""  # Name of the current anchor
@@ -342,8 +347,8 @@ def parse_rules(override=False):
         print("The file `Refills.py` has been successfully created.")
 
 
-def convert(anc: str, p_type: str, p_name: str, L_rules: List[str], entrances: List[str], ref_type: str, diff: int,
-            req: str) -> (List[str], List[str]):
+def convert(anc: str, p_type: str, p_name: str, L_rules: list[str], entrances: list[str], ref_type: str, diff: int,
+            req: str) -> tuple[list[str], list[str]]:
     """
     Convert the data given by the arguments into an add_rule function, and add it to the right difficulty.
 
@@ -482,7 +487,7 @@ def convert(anc: str, p_type: str, p_name: str, L_rules: List[str], entrances: L
     return L_rules, entrances
 
 
-def combat_req(need: str, value: str) -> (List[List[int | str]], List[str]):
+def combat_req(need: str, value: str) -> tuple[list[list[int | str]], list[str]]:
     """Parse the combat requirement with the given enemies, returns the damage and type of combat."""
     damage = []
     dangers = []
@@ -516,7 +521,7 @@ def combat_req(need: str, value: str) -> (List[List[int | str]], List[str]):
     return damage, dangers
 
 
-def parse_and(and_req: List[str], diff: int) -> (List, bool):
+def parse_and(and_req: list[str], diff: int) -> tuple[list, bool]:
     """Parse the list of requirements in the `and` chain, and returns the processed information."""
     and_skills = []  # Stores inf_skills
     and_other = []  # Stores other requirements (that often have their own event)
@@ -578,7 +583,7 @@ def parse_and(and_req: List[str], diff: int) -> (List, bool):
     return (and_skills, and_other, damage_and, combat_and, en_and), glitched
 
 
-def order_or(or_chain: List[str]) -> (List[str], List[str], List[str]):
+def order_or(or_chain: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Parse the list of requirements in the `or` chain, and categorize them."""
     or_skills = []  # Stores inf_skills
     or_glitch = []  # Stores the glitches
@@ -604,9 +609,9 @@ def order_or(or_chain: List[str]) -> (List[str], List[str], List[str]):
     return or_skills, or_glitch, or_resource
 
 
-def append_rule(and_requirements: List[List], or_skills0: str | List[str], or_skills1: str | List[str],
-                or_resource: str | List[str], health: int, diff: int, glitched: bool, anc: str, arrival: str,
-                p_type: str, L_rules: List[str]) -> List[str]:
+def append_rule(and_requirements: list[list], or_skills0: str | list[str], or_skills1: str | list[str],
+                or_resource: str | list[str], health: int, diff: int, glitched: bool, anc: str, arrival: str,
+                p_type: str, L_rules: list[str]) -> list[str]:
     """
     Add the text to the rules list. Returns the updated L_rules.
 
@@ -626,13 +631,6 @@ def append_rule(and_requirements: List[List], or_skills0: str | List[str], or_sk
 
     start_txt = f"    add_rule(world.get_entrance(\"{anc}_to_{arrival}\", player), lambda s: "
     req_txt = ""
-
-    if p_type == "refill":
-        # refill_type = arrival[0]
-        arrival = anc
-
-    # else:
-    #     refill_type = ""
 
     if and_skills:
         temp_txt = ""
@@ -766,8 +764,8 @@ def append_rule(and_requirements: List[List], or_skills0: str | List[str], or_sk
     return L_rules
 
 
-def conv_refill(p_name: str, anc: str, refills: Dict[str, List[int]],
-                refill_events: List[str]) -> (str, Dict[str, List[int]], List[str]):
+def conv_refill(p_name: str, anc: str, refills: dict[str, list[int]],
+                refill_events: list[str]) -> tuple[str, dict[str, list[int]], list[str]]:
     """Return the refill type (to add before the region name) and updates the data tables."""
     current = refills[anc]
     if "=" in p_name:
@@ -793,7 +791,7 @@ def conv_refill(p_name: str, anc: str, refills: Dict[str, List[int]],
     raise ValueError(f"{p_name} is not a valid refill type (at anchor {anc}).")
 
 
-def req_area(area: str, diff: int) -> (bool, str):
+def req_area(area: str, diff: int) -> tuple[bool, int]:
     """
     Return the requirement for entering an area.
 
