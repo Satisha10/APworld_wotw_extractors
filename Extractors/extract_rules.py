@@ -16,36 +16,38 @@ from collections import Counter
 # TODO fix typing
 # TODO entrance rando
 # TODO rename glitches, can_open_door, change combat, change resource function
+# TODO use global variables (for list_rules...) and make it into a script
 
 # Enemy data
-ref_en = {"Mantis": (32, ["Free"]),
-          "Slug": (13, ["Free"]),
-          "WeakSlug": (12, ["Free"]),
-          "BombSlug": (1, ["Ranged"]),
-          "CorruptSlug": (1, ["Ranged"]),
-          "SneezeSlug": (32, ["Dangerous"]),
-          "ShieldSlug": (24, ["Free"]),
-          "Lizard": (24, ["Free"]),
-          "Bat": (32, ["Bat", "Aerial", "Ranged"]),
-          "Hornbug": (40, ["Dangerous", "Shielded"]),
-          "Skeeto": (20, ["Aerial"]),
-          "SmallSkeeto": (8, ["Aerial"]),
-          "Bee": (24, ["Aerial"]),
-          "Nest": (25, ["Aerial"]),
-          "Fish": (10, ["Free"]),
-          "Waterworm": (20, ["Free"]),
-          "Crab": (32, ["Dangerous"]),
-          "SpinCrab": (32, ["Dangerous"]),
-          "Tentacle": (40, ["Ranged"]),
-          "Balloon": (1, ["Free"]),
-          "Miner": (40, ["Dangerous"]),
-          "MaceMiner": (60, ["Dangerous"]),
-          "ShieldMiner": (60, ["Dangerous", "Shielded"]),
-          "CrystalMiner": (80, ["Dangerous"]),
-          "ShieldCrystalMiner": (50, ["Dangerous", "Shielded"]),
-          "Sandworm": (20, ["Sand"]),
-          "Spiderling": (12, ["Free"]),
-          }
+ref_en: dict[str, tuple[int, list[str]]] = {
+    "Mantis": (32, ["Free"]),
+    "Slug": (13, ["Free"]),
+    "WeakSlug": (12, ["Free"]),
+    "BombSlug": (1, ["Ranged"]),
+    "CorruptSlug": (1, ["Ranged"]),
+    "SneezeSlug": (32, ["Dangerous"]),
+    "ShieldSlug": (24, ["Free"]),
+    "Lizard": (24, ["Free"]),
+    "Bat": (32, ["Bat", "Aerial", "Ranged"]),
+    "Hornbug": (40, ["Dangerous", "Shielded"]),
+    "Skeeto": (20, ["Aerial"]),
+    "SmallSkeeto": (8, ["Aerial"]),
+    "Bee": (24, ["Aerial"]),
+    "Nest": (25, ["Aerial"]),
+    "Fish": (10, ["Free"]),
+    "Waterworm": (20, ["Free"]),
+    "Crab": (32, ["Dangerous"]),
+    "SpinCrab": (32, ["Dangerous"]),
+    "Tentacle": (40, ["Ranged"]),
+    "Balloon": (1, ["Free"]),
+    "Miner": (40, ["Dangerous"]),
+    "MaceMiner": (60, ["Dangerous"]),
+    "ShieldMiner": (60, ["Dangerous", "Shielded"]),
+    "CrystalMiner": (80, ["Dangerous"]),
+    "ShieldCrystalMiner": (50, ["Dangerous", "Shielded"]),
+    "Sandworm": (20, ["Sand"]),
+    "Spiderling": (12, ["Free"]),
+}
 
 name_convert: dict[str, str] = {  # Translation of the item names
     "DoubleJump": "Double Jump",
@@ -76,15 +78,15 @@ name_convert: dict[str, str] = {  # Translation of the item names
 
 
 # Regular expressions used for parsing
-com = re.compile(" *#")  # Detects comments
-sp = re.compile("^ *")  # Used for indents
-col = re.compile(" .*:")  # name between space and colon
-tra = re.compile(" *$")  # Trailing space
-sep = re.compile(" at ")
-typ = re.compile("^ {2}[a-z]+ ")  # Detects the type of the path
-nam = re.compile(" [a-zA-Z.=0-9]+:")  # Name of the object
-dif = re.compile("^[a-z]+, ")  # extracts the difficulty of the path
-ref = re.compile("[a-zA-Z=0-9]+$")  # Extracts the refill type if it has no colon
+r_comment = re.compile(" *#")  # Detects comments
+r_indent = re.compile("^ *")  # Used for indents
+r_colon = re.compile(" .*:")  # name between space and colon
+r_trailing = re.compile(" *$")  # Trailing space
+r_separate = re.compile(" at ")
+r_type = re.compile("^ {2}[a-z]+ ")  # Detects the type of the path
+r_name = re.compile(" [a-zA-Z.=0-9]+:")  # Name of the object
+r_difficulty = re.compile("^[a-z]+, ")  # extracts the difficulty of the path
+r_refill = re.compile("[a-zA-Z=0-9]+$")  # Extracts the refill type if it has no colon
 
 en_skills = ["Bow", "Grenade", "Flash", "Sentry", "Shuriken", "Spear", "Blaze"]  # Skills that require energy
 
@@ -93,9 +95,28 @@ combat_name = ["BreakWall", "Combat", "Boss"]
 
 # Skills that can be used infinitely (note: Regenerate is here because of how the logic is written)
 # The energy skills are also there because they are sometimes without a number of uses specified
-inf_skills = ["Sword", "Double Jump", "Regenerate", "Dash", "Bash", "Grapple", "Glide", "Flap", "Water Dash",
-              "Burrow", "Launch", "Clean Water", "Water Breath", "Hammer", "free", "Bow", "Grenade", "Flash", "Sentry",
-              "Shuriken", "Spear", "Blaze"]
+inf_skills = ["Sword",
+              "Double Jump",
+              "Regenerate",
+              "Dash",
+              "Bash",
+              "Grapple",
+              "Glide",
+              "Flap",
+              "Water Dash",
+              "Burrow",
+              "Launch",
+              "Clean Water",
+              "Water Breath",
+              "Hammer",
+              "free",
+              "Bow",
+              "Grenade",
+              "Flash",
+              "Sentry",
+              "Shuriken",
+              "Spear",
+              "Blaze",]
 
 # Glitches that use resources
 glitches = {"ShurikenBreak": ["Shuriken"],
@@ -109,7 +130,7 @@ glitches = {"ShurikenBreak": ["Shuriken"],
             "BlazeSwap": ["Blaze"],
             "GrenadeRedirect": ["Grenade"],
             "SentryRedirect": ["Sentry"],
-            "SpearJump": ["Spear"]}
+            "SpearJump": ["Spear"],}
 
 # Glitches that can be used infinitely (and only use one skill)
 inf_glitches = {"RemoveKillPlane": "free",
@@ -120,13 +141,13 @@ inf_glitches = {"RemoveKillPlane": "free",
                 "GrenadeCancel": "Grenade",
                 "BowCancel": "Bow",
                 "PauseHover": "free",
-                "GlideJump": "Glide"}
+                "GlideJump": "Glide",}
 
 # Glitches that can be used infinitely, and use two skills
 other_glitches = {"WaveDash": "can_wavedash(s, player)",
                   "HammerJump": "can_hammerjump(s, player)",
                   "SwordJump": "can_swordjump(s, player)",
-                  "GlideHammerJump": "can_glidehammerjump(s, player)"}
+                  "GlideHammerJump": "can_glidehammerjump(s, player)",}
 
 
 
@@ -217,16 +238,16 @@ def parse_rules(override=False) -> None:
     c_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
     for i, p in enumerate(temp):  # line number is only used for debug
-        m = com.search(p)  # Removes the comments
+        m = r_comment.search(p)  # Removes the comments
         if m:
             p = p[:m.start()]
-        m = tra.search(p)  # Removes the trailing spaces
+        m = r_trailing.search(p)  # Removes the trailing spaces
         if m:
             p = p[:m.start()]
         if p == "":
             continue
 
-        m = sp.match(p)  # Counts the indents
+        m = r_indent.match(p)  # Counts the indents
         if m is None:
             ind = 0
         else:
@@ -234,8 +255,8 @@ def parse_rules(override=False) -> None:
 
         if ind == 0:
             if "anchor" in p:
-                name = try_search(col, p, 1, -1)
-                s = sep.search(name)
+                name = try_search(r_colon, p, 1, -1)
+                s = r_indent.search(name)
                 if s:
                     anc = name[:s.start()]
                 else:
@@ -249,19 +270,19 @@ def parse_rules(override=False) -> None:
                 continue
             if "nospawn" in p or "tprestriction" in p:  # TODO: manage these if spawn anywhere implemented
                 continue
-            p_type = try_search(typ, p, 2, -1)  # Connection type
+            p_type = try_search(r_type, p, 2, -1)  # Connection type
             if p_type not in ("conn", "state", "pickup", "refill", "quest"):
                 raise ValueError(f"{p_type} (line {i}) is not an appropriate path type.\n\"{p}\"")
             if p_type == "refill":
                 if ":" in p:
-                    p_name = try_search(nam, p, 1, -1)
+                    p_name = try_search(r_name, p, 1, -1)
                     ref_type, refills, refill_events = conv_refill(p_name, anc, refills, refill_events)
                 else:
-                    p_name = try_search(ref, p)
+                    p_name = try_search(r_refill, p)
                     ref_type, refills, refill_events = conv_refill(p_name, anc, refills, refill_events)
                     convert(anc, p_type, p_name, list_rules, entrances, ref_type, 0, "free")
             else:
-                p_name = try_search(nam, p, 1, -1)  # Name
+                p_name = try_search(r_name, p, 1, -1)  # Name
 
             if "free" in p:
                 list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, 0, "free")
@@ -274,9 +295,9 @@ def parse_rules(override=False) -> None:
                     diff = c_diff[p[4:-1]]
                     req2 = ""
                 elif "moki" in p or "gorlek" in p or "kii" in p or "unsafe" in p:
-                    path_diff = try_search(dif, p[4:], end=-2)
+                    path_diff = try_search(r_difficulty, p[4:], end=-2)
                     diff = c_diff[path_diff]
-                    req2 = p[try_end(dif, p[4:]) + 4:-1]
+                    req2 = p[try_end(r_difficulty, p[4:]) + 4:-1]
                 else:
                     raise ValueError(f"Input on line {i} is invalid.\n\"{p}\"")
 
@@ -287,9 +308,9 @@ def parse_rules(override=False) -> None:
                     req = p[start + 2:]
                     list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
                 else:
-                    path_diff = try_search(dif, p[4:], end=-2)
+                    path_diff = try_search(r_difficulty, p[4:], end=-2)
                     diff = c_diff[path_diff]
-                    req = p[try_end(dif, p[4:]) + 4:]
+                    req = p[try_end(r_difficulty, p[4:]) + 4:]
                     req = req.replace(":", ",")
                     list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
             else:
