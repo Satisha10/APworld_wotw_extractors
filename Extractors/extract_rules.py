@@ -184,23 +184,23 @@ def parse_rules(override=False) -> None:
         temp = file.readlines()
 
     # Moki, Gorlek, Kii and Unsafe rules respectively
-    M = (header + imports + "from worlds.generic.Rules import add_rule\n\n\n"
+    moki = (header + imports + "from worlds.generic.Rules import add_rule\n\n\n"
          "def set_moki_rules(world, player, options):\n"
          "    \"\"\"Moki (or easy, default) rules.\"\"\"\n")
-    G = ("\n\ndef set_gorlek_rules(world, player, options):\n"
+    gorlek = ("\n\ndef set_gorlek_rules(world, player, options):\n"
          "    \"\"\"Gorlek (or medium) rules.\"\"\"\n")
-    Gg = ("\n\ndef set_gorlek_glitched_rules(world, player, options):\n"
+    gorlek_glitch = ("\n\ndef set_gorlek_glitched_rules(world, player, options):\n"
           "    \"\"\"Gorlek (or medium) rules with glitches\"\"\"\n")
-    K = ("\n\ndef set_kii_rules(world, player, options):\n"
+    kii = ("\n\ndef set_kii_rules(world, player, options):\n"
          "    \"\"\"Kii (or hard) rules\"\"\"\n")
-    Kg = ("\n\ndef set_kii_glitched_rules(world, player, options):\n"
+    kii_glitch = ("\n\ndef set_kii_glitched_rules(world, player, options):\n"
           "    \"\"\"Kii (or hard) rules with glitches.\"\"\"\n")
-    U = ("\n\ndef set_unsafe_rules(world, player, options):\n"
+    unsafe = ("\n\ndef set_unsafe_rules(world, player, options):\n"
          "    \"\"\"Unsafe rules.\"\"\"\n")
-    Ug = ("\n\ndef set_unsafe_glitched_rules(world, player, options):\n"
+    unsafe_glitch = ("\n\ndef set_unsafe_glitched_rules(world, player, options):\n"
           "    \"\"\"Unsafe rules with glitches.\"\"\"\n")
 
-    L_rules: list[str] = [M, G, Gg, K, Kg, U, Ug]
+    list_rules: list[str] = [moki, gorlek, gorlek_glitch, kii, kii_glitch, unsafe, unsafe_glitch]
     entrances: list[str] = []
     refills: dict[str, list] = {}  # Contains the refill info per region as a list: [health, energy, type]
     refill_events: list[str] = []  # Stores all the names given to the refill events.
@@ -260,12 +260,12 @@ def parse_rules(override=False) -> None:
                 else:
                     p_name = try_search(ref, p)
                     ref_type, refills, refill_events = conv_refill(p_name, anc, refills, refill_events)
-                    convert(anc, p_type, p_name, L_rules, entrances, ref_type, 0, "free")
+                    convert(anc, p_type, p_name, list_rules, entrances, ref_type, 0, "free")
             else:
                 p_name = try_search(nam, p, 1, -1)  # Name
 
             if "free" in p:
-                L_rules, entrances = convert(anc, p_type, p_name, L_rules, entrances, ref_type, 0, "free")
+                list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, 0, "free")
 
         elif ind == 2:
             if not anc:
@@ -286,13 +286,13 @@ def parse_rules(override=False) -> None:
                     start = p.find(": ")
                     diff = c_diff[p[4:start]]
                     req = p[start + 2:]
-                    L_rules, entrances = convert(anc, p_type, p_name, L_rules, entrances, ref_type, diff, req)
+                    list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
                 else:
                     path_diff = try_search(dif, p[4:], end=-2)
                     diff = c_diff[path_diff]
                     req = p[try_end(dif, p[4:]) + 4:]
                     req = req.replace(":", ",")
-                    L_rules, entrances = convert(anc, p_type, p_name, L_rules, entrances, ref_type, diff, req)
+                    list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
             else:
                 raise ValueError(f"Input on line {i} is invalid.\n\"{p}\"")
 
@@ -307,7 +307,7 @@ def parse_rules(override=False) -> None:
                     req = req2 + ", " + p[6:]
                 else:
                     req = p[6:]
-                L_rules, entrances = convert(anc, p_type, p_name, L_rules, entrances, ref_type, diff, req)
+                list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
 
         elif ind == 4:
             if not anc:
@@ -322,7 +322,7 @@ def parse_rules(override=False) -> None:
                 if req3:
                     req += req3 + ", "
                 req += p[8:]
-                L_rules, entrances = convert(anc, p_type, p_name, L_rules, entrances, ref_type, diff, req)
+                list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
 
         elif ind == 5:
             if not anc:
@@ -335,7 +335,7 @@ def parse_rules(override=False) -> None:
             if req4:
                 req += req4 + ", "
             req += p[10:]
-            L_rules, entrances = convert(anc, p_type, p_name, L_rules, entrances, ref_type, diff, req)
+            list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
 
         else:
             raise NotImplementedError(f"Too many indents ({ind}) on line {i}.\n{p}")
@@ -360,7 +360,7 @@ def parse_rules(override=False) -> None:
 
     with open("Rules.py", "w") as file:
         for i in range(7):
-            file.write(L_rules[i])
+            file.write(list_rules[i])
         print("The file `Rules.py` has been successfully created.")
     with open("Entrances.py", "w") as file:
         file.write(ent_txt)
@@ -370,12 +370,12 @@ def parse_rules(override=False) -> None:
         print("The file `Refills.py` has been successfully created.")
 
 
-def convert(anc: str, p_type: str, p_name: str, L_rules: list[str], entrances: list[str], ref_type: str, diff: int,
+def convert(anc: str, p_type: str, p_name: str, list_rules: list[str], entrances: list[str], ref_type: str, diff: int,
             req: str) -> tuple[list[str], list[str]]:
     """
     Convert the data given by the arguments into an add_rule function, and add it to the right difficulty.
 
-    Return the updated L_rules and entrances lists.
+    Return the updated list_rules and entrances lists.
     anc: name of the starting anchor
     p_type: type of the element accessed by the rules (anchor, state, refill or item)
     p_name: name of the element accessed by the rules
@@ -418,8 +418,8 @@ def convert(anc: str, p_type: str, p_name: str, L_rules: list[str], entrances: l
 
     if len(or_req) == 0:
         and_requirements, glitched = parse_and(and_req, diff)
-        L_rules = append_rule(and_requirements, "", "", "", health_req, diff, glitched, anc, arrival,
-                              p_type, L_rules)
+        list_rules = append_rule(and_requirements, "", "", "", health_req, diff, glitched, anc, arrival,
+                              list_rules)
 
     elif len(or_req) == 1:
         or_skills0, or_glitch0, or_resource0 = order_or(or_req[0])
@@ -428,16 +428,16 @@ def convert(anc: str, p_type: str, p_name: str, L_rules: list[str], entrances: l
             and_req.append(req)
             and_requirements, glitched = parse_and(and_req, diff)
             and_req.remove(req)
-            L_rules = append_rule(and_requirements, "", "", "", health_req, diff, True, anc, arrival,
-                                  p_type, L_rules)
+            list_rules = append_rule(and_requirements, "", "", "", health_req, diff, True, anc, arrival,
+                                  list_rules)
         if or_skills0:
             and_requirements, glitched = parse_and(and_req, diff)
-            L_rules = append_rule(and_requirements, or_skills0, "", "", health_req, diff, glitched, anc,
-                                  arrival, p_type, L_rules)
+            list_rules = append_rule(and_requirements, or_skills0, "", "", health_req, diff, glitched, anc,
+                                  arrival, list_rules)
         if or_resource0:
             and_requirements, glitched = parse_and(and_req, diff)
-            L_rules = append_rule(and_requirements, "", "", or_resource0, health_req, diff, glitched, anc,
-                                  arrival, p_type, L_rules)
+            list_rules = append_rule(and_requirements, "", "", or_resource0, health_req, diff, glitched, anc,
+                                  arrival, list_rules)
 
     elif len(or_req) == 2:
         or_skills0, or_glitch0, or_resource0 = order_or(or_req[0])
@@ -455,20 +455,20 @@ def convert(anc: str, p_type: str, p_name: str, L_rules: list[str], entrances: l
                 and_requirements, glitched = parse_and(and_req, diff)
                 and_req.remove(req)
                 and_req.remove(req2)
-                L_rules = append_rule(and_requirements, "", "", "", health_req, diff, True, anc, arrival,
-                                      p_type, L_rules)
+                list_rules = append_rule(and_requirements, "", "", "", health_req, diff, True, anc, arrival,
+                                      list_rules)
             if or_skills1:   # Case 0 glitched, 1 skill
                 and_req.append(req)
                 and_requirements, glitched = parse_and(and_req, diff)
                 and_req.remove(req)
-                L_rules = append_rule(and_requirements, "", or_skills1, "", health_req, diff, True, anc,
-                                      arrival, p_type, L_rules)
+                list_rules = append_rule(and_requirements, "", or_skills1, "", health_req, diff, True, anc,
+                                      arrival, list_rules)
             if or_resource1:  # Case 0 glitched, 1 resource
                 and_req.append(req)
                 and_requirements, glitched = parse_and(and_req, diff)
                 and_req.remove(req)
-                L_rules = append_rule(and_requirements, "", "", or_resource1, health_req, diff, True, anc,
-                                      arrival, p_type, L_rules)
+                list_rules = append_rule(and_requirements, "", "", or_resource1, health_req, diff, True, anc,
+                                      arrival, list_rules)
 
         for req in or_resource0:
             for req2 in or_glitch1:  # Case 0 resource, 1 glitched
@@ -477,43 +477,43 @@ def convert(anc: str, p_type: str, p_name: str, L_rules: list[str], entrances: l
                 and_requirements, glitched = parse_and(and_req, diff)
                 and_req.remove(req)
                 and_req.remove(req2)
-                L_rules = append_rule(and_requirements, "", "", "", health_req, diff, True, anc, arrival,
-                                      p_type, L_rules)
+                list_rules = append_rule(and_requirements, "", "", "", health_req, diff, True, anc, arrival,
+                                      list_rules)
             if or_skills1:  # Case 0 resource, 1 skill
                 and_req.append(req)
                 and_requirements, glitched = parse_and(and_req, diff)
                 and_req.remove(req)
-                L_rules = append_rule(and_requirements, "", or_skills1, "", health_req, diff, glitched, anc,
-                                      arrival, p_type, L_rules)
+                list_rules = append_rule(and_requirements, "", or_skills1, "", health_req, diff, glitched, anc,
+                                      arrival, list_rules)
             if or_resource1:  # Case 0 resource, 1 resource
                 and_req.append(req)
                 and_requirements, glitched = parse_and(and_req, diff)
                 and_req.remove(req)
-                L_rules = append_rule(and_requirements, "", "", or_resource1, health_req, diff, glitched, anc,
-                                      arrival, p_type, L_rules)
+                list_rules = append_rule(and_requirements, "", "", or_resource1, health_req, diff, glitched, anc,
+                                      arrival, list_rules)
 
         for req2 in or_glitch1:  # Case 0 skill, 1 glitched
             and_req.append(req2)
             and_requirements, glitched = parse_and(and_req, diff)
             and_req.remove(req2)
-            L_rules = append_rule(and_requirements, or_skills0, "", "", health_req, diff, True, anc, arrival,
-                                  p_type, L_rules)
+            list_rules = append_rule(and_requirements, or_skills0, "", "", health_req, diff, True, anc, arrival,
+                                  list_rules)
         if or_skills1:  # Case 0 skill, 1 skill
             and_requirements, glitched = parse_and(and_req, diff)
-            L_rules = append_rule(and_requirements, or_skills0, or_skills1, "", health_req, diff, glitched, anc,
-                                  arrival, p_type, L_rules)
+            list_rules = append_rule(and_requirements, or_skills0, or_skills1, "", health_req, diff, glitched, anc,
+                                  arrival, list_rules)
         if or_resource1:  # Case 0 skill, 1 resource
             and_requirements, glitched = parse_and(and_req, diff)
-            L_rules = append_rule(and_requirements, or_skills0, "", or_resource1, health_req, diff, glitched, anc,
-                                  arrival, p_type, L_rules)
+            list_rules = append_rule(and_requirements, or_skills0, "", or_resource1, health_req, diff, glitched, anc,
+                                  arrival, list_rules)
 
-    return L_rules, entrances
+    return list_rules, entrances
 
 
 def combat_req(need: str, value: str) -> tuple[list[list[int | str]], list[str]]:
     """Parse the combat requirement with the given enemies, returns the damage and type of combat."""
-    damage = []
-    dangers = []
+    damage: list[list[int | str]] = []
+    dangers: list[str] = []
 
     if need == "Combat":
         enemies = value.split("+")
@@ -632,11 +632,18 @@ def order_or(or_chain: list[str]) -> tuple[list[str], list[str], list[str]]:
     return or_skills, or_glitch, or_resource
 
 
-def append_rule(and_requirements: list[list], or_skills0: str | list[str], or_skills1: str | list[str],
-                or_resource: str | list[str], health: int, diff: int, glitched: bool, anc: str, arrival: str,
-                p_type: str, L_rules: list[str]) -> list[str]:
+def append_rule(and_requirements: list[list],
+                or_skills0: str | list[str],
+                or_skills1: str | list[str],
+                or_resource: str | list[str],
+                health: int,
+                diff: int,
+                glitched: bool,
+                anc: str,
+                arrival: str,
+                list_rules: list[str]) -> list[str]:
     """
-    Add the text to the rules list. Returns the updated L_rules.
+    Add the text to the rules list. Returns the updated list_rules.
 
     and_requirements contains requirements that must all be satisfied.
     or_skills0 contains a chain of skills, any can be satisfied. Same for or_skills1
@@ -647,7 +654,7 @@ def append_rule(and_requirements: list[list], or_skills0: str | list[str], or_sk
     anc is the name of the starting region
     arrival is the name of the connected region
     p_type is the type of the path (connection, or location/event)
-    L_rules is the list containing the parsed data. It is modified and returned at the end
+    list_rules is the list containing the parsed data. It is modified and returned at the end
     """
     and_skills, and_other, damage_and, combat_and, en_and = and_requirements
     energy = []
@@ -782,9 +789,9 @@ def append_rule(and_requirements: list[list], or_skills0: str | list[str], or_sk
     if glitched:
         diff += 1
 
-    L_rules[diff] += tot_txt
+    list_rules[diff] += tot_txt
 
-    return L_rules
+    return list_rules
 
 
 def conv_refill(p_name: str, anc: str, refills: dict[str, list[int]],
@@ -820,22 +827,38 @@ def req_area(area: str, diff: int) -> tuple[bool, int]:
 
     Returns if Regenerate is needed, and the amount of health required.
     """
-    M_dat = {"MidnightBurrows": (25, False), "EastHollow": (20, False), "WestHollow": (20, False),
-             "WestGlades": (20, False), "OuterWellspring": (25, False), "InnerWellspring": (25, False),
-             "WoodsEntry": (40, True), "WoodsMain": (40, True), "LowerReach": (40, True), "UpperReach": (40, True),
-             "UpperDepths": (40, True), "LowerDepths": (40, True), "PoolsApproach": (25, True), "EastPools": (40, True),
-             "UpperPools": (40, True), "WestPools": (40, True), "LowerWastes": (50, True), "UpperWastes": (50, True),
-             "WindtornRuins": (50, True), "WeepingRidge": (60, True), "WillowsEnd": (60, True)}
+    area_data = {"MidnightBurrows": (25, False),
+                 "EastHollow": (20, False),
+                 "WestHollow": (20, False),
+                 "WestGlades": (20, False),
+                 "OuterWellspring": (25, False),
+                 "InnerWellspring": (25, False),
+                 "WoodsEntry": (40, True),
+                 "WoodsMain": (40, True),
+                 "LowerReach": (40, True),
+                 "UpperReach": (40, True),
+                 "UpperDepths": (40, True),
+                 "LowerDepths": (40, True),
+                 "PoolsApproach": (25, True),
+                 "EastPools": (40, True),
+                 "UpperPools": (40, True),
+                 "WestPools": (40, True),
+                 "LowerWastes": (50, True),
+                 "UpperWastes": (50, True),
+                 "WindtornRuins": (50, True),
+                 "WeepingRidge": (60, True),
+                 "WillowsEnd": (60, True),
+                 }
 
     if area in (None, "MarshSpawn", "HowlsDen", "MarshPastOpher", "GladesTown"):
         return False, 0
     if diff >= 5:  # Unsafe
         return False, 0
     if diff >= 1:
-        if M_dat[area][1]:  # Kii, Gorlek
+        if area_data[area][1]:  # Kii, Gorlek
             return True, 0
         return False, 0
 
-    if M_dat[area][1]:  # Moki
-        return True, M_dat[area][0]
-    return False, M_dat[area][0]
+    if area_data[area][1]:  # Moki
+        return True, area_data[area][0]
+    return False, area_data[area][0]
