@@ -7,6 +7,7 @@ See https://github.com/ori-community/wotw-seedgen/tree/main/wotw_seedgen to get 
 
 import os
 import re
+from typing import Pattern
 from collections import Counter
 
 # %% Data and global variables
@@ -123,7 +124,11 @@ inf_glitches = {"RemoveKillPlane": "free",
                 "GlideJump": "Glide"}
 
 # Glitches that can be used infinitely, and use two skills
-other_glitches = ["WaveDash", "HammerJump", "SwordJump", "GlideHammerJump"]
+other_glitches = {"WaveDash": "can_wavedash(s, player)",
+                  "HammerJump": "can_hammerjump(s, player)",
+                  "SwordJump": "can_swordjump(s, player)",
+                  "GlideHammerJump": "can_glidehammerjump(s, player)"}
+
 
 
 # %% Text initialisations
@@ -137,6 +142,24 @@ header = ("\"\"\"\n"
 imports = "from .Rules_Functions import *\n\n"
 
 # %% Functions for extracting rules
+
+def try_search(regex: Pattern[str], text: str, begin=0, end=0) -> str:
+    """Return the result for search, sliced between begin and end. Raise an error if it does not match."""
+    match = regex.search(text)
+    if match is None:
+        raise RuntimeError(f"Could not find a match for {text} with {regex.pattern}.")
+    if begin is None:
+        begin = 0
+    if end == 0:
+        end = len(match.group()) + 1
+    return match.group()[begin: end]
+
+def try_end(regex: Pattern[str], text: str) -> int:
+    """Return the result for search, sliced between begin and end. Raise an error if it does not match."""
+    match = regex.search(text)
+    if match is None:
+        raise RuntimeError(f"Could not find a match for {text} with {regex.pattern}.")
+    return match.end()
 
 
 def parse_rules(override=False) -> None:
@@ -212,7 +235,7 @@ def parse_rules(override=False) -> None:
 
         if ind == 0:
             if "anchor" in p:
-                name = col.search(p).group()[1:-1]
+                name = try_search(col, p, 1, -1)
                 s = sep.search(name)
                 if s:
                     anc = name[:s.start()]
@@ -227,19 +250,19 @@ def parse_rules(override=False) -> None:
                 continue
             if "nospawn" in p or "tprestriction" in p:  # TODO: manage these if spawn anywhere implemented
                 continue
-            p_type = typ.search(p).group()[2:-1]  # Connection type
+            p_type = try_search(typ, p, 2, -1)  # Connection type
             if p_type not in ("conn", "state", "pickup", "refill", "quest"):
                 raise ValueError(f"{p_type} (line {i}) is not an appropriate path type.\n\"{p}\"")
             if p_type == "refill":
                 if ":" in p:
-                    p_name = nam.search(p).group()[1:-1]
+                    p_name = try_search(nam, p, 1, -1)
                     ref_type, refills, refill_events = conv_refill(p_name, anc, refills, refill_events)
                 else:
-                    p_name = ref.search(p).group()
+                    p_name = try_search(ref, p)
                     ref_type, refills, refill_events = conv_refill(p_name, anc, refills, refill_events)
                     convert(anc, p_type, p_name, L_rules, entrances, ref_type, 0, "free")
             else:
-                p_name = nam.search(p).group()[1:-1]  # Name
+                p_name = try_search(nam, p, 1, -1)  # Name
 
             if "free" in p:
                 L_rules, entrances = convert(anc, p_type, p_name, L_rules, entrances, ref_type, 0, "free")
@@ -252,9 +275,9 @@ def parse_rules(override=False) -> None:
                     diff = c_diff[p[4:-1]]
                     req2 = ""
                 elif "moki" in p or "gorlek" in p or "kii" in p or "unsafe" in p:
-                    s = dif.search(p[4:])
-                    diff = c_diff[s.group()[:-2]]
-                    req2 = p[s.end() + 4:-1]
+                    path_diff = try_search(dif, p[4:], end=-2)
+                    diff = c_diff[path_diff]
+                    req2 = p[try_end(dif, p[4:]) + 4:-1]
                 else:
                     raise ValueError(f"Input on line {i} is invalid.\n\"{p}\"")
 
@@ -265,9 +288,9 @@ def parse_rules(override=False) -> None:
                     req = p[start + 2:]
                     L_rules, entrances = convert(anc, p_type, p_name, L_rules, entrances, ref_type, diff, req)
                 else:
-                    s = dif.search(p[4:])
-                    diff = c_diff[s.group()[:-2]]
-                    req = p[s.end() + 4:]
+                    path_diff = try_search(dif, p[4:], end=-2)
+                    diff = c_diff[path_diff]
+                    req = p[try_end(dif, p[4:]) + 4:]
                     req = req.replace(":", ",")
                     L_rules, entrances = convert(anc, p_type, p_name, L_rules, entrances, ref_type, diff, req)
             else:
