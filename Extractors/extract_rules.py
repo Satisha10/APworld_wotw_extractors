@@ -14,7 +14,6 @@ from collections import Counter
 
 # TODO probably best to just rework the whole code for better quality
 # TODO fix typing
-# TODO add function for regex with error handling
 # TODO entrance rando
 # TODO rename glitches, can_open_door, change combat, change resource function
 
@@ -603,7 +602,7 @@ def parse_and(and_req: list[str], diff: int) -> tuple[list, bool]:
             and_other += danger
         else:  # Case of an event, or keystone, or spirit light, or ore
             and_other.append(requirement)
-    return (and_skills, and_other, damage_and, combat_and, en_and), glitched
+    return [and_skills, and_other, damage_and, combat_and, en_and], glitched
 
 
 def order_or(or_chain: list[str]) -> tuple[list[str], list[str], list[str]]:
@@ -762,24 +761,12 @@ def append_rule(and_requirements: list[list],
             or_costs.append([2, int(value)])
 
     if damage_and or combat_and or en_and or or_costs:
-        # temp_txt = (f"cost_all(s, player, ref_resource, options, \"{anc}\", \"{arrival}\", {damage_and}, {energy}, "
-        #             f"{combat_and}, {or_costs}, \"{refill_type}\"")
         temp_txt = (f"cost_all(s, player, options, \"{anc}\", {damage_and}, {energy}, "
                     f"{combat_and}, {or_costs}, {diff})")
-        # if p_type in ("conn", "refill"):
-        #     temp_txt += ", True)"  # Indicates if the resource table has to be updated
-        # else:
-        #     temp_txt += ", False)"
         if req_txt:
             req_txt += " and " + temp_txt
         else:
             req_txt += temp_txt
-
-    # elif p_type in ("conn", "refill"):
-    #     if req_txt:  # Indicates that the resource table has to be updated, but the path does not consume resource
-    #         req_txt += " and " + f"no_cost(\"{anc}\", \"{arrival}\", s, player, ref_resource, \"{refill_type}\")"
-    #     else:
-    #         req_txt += f"no_cost(\"{anc}\", \"{arrival}\", s, player, ref_resource, \"{refill_type}\")"
 
     if req_txt:
         tot_txt = start_txt + req_txt + ", \"or\")\n"
