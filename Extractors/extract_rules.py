@@ -17,6 +17,7 @@ from collections import Counter
 # TODO entrance rando
 # TODO rename glitches, can_open_door, change combat, change resource function
 # TODO use global variables (for list_rules...) and make it into a script
+# TODO 8659 in areas.wotw
 
 # Enemy data
 ref_en: dict[str, tuple[int, list[str]]] = {
@@ -226,114 +227,114 @@ def parse_rules(override=False) -> None:
     refill_events: list[str] = []  # Stores all the names given to the refill events.
 
     # Variables
-    anc = ""  # Name of the current anchor
-    diff = 0  # Difficulty of the path
+    anchor = ""  # Name of the current anchor
+    difficulty = 0  # Difficulty of the path
     req2 = ""  # Requirements from second indent
     req3 = ""  # Requirements from third indent
     req4 = ""  # Requirements from fourth indent
-    ref_type = ""  # Refill type (energy, health, checkpoint or full)
-    p_type = ""  # Type of the path
-    p_name = ""  # Name of the location/region/event accessed by the path
+    refill_type = ""  # Refill type (energy, health, checkpoint or full)
+    path_type = ""  # Type of the path
+    path_name = ""  # Name of the location/region/event accessed by the path
 
     c_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
-    for i, p in enumerate(temp):  # line number is only used for debug
-        m = r_comment.search(p)  # Removes the comments
+    for i, line in enumerate(temp):  # line number is only used for debug
+        m = r_comment.search(line)  # Removes the comments
         if m:
-            p = p[:m.start()]
-        m = r_trailing.search(p)  # Removes the trailing spaces
+            line = line[:m.start()]
+        m = r_trailing.search(line)  # Removes the trailing spaces
         if m:
-            p = p[:m.start()]
-        if p == "":
+            line = line[:m.start()]
+        if line == "":
             continue
 
-        m = r_indent.match(p)  # Counts the indents
+        m = r_indent.match(line)  # Counts the indents
         if m is None:
-            ind = 0
+            indent = 0
         else:
-            ind = (m.end() + 1) // 2
+            indent = (m.end() + 1) // 2
 
-        if ind == 0:
-            if "anchor" in p:
-                name = try_search(r_colon, p, 1, -1)
+        if indent == 0:
+            if "anchor" in line:
+                name = try_search(r_colon, line, 1, -1)
                 s = r_indent.search(name)
                 if s:
-                    anc = name[:s.start()]
+                    anchor = name[:s.start()]
                 else:
-                    anc = name
-                refills.setdefault(anc, [0, 0, 0])
+                    anchor = name
+                refills.setdefault(anchor, [0, 0, 0])
             else:
-                anc = ""
+                anchor = ""
 
-        elif ind == 1:
-            if not anc:
+        elif indent == 1:
+            if not anchor:
                 continue
-            if "nospawn" in p or "tprestriction" in p:  # TODO: manage these if spawn anywhere implemented
+            if "nospawn" in line or "tprestriction" in line:  # TODO: manage these if spawn anywhere implemented
                 continue
-            p_type = try_search(r_type, p, 2, -1)  # Connection type
-            if p_type not in ("conn", "state", "pickup", "refill", "quest"):
-                raise ValueError(f"{p_type} (line {i}) is not an appropriate path type.\n\"{p}\"")
-            if p_type == "refill":
-                if ":" in p:
-                    p_name = try_search(r_name, p, 1, -1)
-                    ref_type, refills, refill_events = conv_refill(p_name, anc, refills, refill_events)
+            path_type = try_search(r_type, line, 2, -1)  # Connection type
+            if path_type not in ("conn", "state", "pickup", "refill", "quest"):
+                raise ValueError(f"{path_type} (line {i}) is not an appropriate path type.\n\"{line}\"")
+            if path_type == "refill":
+                if ":" in line:
+                    path_name = try_search(r_name, line, 1, -1)
+                    refill_type, refills, refill_events = conv_refill(path_name, anchor, refills, refill_events)
                 else:
-                    p_name = try_search(r_refill, p)
-                    ref_type, refills, refill_events = conv_refill(p_name, anc, refills, refill_events)
-                    convert(anc, p_type, p_name, list_rules, entrances, ref_type, 0, "free")
+                    path_name = try_search(r_refill, line)
+                    refill_type, refills, refill_events = conv_refill(path_name, anchor, refills, refill_events)
+                    convert(anchor, path_type, path_name, list_rules, entrances, refill_type, 0, "free")
             else:
-                p_name = try_search(r_name, p, 1, -1)  # Name
+                path_name = try_search(r_name, line, 1, -1)  # Name
 
-            if "free" in p:
-                list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, 0, "free")
+            if "free" in line:
+                list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, 0, "free")
 
-        elif ind == 2:
-            if not anc:
+        elif indent == 2:
+            if not anchor:
                 continue
-            if p[-1] == ":":
-                if p[4:] in ("moki:", "gorlek:", "kii:", "unsafe:"):
-                    diff = c_diff[p[4:-1]]
+            if line[-1] == ":":
+                if line[4:] in ("moki:", "gorlek:", "kii:", "unsafe:"):
+                    difficulty = c_diff[line[4:-1]]
                     req2 = ""
-                elif "moki" in p or "gorlek" in p or "kii" in p or "unsafe" in p:
-                    path_diff = try_search(r_difficulty, p[4:], end=-2)
-                    diff = c_diff[path_diff]
-                    req2 = p[try_end(r_difficulty, p[4:]) + 4:-1]
+                elif "moki" in line or "gorlek" in line or "kii" in line or "unsafe" in line:
+                    path_diff = try_search(r_difficulty, line[4:], end=-2)
+                    difficulty = c_diff[path_diff]
+                    req2 = line[try_end(r_difficulty, line[4:]) + 4:-1]
                 else:
-                    raise ValueError(f"Input on line {i} is invalid.\n\"{p}\"")
+                    raise ValueError(f"Input on line {i} is invalid.\n\"{line}\"")
 
-            elif ": " in p:
-                if "moki:" in p or "gorlek:" in p or "kii:" in p or "unsafe:" in p:
-                    start = p.find(": ")
-                    diff = c_diff[p[4:start]]
-                    req = p[start + 2:]
-                    list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
+            elif ": " in line:
+                if "moki:" in line or "gorlek:" in line or "kii:" in line or "unsafe:" in line:
+                    start = line.find(": ")
+                    difficulty = c_diff[line[4:start]]
+                    req = line[start + 2:]
+                    list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req)
                 else:
-                    path_diff = try_search(r_difficulty, p[4:], end=-2)
-                    diff = c_diff[path_diff]
-                    req = p[try_end(r_difficulty, p[4:]) + 4:]
+                    path_diff = try_search(r_difficulty, line[4:], end=-2)
+                    difficulty = c_diff[path_diff]
+                    req = line[try_end(r_difficulty, line[4:]) + 4:]
                     req = req.replace(":", ",")
-                    list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
+                    list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req)
             else:
-                raise ValueError(f"Input on line {i} is invalid.\n\"{p}\"")
+                raise ValueError(f"Input on line {i} is invalid.\n\"{line}\"")
 
-        elif ind == 3:
-            if not anc:
+        elif indent == 3:
+            if not anchor:
                 continue
-            if p[-1] == ":":
-                req3 = p[6:-1]
+            if line[-1] == ":":
+                req3 = line[6:-1]
             else:
                 req3 = ""
                 if req2:
-                    req = req2 + ", " + p[6:]
+                    req = req2 + ", " + line[6:]
                 else:
-                    req = p[6:]
-                list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
+                    req = line[6:]
+                list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req)
 
-        elif ind == 4:
-            if not anc:
+        elif indent == 4:
+            if not anchor:
                 continue
-            if p[-1] == ":":
-                req4 = p[8:-1]
+            if line[-1] == ":":
+                req4 = line[8:-1]
             else:
                 req4 = ""
                 req = ""
@@ -341,11 +342,11 @@ def parse_rules(override=False) -> None:
                     req += req2 + ", "
                 if req3:
                     req += req3 + ", "
-                req += p[8:]
-                list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
+                req += line[8:]
+                list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req)
 
-        elif ind == 5:
-            if not anc:
+        elif indent == 5:
+            if not anchor:
                 continue
             req = ""
             if req2:
@@ -354,11 +355,11 @@ def parse_rules(override=False) -> None:
                 req += req3 + ", "
             if req4:
                 req += req4 + ", "
-            req += p[10:]
-            list_rules, entrances = convert(anc, p_type, p_name, list_rules, entrances, ref_type, diff, req)
+            req += line[10:]
+            list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req)
 
         else:
-            raise NotImplementedError(f"Too many indents ({ind}) on line {i}.\n{p}")
+            raise NotImplementedError(f"Too many indents ({indent}) on line {i}.\n{line}")
 
     ent_txt = header + "\n" + "entrance_table = [\n"
     for entrance in entrances:
