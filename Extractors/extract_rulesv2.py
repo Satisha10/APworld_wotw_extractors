@@ -7,7 +7,7 @@ See https://github.com/ori-community/wotw-seedgen/tree/main/wotw_seedgen to get 
 
 import os
 import re
-from typing import Pattern, NamedTuple
+from typing import Pattern
 from collections import Counter
 
 # %% Data and global variables
@@ -225,10 +225,171 @@ def req_area(area: str, diff: int) -> tuple[bool, int]:
         return True, area_data[area][0]
     return False, area_data[area][0]
 
+
+def convert() -> None:
+    """Convert the data given by the arguments into an add_rule function, and add it to the right difficulty."""
+    global anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req, glitched, arrival
+    health_req = 0  # Requirement when entering a new area
+
+    and_req = []
+    or_req = []
+
+    if path_type == "conn" and "." in path_name:  # Gets the requirements when entering a new area.
+        dot_position = path_name.find(".")
+        f_area = path_name[:dot_position]
+        if "." in anchor:
+            dot_position = anchor.find(".")
+            i_area = anchor[:dot_position]  # Extracts the name of the starting area
+        else:
+            i_area = ""
+        if i_area != f_area:
+            regen, health_req = req_area(f_area, difficulty)
+            if regen:
+                and_req.append("Regenerate")
+
+    if path_type == "refill":
+        path_name = refill_type + anchor
+
+    arrival = path_name
+    conn_name = f"{anchor} -> {path_name}"
+    if conn_name not in entrances:
+        entrances.append(conn_name)
+
+    s_req = req.split(", ")
+    for elem in s_req:
+        if " OR " in elem:
+            or_req.append(elem.split(" OR "))
+        else:
+            and_req.append(elem)
+
+    if len(or_req) == 0:
+        and_requirements, glitched = parse_and(and_req, difficulty)
+        list_rules = append_rule(and_requirements, "", "", "", health_req, difficulty, glitched, anchor, arrival,
+                              list_rules)
+
+    elif len(or_req) == 1:
+        or_skills0, or_glitch0, or_resource0 = order_or(or_req[0])
+
+        for req in or_glitch0:
+            and_req.append(req)
+            and_requirements, glitched = parse_and(and_req, difficulty)
+            and_req.remove(req)
+            list_rules = append_rule(and_requirements, "", "", "", health_req, difficulty, True, anchor, arrival,
+                                  list_rules)
+        if or_skills0:
+            and_requirements, glitched = parse_and(and_req, difficulty)
+            list_rules = append_rule(and_requirements, or_skills0, "", "", health_req, difficulty, glitched, anchor,
+                                  arrival, list_rules)
+        if or_resource0:
+            and_requirements, glitched = parse_and(and_req, difficulty)
+            list_rules = append_rule(and_requirements, "", "", or_resource0, health_req, difficulty, glitched, anchor,
+                                  arrival, list_rules)
+
+    elif len(or_req) == 2:
+        or_skills0, or_glitch0, or_resource0 = order_or(or_req[0])
+        or_skills1, or_glitch1, or_resource1 = order_or(or_req[1])
+
+        # Swaps the two chains if it is more efficient to split the second resource chain
+        if len(or_resource0) > len(or_resource1):
+            (or_skills0, or_glitch0, or_resource0, or_skills1, or_glitch1,
+             or_resource1) = (or_skills1, or_glitch1, or_resource1, or_skills0, or_glitch0, or_resource0)
+
+        for req in or_glitch0:
+            for req2 in or_glitch1:  # Case 0 glitched, 1 glitched
+                and_req.append(req)
+                and_req.append(req2)
+                and_requirements, glitched = parse_and(and_req, difficulty)
+                and_req.remove(req)
+                and_req.remove(req2)
+                list_rules = append_rule(and_requirements, "", "", "", health_req, difficulty, True, anchor, arrival,
+                                      list_rules)
+            if or_skills1:   # Case 0 glitched, 1 skill
+                and_req.append(req)
+                and_requirements, glitched = parse_and(and_req, difficulty)
+                and_req.remove(req)
+                list_rules = append_rule(and_requirements, "", or_skills1, "", health_req, difficulty, True, anchor,
+                                      arrival, list_rules)
+            if or_resource1:  # Case 0 glitched, 1 resource
+                and_req.append(req)
+                and_requirements, glitched = parse_and(and_req, difficulty)
+                and_req.remove(req)
+                list_rules = append_rule(and_requirements, "", "", or_resource1, health_req, difficulty, True, anchor,
+                                      arrival, list_rules)
+
+        for req in or_resource0:
+            for req2 in or_glitch1:  # Case 0 resource, 1 glitched
+                and_req.append(req)
+                and_req.append(req2)
+                and_requirements, glitched = parse_and(and_req, difficulty)
+                and_req.remove(req)
+                and_req.remove(req2)
+                list_rules = append_rule(and_requirements, "", "", "", health_req, difficulty, True, anchor, arrival,
+                                      list_rules)
+            if or_skills1:  # Case 0 resource, 1 skill
+                and_req.append(req)
+                and_requirements, glitched = parse_and(and_req, difficulty)
+                and_req.remove(req)
+                list_rules = append_rule(and_requirements, "", or_skills1, "", health_req, difficulty, glitched, anchor,
+                                      arrival, list_rules)
+            if or_resource1:  # Case 0 resource, 1 resource
+                and_req.append(req)
+                and_requirements, glitched = parse_and(and_req, difficulty)
+                and_req.remove(req)
+                list_rules = append_rule(and_requirements, "", "", or_resource1, health_req, difficulty, glitched, anchor,
+                                      arrival, list_rules)
+
+        for req2 in or_glitch1:  # Case 0 skill, 1 glitched
+            and_req.append(req2)
+            and_requirements, glitched = parse_and(and_req, difficulty)
+            and_req.remove(req2)
+            list_rules = append_rule(and_requirements, or_skills0, "", "", health_req, difficulty, True, anchor, arrival,
+                                  list_rules)
+        if or_skills1:  # Case 0 skill, 1 skill
+            and_requirements, glitched = parse_and(and_req, difficulty)
+            list_rules = append_rule(and_requirements, or_skills0, or_skills1, "", health_req, difficulty, glitched, anchor,
+                                  arrival, list_rules)
+        if or_resource1:  # Case 0 skill, 1 resource
+            and_requirements, glitched = parse_and(and_req, difficulty)
+            list_rules = append_rule(and_requirements, or_skills0, "", or_resource1, health_req, difficulty, glitched, anchor,
+                                  arrival, list_rules)
+
+
+def write_files() -> None:
+    """Write the extracted data into output files."""
+    # TODO Add a file for ER data.
+    ent_txt = header + "\n" + "entrance_table = [\n"
+    for entrance in entrances:
+        ent_txt += f"    \"{entrance}\",\n"
+    ent_txt = ent_txt[:-2]
+    ent_txt += "\n    ]\n"
+
+    ref_txt = header + "\n" + "refills = {  # key: region name. List: [health restored, energy restored, refill type]\n"
+    ref_txt += "    # For refill type: 0 is no refill, 1 is Checkpoint, 2 is Full refill.\n"
+    for region, info in refills.items():
+        ref_txt += f"    \"{region}\": {info},\n"
+    ref_txt = ref_txt[:-2]
+    ref_txt += ("\n    }\n\n"
+                "refill_events = [\n")
+    for refill_name in refill_events:
+        ref_txt += f"    \"{refill_name}\",\n"
+    ref_txt = ref_txt[:-2]
+    ref_txt += "\n    ]\n"
+
+    with open("Rules.py", "w") as w_file:
+        for j in range(7):
+            w_file.write(list_rules[j])
+        print("The file `Rules.py` has been successfully created.")
+    with open("Entrances.py", "w") as w_file:
+        w_file.write(ent_txt)
+        print("The file `Entrances.py` has been successfully created.")
+    with open("Refills.py", "w") as w_file:
+        w_file.write(ref_txt)
+        print("The file `Refills.py` has been successfully created.")
+
 # %% Main script
 
 with open("./areasv2.wotw", "r") as file:
-    text = file.readlines()
+    source_text = file.readlines()
 
 # Moki, Gorlek, Kii and Unsafe rules respectively
 moki = (header + imports + "from worlds.generic.Rules import add_rule\n\n\n"
@@ -252,7 +413,7 @@ list_rules: list[str] = [moki, gorlek, gorlek_glitch, kii, kii_glitch, unsafe, u
 # Store the entrance names
 entrances: list[str] = []
 # Contain the refill info per region in a tuple: (health, energy, type)
-refills: dict[str, tuple[int, int, int]] = {}  # TODO enum type ?
+refills: dict[str, tuple[int, int, int]] = {}
 refill_events: list[str] = []  # Store all the names given to the refill events.
 
 # Variables
@@ -261,16 +422,23 @@ anchor = ""  # Name of the current anchor
 glitched = False  # Whether the current path involves glitches
 arrival = ""  # Name of the connected anchor for a connection
 difficulty = 0  # Difficulty of the path
+req = ""  # Full requirement
+req1 = ""  # Requirements from first indent
 req2 = ""  # Requirements from second indent
 req3 = ""  # Requirements from third indent
 req4 = ""  # Requirements from fourth indent
+req5 = ""
 refill_type = ""  # Refill type (energy, health, checkpoint or full)
 path_type = ""  # Type of the path (connection, pickup, refill)
 path_name = ""  # Name of the location/region/event accessed by the path
+should_convert = False  # If True, convert is called to create a rule
 
 convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
-for i, line in enumerate(text):  # Line number is only used for debug
+for i, line in enumerate(source_text):  # Line number is only used for debug
+    should_convert = False  # Reset the flag to false
+
+    ## Parse the line text
     m = r_comment.search(line)  # Remove the comments
     if m:
         line = line[:m.start()]
@@ -315,12 +483,14 @@ for i, line in enumerate(text):  # Line number is only used for debug
             else:
                 path_name = try_group(r_refill, line, 1)  # Checkpoint, Full, Energy=x...
                 refill_type, refills, refill_events = conv_refill(path_name, anchor, refills, refill_events)
-                convert(anchor, path_type, path_name, list_rules, entrances, refill_type, 0, "free")
+                should_convert = True
+                req1 = "free"
         else:
             path_name = try_group(r_name, line, 1, -1)  # Name
 
         if "free" in line:
-            list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, 0, "free")
+            should_convert = True
+            req1 = "free"
     # TODO cases id, target, enter
     elif indent == 2:  # When not a door, this contains the path difficulty
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
@@ -336,12 +506,8 @@ for i, line in enumerate(text):  # Line number is only used for debug
         if line[-1] == ":":
             req3 = line[:-1]
         else:
-            req3 = ""
-            if req2:
-                req = req2 + ", " + line
-            else:
-                req = line
-            list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req)
+            req3 = line
+            should_convert = True
 
     elif indent == 4:
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
@@ -349,27 +515,30 @@ for i, line in enumerate(text):  # Line number is only used for debug
         if line[-1] == ":":
             req4 = line[:-1]
         else:
-            req4 = ""
-            req = ""
-            if req2:
-                req += req2 + ", "
-            if req3:
-                req += req3 + ", "
-            req += line
-            list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req)
+            req4 = line
+            should_convert = True
 
     elif indent == 5:
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
-        req = ""
-        if req2:
-            req += req2 + ", "
-        if req3:
-            req += req3 + ", "
-        if req4:
-            req += req4 + ", "
-        req += line
-        list_rules, entrances = convert(anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req)
+        req5 = line
+        should_convert = True
 
     else:
         raise NotImplementedError(f"Too many indents ({indent}) on line {i}.\n{line}")
+
+    if should_convert:
+        req = req1
+        if indent >= 2:
+            req += req2
+        if indent >= 3:
+            req += req3
+        if indent >= 4:
+            req += req4
+        if indent >= 5:
+            req += req5
+        convert()
+
+write_files()
+
+    ## Convert the parsed line into lists of requirements
