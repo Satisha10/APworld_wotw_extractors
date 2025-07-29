@@ -5,18 +5,15 @@ Run `parse_rules()` to extract the rules from the `areas.wotw` file.
 See https://github.com/ori-community/wotw-seedgen/tree/main/wotw_seedgen to get this file.
 """
 
-import os
 import re
 from typing import Pattern
 from collections import Counter
 
 # %% Data and global variables
 
-# TODO probably best to just rework the whole code for better quality
 # TODO fix typing
 # TODO entrance rando
 # TODO rename glitches, can_open_door, change combat, change resource function
-# TODO use global variables (for list_rules...) and make it into a script
 
 # Enemy data
 ref_en: dict[str, tuple[int, list[str]]] = {
@@ -226,11 +223,39 @@ def req_area(area: str, diff: int) -> tuple[bool, int]:
     return False, area_data[area][0]
 
 
+def conv_refill() -> None:
+    """Get the refill type (to add before the region name) and update the data tables."""
+    global refill_type
+    current = refills[anchor]
+    if "=" in path_name:
+        value = int(path_name[-1])
+        if path_name[:-2] == "Health":
+            if current[0] == 0:
+                refills.update({anchor: (value, current[1], current[2])})
+                refill_events.append(f"H.{anchor}")
+            refill_type = "H."
+        if path_name[:-2] == "Energy":
+            if current[1] == 0:
+                refills.update({anchor: (current[0], value, current[2])})
+                refill_events.append(f"E.{anchor}")
+            refill_type = "E."
+    if path_name == "Checkpoint":
+        refills.update({anchor: (current[0], current[1], 1)})
+        refill_events.append(f"C.{anchor}")
+        refill_type = "C."
+    if path_name == "Full":
+        refills.update({anchor: (current[0], current[1], 2)})
+        refill_events.append(f"F.{anchor}")
+        refill_type = "F."
+    raise ValueError(f"{path_name} is not a valid refill type (at anchor {anchor}).")
+
+
 def convert() -> None:
     """Convert the data given by the arguments into an add_rule function, and add it to the right difficulty."""
-    global anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req, glitched, arrival
-    health_req = 0  # Requirement when entering a new area
+    global anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req, glitched, arrival, health_req
+    global and_req, or_req
 
+    health_req = 0
     and_req = []
     or_req = []
 
@@ -415,8 +440,9 @@ entrances: list[str] = []
 # Contain the refill info per region in a tuple: (health, energy, type)
 refills: dict[str, tuple[int, int, int]] = {}
 refill_events: list[str] = []  # Store all the names given to the refill events.
+doors: list[tuple[str, str, int]] = []  # For each door, contain base region, target region, door ID
 
-# Variables
+# Global variables
 indent = 0  # Number of indents
 anchor = ""  # Name of the current anchor
 glitched = False  # Whether the current path involves glitches
@@ -427,16 +453,23 @@ req1 = ""  # Requirements from first indent
 req2 = ""  # Requirements from second indent
 req3 = ""  # Requirements from third indent
 req4 = ""  # Requirements from fourth indent
-req5 = ""
+req5 = ""  # Requirements from fifth indent
 refill_type = ""  # Refill type (energy, health, checkpoint or full)
 path_type = ""  # Type of the path (connection, pickup, refill)
 path_name = ""  # Name of the location/region/event accessed by the path
 should_convert = False  # If True, convert is called to create a rule
+is_door = False
+is_enter = False  # True when in an enter clause (when parsing the door rules)
+door_id: int = 0
+health_req = 0  # Health requirement when entering a new area
+and_req: list[str] = []  # Stores the requirements form an and chain
+or_req: list[str] = []  # Stores the requirements form an and chain
 
 convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
 for i, line in enumerate(source_text):  # Line number is only used for debug
     should_convert = False  # Reset the flag to false
+    # TODO also reset the chain, the refill type ?
 
     ## Parse the line text
     m = r_comment.search(line)  # Remove the comments
@@ -454,6 +487,11 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
     else:
         indent = (m.end() + 1) // 2
         line = line[m.end():]  # Remove the indents from the text
+        if is_enter:  # When in parsing a door connection, there is one extra indent, it is easier to remove it there
+            if indent < 3:  # Exited from enter clause, so set it to false
+                is_enter = False
+            else:  # Remove the extra indent to avoid adding new cases
+                indent -= 1
 
     if indent == 0:  # Always anchor, except for requirement or region (which are ignored)
         if "anchor" in line:
@@ -467,11 +505,14 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
         else:
             anchor = ""
 
-    # TODO manage door
     elif indent == 1:
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
         if "nospawn" in line or "tprestriction" in line:  # TODO: manage these if spawn anywhere implemented
+            continue
+        if line == "door:":
+            path_type = "conn"
+            is_door = True
             continue
         path_type = try_group(r_type, line, end=-1)  # Connection type
         if path_type not in ("conn", "state", "pickup", "refill", "quest"):
@@ -491,15 +532,27 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
         if "free" in line:
             should_convert = True
             req1 = "free"
-    # TODO cases id, target, enter
+
     elif indent == 2:  # When not a door, this contains the path difficulty
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
+        if is_door:
+            if "id:" in line:
+                door_id = int(line[4:])
+            elif "target:" in line:
+                arrival = line[8:]
+                doors.append((anchor, arrival, door_id))
+            elif "free" in line:  # Case of a free door connection
+                should_convert = True
+                req1 = "free"
+                req2 = ""
+            else:  # Case of line == "enter:", the rules are in the next lines
+                is_enter = True
+                is_door = False
         path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
         difficulty = convert_diff[path_diff]
         req2 = line[try_end(r_difficulty, line):]  # Can be empty
 
-    # TODO holds difficulty in case of a door
     elif indent == 3:
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
