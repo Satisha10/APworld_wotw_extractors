@@ -381,24 +381,29 @@ def convert() -> None:
 
 def write_files() -> None:
     """Write the extracted data into output files."""
-    # TODO Add a file for ER data.
-    ent_txt = header + "\n" + "entrance_table = [\n"
+    ent_txt = header + "\n" + "entrance_table: list[str] = [\n"
     for entrance in entrances:
         ent_txt += f"    \"{entrance}\",\n"
     ent_txt = ent_txt[:-2]
     ent_txt += "\n    ]\n"
 
-    ref_txt = header + "\n" + "refills = {  # key: region name. List: [health restored, energy restored, refill type]\n"
+    ref_txt = header + "\n" + "refills: dict[str, tuple[int, int, int]] = {  # key: region name. Tuple: [health restored, energy restored, refill type]\n"
     ref_txt += "    # For refill type: 0 is no refill, 1 is Checkpoint, 2 is Full refill.\n"
     for region, info in refills.items():
         ref_txt += f"    \"{region}\": {info},\n"
     ref_txt = ref_txt[:-2]
     ref_txt += ("\n    }\n\n"
-                "refill_events = [\n")
+                "refill_events: list[str] = [\n")
     for refill_name in refill_events:
         ref_txt += f"    \"{refill_name}\",\n"
     ref_txt = ref_txt[:-2]
     ref_txt += "\n    ]\n"
+
+    door_txt = header + "\n" + "door_table: list[tuple[str, str, int]] = [\n"
+    for door in doors:
+        door_txt += f"    \"{door}\",\n"
+    door_txt = door_txt[:-2]
+    door_txt += "\n    ]\n"
 
     with open("Rules.py", "w") as w_file:
         for j in range(7):
@@ -410,6 +415,274 @@ def write_files() -> None:
     with open("Refills.py", "w") as w_file:
         w_file.write(ref_txt)
         print("The file `Refills.py` has been successfully created.")
+    with open("DoorData.py", "w") as w_file:
+        w_file.write(door_txt)
+        print("The file `DoorData.py` has been successfully created.")
+
+
+def parse_and(and_req: list[str], diff: int) -> tuple[list, bool]:
+    """Parse the list of requirements in the `and` chain, and returns the processed information."""
+    and_skills = []  # Stores inf_skills
+    and_other = []  # Stores other requirements (that often have their own event)
+    damage_and = []  # Stores damage boosts
+    combat_and = []  # Stores combat damage to inflict, as a list of each damage to do + the type of combat
+    # The type of combat can be ranged, wall
+    en_and = []  # Stores energy weapon used
+    global glitched
+    glitched = False
+
+    for requirement in and_req:
+        if "=" in requirement:
+            elem, value = requirement.split("=")
+        else:
+            if requirement in name_convert.keys():
+                requirement = name_convert[requirement]
+            elem = requirement
+            value = 0
+
+        if elem in other_glitches:  # Handle the glitches
+            glitched = True
+            and_other.append(elem)
+        elif elem in inf_glitches.keys():
+            glitched = True
+            current_req = inf_glitches[elem]
+            if current_req not in and_skills and current_req != "free":
+                and_skills.append(current_req)
+        elif elem in glitches.keys():
+            glitched = True
+            value = int(value)
+            current_req = glitches[elem]
+            for i, skill in enumerate(current_req):
+                if elem == "ShurikenBreak" and diff == 5:
+                    combat_and.append([value * 2, "Shuriken"])
+                elif elem == "ShurikenBreak":
+                    combat_and.append([value * 3, "Shuriken"])
+                elif elem == "SentryBreak":
+                    combat_and.append([value * 6.25, "Shuriken"])
+                elif i == len(current_req) - 1:
+                    en_and += [skill] * value
+                else:
+                    if current_req not in and_skills and current_req != "free":
+                        and_skills.append(current_req)
+
+        elif requirement in inf_skills:  # Check on requirement to catch the energy skills without the =
+            if requirement not in and_skills and requirement != "free":
+                and_skills.append(requirement)
+        elif elem in en_skills:
+            value = int(value)
+            en_and += [elem] * value
+        elif elem == "Damage":
+            value = int(value)
+            damage_and.append(value)
+        elif elem in combat_name:
+            deal_damage, danger = combat_req(elem, value)
+            combat_and += deal_damage
+            and_other += danger
+        else:  # Case of an event, or keystone, or spirit light, or ore
+            and_other.append(requirement)
+    return [and_skills, and_other, damage_and, combat_and, en_and], glitched  # TODO
+
+
+def combat_req(need: str, value: str) -> tuple[list[list[int | str]], list[str]]:
+    """Parse the combat requirement with the given enemies, return the damage and type of combat."""
+    damage: list[list[int | str]] = []
+    dangers: list[str] = []
+
+    if need == "Combat":
+        enemies = value.split("+")
+
+        for elem in enemies:
+            amount = 1
+            if "EnergyRefill" in elem:
+                amount = int(elem[0])
+                damage.append([amount, "Refill"])
+                continue
+            if elem[1] == "x":
+                amount = int(elem[0])
+                elem = elem[2:]
+            danger = ref_en[elem][1]
+            damage_type = "Combat"
+            damage += ([[ref_en[elem][0], damage_type]] * amount)
+            for dan in danger:
+                dan = "Combat." + dan
+                if dan not in dangers and dan != "Combat.Free":
+                    dangers.append(dan)
+
+    elif need == "Boss":
+        damage.append([int(value), "Boss"])
+
+    elif need == "BreakWall":
+        damage.append([int(value), "Wall"])
+
+    return damage, dangers
+
+
+def order_or(or_chain: list[str]) -> tuple[list[str], list[str], list[str]]:
+    """Parse the list of requirements in the `or` chain, and categorize them."""
+    or_skills = []  # Store inf_skills (skills that don't require energy to use)
+    or_glitch = []  # Store the glitches
+    or_resource = []  # Store requirements that need resources
+
+    for requirement in or_chain:
+        if "=" in requirement:
+            elem = requirement.split("=")[0]
+        else:
+            if requirement in name_convert.keys():
+                requirement = name_convert[requirement]
+            elem = requirement
+
+        if elem in other_glitches or elem in inf_glitches.keys() or elem in glitches.keys():  # Handle the glitches
+            or_glitch.append(requirement)
+
+        elif requirement in inf_skills:  # Check on requirement to catch the energy skills without the =
+            or_skills.append(requirement)
+        elif elem in en_skills or elem in combat_name or elem == "Damage":
+            or_resource.append(requirement)
+        else:  # Case of an event
+            or_skills.append(requirement)
+    return or_skills, or_glitch, or_resource
+
+
+def append_rule() -> None:
+    """
+    Add the text to the rules list. Returns the updated list_rules.
+
+    and_requirements contains requirements that must all be satisfied.
+    or_skills0 contains a chain of skills, any can be satisfied. Same for or_skills1
+    or_resource contains requirements that can cost resources. Any can be satisfied.
+    health is the health requirement when entering a new area
+    diff is the path difficulty
+    glitched indicates if the path includes glitches
+    anc is the name of the starting region
+    arrival is the name of the connected region
+    p_type is the type of the path (connection, or location/event)
+    list_rules is the list containing the parsed data. It is modified and returned at the end
+    """
+    global and_requirements, or_skills0, or_skills1, or_resource, health_req, difficulty, glitches, anchor, arrival, list_rules
+    and_skills, and_other, damage_and, combat_and, en_and = and_requirements
+    energy = []
+
+    start_txt = f"    add_rule(world.get_entrance(\"{anchor}_to_{arrival}\", player), lambda s: "
+    req_txt = ""
+
+    if and_skills:
+        temp_txt = ""
+        if len(and_skills) == 1:
+            temp_txt = f"s.has(\"{and_skills[0]}\", player)"
+        else:
+            for elem in and_skills:
+                if temp_txt:
+                    temp_txt += f", \"{elem}\""
+                else:
+                    temp_txt += f"s.has_all((\"{elem}\""
+            temp_txt += "), player)"
+        if req_txt:
+            req_txt += " and " + temp_txt
+        else:
+            req_txt += temp_txt
+
+    if and_other:
+        for elem in and_other:
+            if "Keystone=" in elem:
+                temp_txt = "can_keystones(s, player)"
+            elif "=" in elem:
+                name, amount = elem.split("=")
+                amount = int(amount)
+                if name == "SpiritLight":
+                    if amount == 1200:  # Case of a shop item
+                        temp_txt = "s.count(\"200 Spirit Light\", player) >= 6"
+                    else:  # Case of a map from Lupo
+                        temp_txt = "can_buy_map(s, player)"
+                elif name == "Ore":
+                    temp_txt = f"s.count(\"Gorlek Ore\", player) >= {amount}"
+                else:
+                    raise ValueError(f"Invalid input: {elem}")
+            else:
+                temp_txt = f"s.has(\"{elem}\", player)"
+            if req_txt:
+                req_txt += " and " + temp_txt
+            else:
+                req_txt += temp_txt
+
+    if or_skills0:
+        temp_txt = ""
+        if len(or_skills0) == 1:
+            temp_txt = f"s.has(\"{or_skills0[0]}\", player)"
+        else:
+            for elem in or_skills0:
+                if temp_txt:
+                    temp_txt += f", \"{elem}\""
+                else:
+                    temp_txt += f"s.has_any((\"{elem}\""
+            temp_txt += "), player)"
+        if req_txt:
+            req_txt += " and " + temp_txt
+        else:
+            req_txt += temp_txt
+
+    if or_skills1:
+        temp_txt = ""
+        if len(or_skills1) == 1:
+            temp_txt = f"s.has(\"{or_skills1[0]}\", player)"
+        else:
+            for elem in or_skills1:
+                if temp_txt:
+                    temp_txt += f", \"{elem}\""
+                else:
+                    temp_txt += f"s.has_any((\"{elem}\""
+            temp_txt += "), player)"
+        if req_txt:
+            req_txt += " and " + temp_txt
+        else:
+            req_txt += temp_txt
+
+    if health_req:
+        if req_txt:
+            req_txt += " and " + f"has_health({health_req}, s, player)"
+        else:
+            req_txt += f"has_health({health_req}, s, player)"
+
+    if en_and:
+        counter = Counter(en_and)
+        for weapon in en_skills:
+            amount = counter[weapon]
+            if amount != 0:
+                energy.append([weapon, amount])
+
+    or_costs = []  # List of list, each element is a possibility. The first element of the lists codes the type of cost.
+    for requirement in or_resource:
+        if "=" in requirement:
+            elem, value = requirement.split("=")
+        else:
+            elem = requirement
+            value = 0
+        if elem == "Combat":
+            deal_damage, danger = combat_req(elem, value)
+            or_costs.append([0, deal_damage, danger])
+        elif elem in en_skills:
+            or_costs.append([1, elem, int(value)])
+        elif elem == "Damage":
+            or_costs.append([2, int(value)])
+
+    if damage_and or combat_and or en_and or or_costs:
+        temp_txt = (f"cost_all(s, player, options, \"{anchor}\", {damage_and}, {energy}, "
+                    f"{combat_and}, {or_costs}, {difficulty})")
+        if req_txt:
+            req_txt += " and " + temp_txt
+        else:
+            req_txt += temp_txt
+
+    if req_txt:
+        tot_txt = start_txt + req_txt + ", \"or\")\n"
+    else:
+        tot_txt = start_txt + "True, \"or\")\n"
+
+    if glitched:
+        difficulty += 1
+
+    list_rules[difficulty] += tot_txt
+
+    return list_rules  # TODO
 
 # %% Main script
 
@@ -464,6 +737,11 @@ door_id: int = 0
 health_req = 0  # Health requirement when entering a new area
 and_req: list[str] = []  # Stores the requirements form an and chain
 or_req: list[str] = []  # Stores the requirements form an and chain
+
+and_requirements = ()  # TODO
+or_skills0: list[str] = []
+or_skills1: list[str] = []
+or_resource: list[str] = []
 
 convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
