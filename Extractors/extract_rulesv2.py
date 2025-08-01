@@ -253,7 +253,18 @@ def conv_refill() -> None:
 def convert() -> None:
     """Convert the data given by the arguments into an add_rule function, and add it to the right difficulty."""
     global anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req, glitched, arrival, health_req
-    global and_req, or_req
+    global and_req, or_req, and_requirements, or_resource
+    global or_skills0, or_skills1, or_resource0, or_resource1, or_glitch0, or_glitch1
+
+    glitched = False
+
+    or_skills0 = []
+    or_skills1 = []
+    or_resource0 = []
+    or_resource1 = []
+    or_glitch0 = []
+    or_glitch1 = []
+    and_requirements = []
 
     health_req = 0
     and_req = []
@@ -288,29 +299,15 @@ def convert() -> None:
             and_req.append(elem)
 
     if len(or_req) == 0:
-        and_requirements, glitched = parse_and(and_req, difficulty)
-        list_rules = append_rule(and_requirements, "", "", "", health_req, difficulty, glitched, anchor, arrival,
-                              list_rules)
+        and_requirements = parse_and(and_req, difficulty)
+        append_rule()
 
     elif len(or_req) == 1:
         or_skills0, or_glitch0, or_resource0 = order_or(or_req[0])
+        and_requirements = parse_and(and_req, difficulty)
+        append_rule()
 
-        for req in or_glitch0:
-            and_req.append(req)
-            and_requirements, glitched = parse_and(and_req, difficulty)
-            and_req.remove(req)
-            list_rules = append_rule(and_requirements, "", "", "", health_req, difficulty, True, anchor, arrival,
-                                  list_rules)
-        if or_skills0:
-            and_requirements, glitched = parse_and(and_req, difficulty)
-            list_rules = append_rule(and_requirements, or_skills0, "", "", health_req, difficulty, glitched, anchor,
-                                  arrival, list_rules)
-        if or_resource0:
-            and_requirements, glitched = parse_and(and_req, difficulty)
-            list_rules = append_rule(and_requirements, "", "", or_resource0, health_req, difficulty, glitched, anchor,
-                                  arrival, list_rules)
-
-    elif len(or_req) == 2:
+    elif len(or_req) == 2:  # Two chains of or
         or_skills0, or_glitch0, or_resource0 = order_or(or_req[0])
         or_skills1, or_glitch1, or_resource1 = order_or(or_req[1])
 
@@ -320,63 +317,10 @@ def convert() -> None:
              or_resource1) = (or_skills1, or_glitch1, or_resource1, or_skills0, or_glitch0, or_resource0)
 
         for req in or_glitch0:
-            for req2 in or_glitch1:  # Case 0 glitched, 1 glitched
-                and_req.append(req)
-                and_req.append(req2)
-                and_requirements, glitched = parse_and(and_req, difficulty)
-                and_req.remove(req)
-                and_req.remove(req2)
-                list_rules = append_rule(and_requirements, "", "", "", health_req, difficulty, True, anchor, arrival,
-                                      list_rules)
-            if or_skills1:   # Case 0 glitched, 1 skill
-                and_req.append(req)
-                and_requirements, glitched = parse_and(and_req, difficulty)
-                and_req.remove(req)
-                list_rules = append_rule(and_requirements, "", or_skills1, "", health_req, difficulty, True, anchor,
-                                      arrival, list_rules)
-            if or_resource1:  # Case 0 glitched, 1 resource
-                and_req.append(req)
-                and_requirements, glitched = parse_and(and_req, difficulty)
-                and_req.remove(req)
-                list_rules = append_rule(and_requirements, "", "", or_resource1, health_req, difficulty, True, anchor,
-                                      arrival, list_rules)
-
-        for req in or_resource0:
-            for req2 in or_glitch1:  # Case 0 resource, 1 glitched
-                and_req.append(req)
-                and_req.append(req2)
-                and_requirements, glitched = parse_and(and_req, difficulty)
-                and_req.remove(req)
-                and_req.remove(req2)
-                list_rules = append_rule(and_requirements, "", "", "", health_req, difficulty, True, anchor, arrival,
-                                      list_rules)
-            if or_skills1:  # Case 0 resource, 1 skill
-                and_req.append(req)
-                and_requirements, glitched = parse_and(and_req, difficulty)
-                and_req.remove(req)
-                list_rules = append_rule(and_requirements, "", or_skills1, "", health_req, difficulty, glitched, anchor,
-                                      arrival, list_rules)
-            if or_resource1:  # Case 0 resource, 1 resource
-                and_req.append(req)
-                and_requirements, glitched = parse_and(and_req, difficulty)
-                and_req.remove(req)
-                list_rules = append_rule(and_requirements, "", "", or_resource1, health_req, difficulty, glitched, anchor,
-                                      arrival, list_rules)
-
-        for req2 in or_glitch1:  # Case 0 skill, 1 glitched
-            and_req.append(req2)
-            and_requirements, glitched = parse_and(and_req, difficulty)
-            and_req.remove(req2)
-            list_rules = append_rule(and_requirements, or_skills0, "", "", health_req, difficulty, True, anchor, arrival,
-                                  list_rules)
-        if or_skills1:  # Case 0 skill, 1 skill
-            and_requirements, glitched = parse_and(and_req, difficulty)
-            list_rules = append_rule(and_requirements, or_skills0, or_skills1, "", health_req, difficulty, glitched, anchor,
-                                  arrival, list_rules)
-        if or_resource1:  # Case 0 skill, 1 resource
-            and_requirements, glitched = parse_and(and_req, difficulty)
-            list_rules = append_rule(and_requirements, or_skills0, "", or_resource1, health_req, difficulty, glitched, anchor,
-                                  arrival, list_rules)
+            and_req.append(req)
+            parse_and(and_req, difficulty)
+            and_req.remove(req)
+            append_rule()
 
 
 def write_files() -> None:
@@ -420,7 +364,8 @@ def write_files() -> None:
         print("The file `DoorData.py` has been successfully created.")
 
 
-def parse_and(and_req: list[str], diff: int) -> tuple[list, bool]:
+# TODO remove return and args
+def parse_and(and_req: list[str], diff: int) -> tuple[list[str], list[str], list[str], list[str], list[str]]:
     """Parse the list of requirements in the `and` chain, and returns the processed information."""
     and_skills = []  # Stores inf_skills
     and_other = []  # Stores other requirements (that often have their own event)
@@ -429,7 +374,6 @@ def parse_and(and_req: list[str], diff: int) -> tuple[list, bool]:
     # The type of combat can be ranged, wall
     en_and = []  # Stores energy weapon used
     global glitched
-    glitched = False
 
     for requirement in and_req:
         if "=" in requirement:
@@ -480,7 +424,7 @@ def parse_and(and_req: list[str], diff: int) -> tuple[list, bool]:
             and_other += danger
         else:  # Case of an event, or keystone, or spirit light, or ore
             and_other.append(requirement)
-    return [and_skills, and_other, damage_and, combat_and, en_and], glitched  # TODO
+    return and_skills, and_other, damage_and, combat_and, en_and
 
 
 def combat_req(need: str, value: str) -> tuple[list[list[int | str]], list[str]]:
@@ -516,7 +460,7 @@ def combat_req(need: str, value: str) -> tuple[list[list[int | str]], list[str]]
 
     return damage, dangers
 
-
+# TODO global vars
 def order_or(or_chain: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Parse the list of requirements in the `or` chain, and categorize them."""
     or_skills = []  # Store inf_skills (skills that don't require energy to use)
@@ -558,6 +502,7 @@ def append_rule() -> None:
     p_type is the type of the path (connection, or location/event)
     list_rules is the list containing the parsed data. It is modified and returned at the end
     """
+    # TODO checker les glitch autrement qu'avec or_glitch ; séparer les cas avec ressource... ici
     global and_requirements, or_skills0, or_skills1, or_resource, health_req, difficulty, glitches, anchor, arrival, list_rules
     and_skills, and_other, damage_and, combat_and, en_and = and_requirements
     energy = []
@@ -586,7 +531,7 @@ def append_rule() -> None:
             if "Keystone=" in elem:
                 temp_txt = "can_keystones(s, player)"
             elif "=" in elem:
-                name, amount = elem.split("=")
+                name, amount = elem.split("=")  # TODO rename
                 amount = int(amount)
                 if name == "SpiritLight":
                     if amount == 1200:  # Case of a shop item
@@ -682,8 +627,6 @@ def append_rule() -> None:
 
     list_rules[difficulty] += tot_txt
 
-    return list_rules  # TODO
-
 # %% Main script
 
 with open("./areasv2.wotw", "r") as file:
@@ -733,14 +676,18 @@ path_name = ""  # Name of the location/region/event accessed by the path
 should_convert = False  # If True, convert is called to create a rule
 is_door = False
 is_enter = False  # True when in an enter clause (when parsing the door rules)
-door_id: int = 0
+door_id = 0
 health_req = 0  # Health requirement when entering a new area
 and_req: list[str] = []  # Stores the requirements form an and chain
-or_req: list[str] = []  # Stores the requirements form an and chain
+or_req: list[list[str]] = []  # Stores the requirements form an and chain
 
-and_requirements = ()  # TODO
+and_requirements: tuple[list[str], list[str], list[str], list[str], list[str]] = ([], [], [], [], [])
 or_skills0: list[str] = []
 or_skills1: list[str] = []
+or_resource0: list[str] = []
+or_resource1: list[str] = []
+or_glitch0: list[str] = []
+or_glitch1: list[str] = []
 or_resource: list[str] = []
 
 convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
@@ -798,10 +745,10 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
         if path_type == "refill":
             if ":" in line:
                 path_name = try_group(r_name, line, 1, -1)  # Checkpoint, Full, Energy=x...
-                refill_type, refills, refill_events = conv_refill(path_name, anchor, refills, refill_events)
+                conv_refill()
             else:
                 path_name = try_group(r_refill, line, 1)  # Checkpoint, Full, Energy=x...
-                refill_type, refills, refill_events = conv_refill(path_name, anchor, refills, refill_events)
+                conv_refill()
                 should_convert = True
                 req1 = "free"
         else:
