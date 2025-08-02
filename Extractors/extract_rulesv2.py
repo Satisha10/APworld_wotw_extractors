@@ -11,8 +11,6 @@ from collections import Counter
 
 # %% Data and global variables
 
-# TODO fix typing
-# TODO entrance rando
 # TODO rename glitches, can_open_door, change combat, change resource function
 
 # Enemy data
@@ -253,7 +251,7 @@ def conv_refill() -> None:
 def convert() -> None:
     """Convert the data given by the arguments into an add_rule function, and add it to the right difficulty."""
     global anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req, glitched, arrival, health_req
-    global and_req, or_req, and_requirements, or_resource
+    global and_req, or_req, and_requirements, or_requirements
     global or_skills0, or_skills1, or_resource0, or_resource1, or_glitch0, or_glitch1
 
     glitched = False
@@ -265,6 +263,7 @@ def convert() -> None:
     or_glitch0 = []
     or_glitch1 = []
     and_requirements = []
+    or_requirements = []
 
     health_req = 0
     and_req = []
@@ -303,13 +302,16 @@ def convert() -> None:
         append_rule()
 
     elif len(or_req) == 1:
-        or_skills0, or_glitch0, or_resource0 = order_or(or_req[0])
+        order_or(or_req[0])
+        or_skills0, or_glitch0, or_resource0 = or_requirements
         parse_and()
         append_rule()
 
     elif len(or_req) == 2:  # Two chains of or
-        or_skills0, or_glitch0, or_resource0 = order_or(or_req[0])
-        or_skills1, or_glitch1, or_resource1 = order_or(or_req[1])
+        order_or(or_req[0])
+        or_skills0, or_glitch0, or_resource0 = or_requirements
+        order_or(or_req[1])
+        or_skills0, or_glitch0, or_resource0 = or_requirements
 
         # Swaps the two chains if it is more efficient to split the second resource chain
         if len(or_resource0) > len(or_resource1):
@@ -364,7 +366,6 @@ def write_files() -> None:
         print("The file `DoorData.py` has been successfully created.")
 
 
-# TODO remove return and args
 def parse_and() -> None:
     """Parse the list of requirements in the `and` chain, and returns the processed information."""
     and_skills = []  # Stores inf_skills
@@ -461,10 +462,10 @@ def combat_req(need: str, value: str) -> tuple[list[list[int | str]], list[str]]
 
     return damage, dangers
 
-# TODO global vars
-def order_or() -> None:
+
+def order_or(or_chain: list[str]) -> None:
     """Parse the list of requirements in the `or` chain, and categorize them."""
-    global or_skills, or_glitch, or_resource, or_chain
+    global or_requirements
 
     or_skills = []  # Store inf_skills (skills that don't require energy to use)
     or_glitch = []  # Store the glitches
@@ -488,24 +489,13 @@ def order_or() -> None:
         else:  # Case of an event
             or_skills.append(requirement)
 
+        or_requirements = (or_skills, or_glitch, or_resource)
+
 
 def append_rule() -> None:
-    """
-    Add the text to the rules list. Returns the updated list_rules.
-
-    and_requirements contains requirements that must all be satisfied.
-    or_skills0 contains a chain of skills, any can be satisfied. Same for or_skills1
-    or_resource contains requirements that can cost resources. Any can be satisfied.
-    health is the health requirement when entering a new area
-    diff is the path difficulty
-    glitched indicates if the path includes glitches
-    anc is the name of the starting region
-    arrival is the name of the connected region
-    p_type is the type of the path (connection, or location/event)
-    list_rules is the list containing the parsed data. It is modified and returned at the end
-    """
+    """Add the text to the rules list."""
     # TODO checker les glitch autrement qu'avec or_glitch ; séparer les cas avec ressource... ici
-    global and_requirements, or_skills0, or_skills1, or_resource, health_req, difficulty, glitches, anchor, arrival, list_rules
+    global list_rules, difficulty
     and_skills, and_other, damage_and, combat_and, en_and = and_requirements
     energy = []
 
@@ -597,7 +587,7 @@ def append_rule() -> None:
                 energy.append([weapon, amount])
 
     or_costs = []  # List of list, each element is a possibility. The first element of the lists codes the type of cost.
-    for requirement in or_resource:
+    for requirement in or_resource:  # TODO rename, handle special cases
         if "=" in requirement:
             elem, value = requirement.split("=")
         else:
@@ -612,7 +602,7 @@ def append_rule() -> None:
             or_costs.append([2, int(value)])
 
     if damage_and or combat_and or en_and or or_costs:
-        temp_txt = (f"cost_all(s, player, options, \"{anchor}\", {damage_and}, {energy}, "
+        temp_txt = (f"cost_all(s, player, options, \"{anchor}\", {damage_and}, {energy}, "  # TODO rename
                     f"{combat_and}, {or_costs}, {difficulty})")
         if req_txt:
             req_txt += " and " + temp_txt
@@ -684,16 +674,13 @@ and_req: list[str] = []  # Stores the requirements form an and chain
 or_req: list[list[str]] = []  # Stores the requirements form an and chain
 
 and_requirements: tuple[list[str], list[str], list[str], list[str], list[str]] = ([], [], [], [], [])
+or_requirements: tuple[list[str], list[str], list[str]] = ([], [], [])
 or_skills0: list[str] = []
 or_skills1: list[str] = []
 or_resource0: list[str] = []
 or_resource1: list[str] = []
 or_glitch0: list[str] = []
 or_glitch1: list[str] = []
-or_skills: list[str] = []
-or_glitch: list[str] = []
-or_resource: list[str] = []
-or_chain: list[str] = []
 
 convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
@@ -724,6 +711,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
                 indent -= 1
 
     if indent == 0:  # Always anchor, except for requirement or region (which are ignored)
+        req1, req2, req3, req4, req5 = "", "", "", "", ""
         if "anchor" in line:
             name = try_group(r_colon, line, 1, -1)
             s = r_indent.search(name)
@@ -736,9 +724,10 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             anchor = ""
 
     elif indent == 1:
+        req2, req3, req4, req5 = "", "", "", ""
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
-        if "nospawn" in line or "tprestriction" in line:  # TODO: manage these if spawn anywhere implemented
+        if "nospawn" in line or "tprestriction" in line:
             continue
         if line == "door:":
             path_type = "conn"
@@ -764,6 +753,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             req1 = "free"
 
     elif indent == 2:  # When not a door, this contains the path difficulty
+        req3, req4, req5 = "", "", ""
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
         if is_door:
@@ -784,6 +774,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
         req2 = line[try_end(r_difficulty, line):]  # Can be empty
 
     elif indent == 3:
+        req4, req5 = "", ""
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
         if line[-1] == ":":
@@ -793,6 +784,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             should_convert = True
 
     elif indent == 4:
+        req5 = ""
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
         if line[-1] == ":":
