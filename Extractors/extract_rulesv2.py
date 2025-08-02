@@ -299,12 +299,12 @@ def convert() -> None:
             and_req.append(elem)
 
     if len(or_req) == 0:
-        and_requirements = parse_and(and_req, difficulty)
+        parse_and()
         append_rule()
 
     elif len(or_req) == 1:
         or_skills0, or_glitch0, or_resource0 = order_or(or_req[0])
-        and_requirements = parse_and(and_req, difficulty)
+        parse_and()
         append_rule()
 
     elif len(or_req) == 2:  # Two chains of or
@@ -318,7 +318,7 @@ def convert() -> None:
 
         for req in or_glitch0:
             and_req.append(req)
-            parse_and(and_req, difficulty)
+            parse_and()
             and_req.remove(req)
             append_rule()
 
@@ -365,7 +365,7 @@ def write_files() -> None:
 
 
 # TODO remove return and args
-def parse_and(and_req: list[str], diff: int) -> tuple[list[str], list[str], list[str], list[str], list[str]]:
+def parse_and() -> None:
     """Parse the list of requirements in the `and` chain, and returns the processed information."""
     and_skills = []  # Stores inf_skills
     and_other = []  # Stores other requirements (that often have their own event)
@@ -373,7 +373,8 @@ def parse_and(and_req: list[str], diff: int) -> tuple[list[str], list[str], list
     combat_and = []  # Stores combat damage to inflict, as a list of each damage to do + the type of combat
     # The type of combat can be ranged, wall
     en_and = []  # Stores energy weapon used
-    global glitched
+    global glitched, difficulty, and_req
+    global and_requirements
 
     for requirement in and_req:
         if "=" in requirement:
@@ -396,14 +397,14 @@ def parse_and(and_req: list[str], diff: int) -> tuple[list[str], list[str], list
             glitched = True
             value = int(value)
             current_req = glitches[elem]
-            for i, skill in enumerate(current_req):
-                if elem == "ShurikenBreak" and diff == 5:
+            for index, skill in enumerate(current_req):
+                if elem == "ShurikenBreak" and difficulty == 5:
                     combat_and.append([value * 2, "Shuriken"])
                 elif elem == "ShurikenBreak":
                     combat_and.append([value * 3, "Shuriken"])
                 elif elem == "SentryBreak":
                     combat_and.append([value * 6.25, "Shuriken"])
-                elif i == len(current_req) - 1:
+                elif index == len(current_req) - 1:
                     en_and += [skill] * value
                 else:
                     if current_req not in and_skills and current_req != "free":
@@ -424,7 +425,7 @@ def parse_and(and_req: list[str], diff: int) -> tuple[list[str], list[str], list
             and_other += danger
         else:  # Case of an event, or keystone, or spirit light, or ore
             and_other.append(requirement)
-    return and_skills, and_other, damage_and, combat_and, en_and
+    and_requirements = (and_skills, and_other, damage_and, combat_and, en_and)  # Update
 
 
 def combat_req(need: str, value: str) -> tuple[list[list[int | str]], list[str]]:
@@ -461,8 +462,10 @@ def combat_req(need: str, value: str) -> tuple[list[list[int | str]], list[str]]
     return damage, dangers
 
 # TODO global vars
-def order_or(or_chain: list[str]) -> tuple[list[str], list[str], list[str]]:
+def order_or() -> None:
     """Parse the list of requirements in the `or` chain, and categorize them."""
+    global or_skills, or_glitch, or_resource, or_chain
+
     or_skills = []  # Store inf_skills (skills that don't require energy to use)
     or_glitch = []  # Store the glitches
     or_resource = []  # Store requirements that need resources
@@ -484,7 +487,6 @@ def order_or(or_chain: list[str]) -> tuple[list[str], list[str], list[str]]:
             or_resource.append(requirement)
         else:  # Case of an event
             or_skills.append(requirement)
-    return or_skills, or_glitch, or_resource
 
 
 def append_rule() -> None:
@@ -531,14 +533,14 @@ def append_rule() -> None:
             if "Keystone=" in elem:
                 temp_txt = "can_keystones(s, player)"
             elif "=" in elem:
-                name, amount = elem.split("=")  # TODO rename
+                req_name, amount = elem.split("=")
                 amount = int(amount)
-                if name == "SpiritLight":
+                if req_name == "SpiritLight":
                     if amount == 1200:  # Case of a shop item
-                        temp_txt = "s.count(\"200 Spirit Light\", player) >= 6"
+                        temp_txt = "s.count(\"200 Spirit Light\", player) >= 6"  # TODO can buy shop ?
                     else:  # Case of a map from Lupo
                         temp_txt = "can_buy_map(s, player)"
-                elif name == "Ore":
+                elif req_name == "Ore":
                     temp_txt = f"s.count(\"Gorlek Ore\", player) >= {amount}"
                 else:
                     raise ValueError(f"Invalid input: {elem}")
@@ -688,7 +690,10 @@ or_resource0: list[str] = []
 or_resource1: list[str] = []
 or_glitch0: list[str] = []
 or_glitch1: list[str] = []
+or_skills: list[str] = []
+or_glitch: list[str] = []
 or_resource: list[str] = []
+or_chain: list[str] = []
 
 convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
