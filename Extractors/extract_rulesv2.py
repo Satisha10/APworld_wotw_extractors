@@ -12,6 +12,7 @@ from collections import Counter
 # %% Data and global variables
 
 # TODO rename glitches, can_open_door, change combat, change resource function
+# TODO move the health check (req_area) since the requirement depends on the difficulty (only put the area arrival)
 
 # Enemy data
 ref_en: dict[str, tuple[int, list[str]]] = {
@@ -500,7 +501,7 @@ def append_rule() -> None:
     and_skills, and_other, damage_and, combat_and, en_and = and_requirements
     energy = []
 
-    start_txt = f"    add_rule(world.get_entrance(\"{anchor}_to_{arrival}\", player), lambda s: "
+    start_txt = f"    add_rule(world.get_entrance(\"{anchor} -> {arrival}\", player), lambda s: "
     req_txt = ""
 
     if and_skills:
@@ -690,6 +691,7 @@ convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
 for i, line in enumerate(source_text):  # Line number is only used for debug
     should_convert = False  # Reset the flag to false
+
     # TODO also reset the chain, the refill type ?
 
     # Parse the line text
@@ -728,7 +730,8 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             anchor = ""
 
     elif indent == 1:
-        req2, req3, req4, req5 = "", "", "", ""
+        req1, req2, req3, req4, req5 = "", "", "", "", ""
+        difficulty = 0  # Reset the difficulty to moki
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
         if "nospawn" in line or "tprestriction" in line:
@@ -758,7 +761,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             req1 = "free"
 
     elif indent == 2:  # When not a door, this contains the path difficulty
-        req3, req4, req5 = "", "", ""
+        req2, req3, req4, req5 = "", "", "", ""
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
         if is_door:
@@ -778,10 +781,14 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
         path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
         difficulty = convert_diff[path_diff]
         req2 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
-        req2 = req2.replace(":", "")  # Remove the colon at the end if there is one
-        # TODO bug avec : à la fin (i=864)
+        if req2:
+            if req2[-1] == ":":
+                req2 = req2[:-1]
+            else:
+                should_convert = True
+
     elif indent == 3:
-        req4, req5 = "", ""
+        req3, req4, req5 = "", "", ""
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
         if line[-1] == ":":
@@ -791,7 +798,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             should_convert = True
 
     elif indent == 4:
-        req5 = ""
+        req4, req5 = "", ""
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
         if line[-1] == ":":
@@ -801,6 +808,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             should_convert = True
 
     elif indent == 5:
+        req5 = ""
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
             continue
         req5 = line
@@ -812,13 +820,17 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
     if should_convert:
         req = req1
         if indent >= 2:
-            req += f", {req2}"
+            if req1:  # req1 can be empty
+                req += f", {req2}"
+            else:
+                req = req2
         if indent >= 3:
             req += f", {req3}"
         if indent >= 4:
             req += f", {req4}"
         if indent >= 5:
             req += f", {req5}"
+        req = req.replace(":", ",")  # In some cases, a colon is used in place of a coma, regroup the two cases
         convert()
 
 write_files()
