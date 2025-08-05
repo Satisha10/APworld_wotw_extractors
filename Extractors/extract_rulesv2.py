@@ -125,7 +125,7 @@ glitches = {"ShurikenBreak": ["Shuriken"],
             "BlazeSwap": ["Blaze"],
             "GrenadeRedirect": ["Grenade"],
             "SentryRedirect": ["Sentry"],
-            "SpearJump": ["Spear"],}
+            "SpearJump": ["Spear"], }
 
 # Glitches that can be used infinitely (and only use one skill)
 inf_glitches = {"RemoveKillPlane": "free",
@@ -136,14 +136,13 @@ inf_glitches = {"RemoveKillPlane": "free",
                 "GrenadeCancel": "Grenade",
                 "BowCancel": "Bow",
                 "PauseHover": "free",
-                "GlideJump": "Glide",}
+                "GlideJump": "Glide", }
 
 # Glitches that can be used infinitely, and use two skills
 other_glitches = {"WaveDash": "can_wavedash(s, player)",
                   "HammerJump": "can_hammerjump(s, player)",
                   "SwordJump": "can_swordjump(s, player)",
-                  "GlideHammerJump": "can_glidehammerjump(s, player)",}
-
+                  "GlideHammerJump": "can_glidehammerjump(s, player)", }
 
 
 # %% Text initialisations
@@ -157,6 +156,7 @@ header = ("\"\"\"\n"
 imports = "from .Rules_Functions import *\n\n"
 
 # %% Helpers
+
 
 def try_group(regex: Pattern[str], text: str, begin=0, end=0) -> str:
     """Return the result for search, sliced between begin and end. Raise an error if no match is found."""
@@ -237,15 +237,16 @@ def conv_refill() -> None:
                 refills.update({anchor: (current[0], value, current[2])})
                 refill_events.append(f"E.{anchor}")
             refill_type = "E."
-    if path_name == "Checkpoint":
+    elif path_name == "Checkpoint":
         refills.update({anchor: (current[0], current[1], 1)})
         refill_events.append(f"C.{anchor}")
         refill_type = "C."
-    if path_name == "Full":
+    elif path_name == "Full":
         refills.update({anchor: (current[0], current[1], 2)})
         refill_events.append(f"F.{anchor}")
         refill_type = "F."
-    raise ValueError(f"{path_name} is not a valid refill type (at anchor {anchor}).")
+    else:
+        raise ValueError(f"{path_name} is not a valid refill type (at anchor {anchor}).")
 
 
 def convert() -> None:
@@ -347,7 +348,7 @@ def write_files() -> None:
 
     door_txt = header + "\n" + "door_table: list[tuple[str, str, int]] = [\n"
     for door in doors:
-        door_txt += f"    \"{door}\",\n"
+        door_txt += f"    {door},\n"
     door_txt = door_txt[:-2]
     door_txt += "\n    ]\n"
 
@@ -587,7 +588,7 @@ def append_rule() -> None:
                 energy.append([weapon, amount])
 
     or_costs = []  # List of list, each element is a possibility. The first element of the lists codes the type of cost.
-    for requirement in or_resource:  # TODO rename, handle special cases
+    for requirement in or_resource0:  # TODO rename, handle special cases
         if "=" in requirement:
             elem, value = requirement.split("=")
         else:
@@ -615,31 +616,34 @@ def append_rule() -> None:
         tot_txt = start_txt + "True, \"or\")\n"
 
     if glitched:
-        difficulty += 1
+        difficulty_index = difficulty + 1
+    else:
+        difficulty_index = difficulty
 
-    list_rules[difficulty] += tot_txt
+    list_rules[difficulty_index] += tot_txt
 
 # %% Main script
+
 
 with open("./areasv2.wotw", "r") as file:
     source_text = file.readlines()
 
 # Moki, Gorlek, Kii and Unsafe rules respectively
 moki = (header + imports + "from worlds.generic.Rules import add_rule\n\n\n"
-     "def set_moki_rules(world, player, options):\n"
-     "    \"\"\"Moki (or easy, default) rules.\"\"\"\n")
+        "def set_moki_rules(world, player, options):\n"
+        "    \"\"\"Moki (or easy, default) rules.\"\"\"\n")
 gorlek = ("\n\ndef set_gorlek_rules(world, player, options):\n"
-     "    \"\"\"Gorlek (or medium) rules.\"\"\"\n")
+          "    \"\"\"Gorlek (or medium) rules.\"\"\"\n")
 gorlek_glitch = ("\n\ndef set_gorlek_glitched_rules(world, player, options):\n"
-      "    \"\"\"Gorlek (or medium) rules with glitches\"\"\"\n")
+                 "    \"\"\"Gorlek (or medium) rules with glitches\"\"\"\n")
 kii = ("\n\ndef set_kii_rules(world, player, options):\n"
-     "    \"\"\"Kii (or hard) rules\"\"\"\n")
+       "    \"\"\"Kii (or hard) rules\"\"\"\n")
 kii_glitch = ("\n\ndef set_kii_glitched_rules(world, player, options):\n"
-      "    \"\"\"Kii (or hard) rules with glitches.\"\"\"\n")
+              "    \"\"\"Kii (or hard) rules with glitches.\"\"\"\n")
 unsafe = ("\n\ndef set_unsafe_rules(world, player, options):\n"
-     "    \"\"\"Unsafe rules.\"\"\"\n")
+          "    \"\"\"Unsafe rules.\"\"\"\n")
 unsafe_glitch = ("\n\ndef set_unsafe_glitched_rules(world, player, options):\n"
-      "    \"\"\"Unsafe rules with glitches.\"\"\"\n")
+                 "    \"\"\"Unsafe rules with glitches.\"\"\"\n")
 
 # Store the parsed text for each difficulty
 list_rules: list[str] = [moki, gorlek, gorlek_glitch, kii, kii_glitch, unsafe, unsafe_glitch]
@@ -688,7 +692,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
     should_convert = False  # Reset the flag to false
     # TODO also reset the chain, the refill type ?
 
-    ## Parse the line text
+    # Parse the line text
     m = r_comment.search(line)  # Remove the comments
     if m:
         line = line[:m.start()]
@@ -714,7 +718,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
         req1, req2, req3, req4, req5 = "", "", "", "", ""
         if "anchor" in line:
             name = try_group(r_colon, line, 1, -1)
-            s = r_indent.search(name)
+            s = r_separate.search(name)  # Detect and remove the ` at <coord>` part if it exists.
             if s:
                 anchor = name[:s.start()]
             else:
@@ -733,6 +737,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             path_type = "conn"
             is_door = True
             continue
+        is_door = False
         path_type = try_group(r_type, line, end=-1)  # Connection type
         if path_type not in ("conn", "state", "pickup", "refill", "quest"):
             raise ValueError(f"{path_type} (line {i}) is not an appropriate path type.\n\"{line}\"")
@@ -769,10 +774,12 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             else:  # Case of line == "enter:", the rules are in the next lines
                 is_enter = True
                 is_door = False
+            continue
         path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
         difficulty = convert_diff[path_diff]
-        req2 = line[try_end(r_difficulty, line):]  # Can be empty
-
+        req2 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
+        req2 = req2.replace(":", "")  # Remove the colon at the end if there is one
+        # TODO bug avec : à la fin (i=864)
     elif indent == 3:
         req4, req5 = "", ""
         if not anchor:  # Only happens with `requirement:` or `region`, ignore it
@@ -805,15 +812,15 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
     if should_convert:
         req = req1
         if indent >= 2:
-            req += req2
+            req += f", {req2}"
         if indent >= 3:
-            req += req3
+            req += f", {req3}"
         if indent >= 4:
-            req += req4
+            req += f", {req4}"
         if indent >= 5:
-            req += req5
+            req += f", {req5}"
         convert()
 
 write_files()
 
-    ## Convert the parsed line into lists of requirements
+# Convert the parsed line into lists of requirements
