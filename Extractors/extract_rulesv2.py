@@ -154,7 +154,12 @@ header = ("\"\"\"\n"
           "Generated with `extract_rules.py` by running `parse_rules()`.\n"
           "\"\"\"\n\n\n")
 
-imports = "from .Rules_Functions import *\n\n"
+imports = ("from .Rules_Functions import *\n"
+           "from worlds.generic.Rules import add_rule\n\n"
+           "from typing import TYPE_CHECKING\n"
+           "if TYPE_CHECKING:\n"
+           "    from BaseClasses import MultiWorld\n"
+           "    from .Options import WotWOptions\n\n\n")
 
 # %% Helpers
 
@@ -255,6 +260,7 @@ def convert() -> None:
     global anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req, glitched, arrival, health_req
     global and_req, or_req, and_requirements, or_requirements
     global or_skills0, or_skills1, or_resource0, or_resource1, or_glitch0, or_glitch1
+    global target_area
 
     glitched = False
 
@@ -271,6 +277,8 @@ def convert() -> None:
     and_req = []
     or_req = []
 
+    target_area = ""
+
     if path_type == "conn" and "." in path_name:  # Gets the requirements when entering a new area.
         dot_position = path_name.find(".")
         f_area = path_name[:dot_position]
@@ -280,9 +288,7 @@ def convert() -> None:
         else:
             i_area = ""
         if i_area != f_area:
-            regen, health_req = req_area(f_area, difficulty)
-            if regen:
-                and_req.append("Regenerate")
+            target_area = f_area
 
     if path_type == "refill":
         path_name = refill_type + anchor
@@ -575,11 +581,11 @@ def append_rule() -> None:
         else:
             req_txt += temp_txt
 
-    if health_req:
+    if target_area:
         if req_txt:
-            req_txt += " and " + f"has_health({health_req}, s, player)"
+            req_txt += " and " + f"can_enter_area({target_area}, s, player, options)"
         else:
-            req_txt += f"has_health({health_req}, s, player)"
+            req_txt += f"can_enter_area({target_area}, s, player, options)"
 
     if en_and:
         counter = Counter(en_and)
@@ -630,20 +636,19 @@ with open("./areasv2.wotw", "r") as file:
     source_text = file.readlines()
 
 # Moki, Gorlek, Kii and Unsafe rules respectively
-moki = (header + imports + "from worlds.generic.Rules import add_rule\n\n\n"
-        "def set_moki_rules(world, player, options):\n"
+moki = (header + imports + "def set_moki_rules(world: Multiworld, player: int, options: WotWOptions):\n"
         "    \"\"\"Moki (or easy, default) rules.\"\"\"\n")
-gorlek = ("\n\ndef set_gorlek_rules(world, player, options):\n"
+gorlek = ("\n\ndef set_gorlek_rules(world: Multiworld, player: int, options: WotWOptions):\n"
           "    \"\"\"Gorlek (or medium) rules.\"\"\"\n")
-gorlek_glitch = ("\n\ndef set_gorlek_glitched_rules(world, player, options):\n"
+gorlek_glitch = ("\n\ndef set_gorlek_glitched_rules(world: Multiworld, player: int, options: WotWOptions):\n"
                  "    \"\"\"Gorlek (or medium) rules with glitches\"\"\"\n")
-kii = ("\n\ndef set_kii_rules(world, player, options):\n"
+kii = ("\n\ndef set_kii_rules(world: Multiworld, player: int, options: WotWOptions):\n"
        "    \"\"\"Kii (or hard) rules\"\"\"\n")
-kii_glitch = ("\n\ndef set_kii_glitched_rules(world, player, options):\n"
+kii_glitch = ("\n\ndef set_kii_glitched_rules(world: Multiworld, player: int, options: WotWOptions):\n"
               "    \"\"\"Kii (or hard) rules with glitches.\"\"\"\n")
-unsafe = ("\n\ndef set_unsafe_rules(world, player, options):\n"
+unsafe = ("\n\ndef set_unsafe_rules(world: Multiworld, player: int, options: WotWOptions):\n"
           "    \"\"\"Unsafe rules.\"\"\"\n")
-unsafe_glitch = ("\n\ndef set_unsafe_glitched_rules(world, player, options):\n"
+unsafe_glitch = ("\n\ndef set_unsafe_glitched_rules(world: Multiworld, player: int, options: WotWOptions):\n"
                  "    \"\"\"Unsafe rules with glitches.\"\"\"\n")
 
 # Store the parsed text for each difficulty
@@ -671,10 +676,9 @@ refill_type = ""  # Refill type (energy, health, checkpoint or full)
 path_type = ""  # Type of the path (connection, pickup, refill)
 path_name = ""  # Name of the location/region/event accessed by the path
 should_convert = False  # If True, convert is called to create a rule
-is_door = False
+is_door = False  # True while parsing a door
 is_enter = False  # True when in an enter clause (when parsing the door rules)
 door_id = 0
-health_req = 0  # Health requirement when entering a new area
 and_req: list[str] = []  # Stores the requirements form an and chain
 or_req: list[list[str]] = []  # Stores the requirements form an and chain
 
@@ -686,6 +690,8 @@ or_resource0: list[str] = []
 or_resource1: list[str] = []
 or_glitch0: list[str] = []
 or_glitch1: list[str] = []
+
+target_area = ""  # Area of the arrival anchor
 
 convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
