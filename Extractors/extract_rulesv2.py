@@ -12,7 +12,6 @@ from collections import Counter
 # %% Data and global variables
 
 # TODO rename glitches, can_open_door, change combat, change resource function
-# TODO move the health check (req_area) since the requirement depends on the difficulty (only put the area arrival)
 
 # Enemy data
 ref_en: dict[str, tuple[int, list[str]]] = {
@@ -182,49 +181,6 @@ def try_end(regex: Pattern[str], text: str) -> int:
     if match is None:
         raise RuntimeError(f"Could not find a match for {text} with {regex.pattern}.")
     return match.end()
-
-
-def req_area(area: str, diff: int) -> tuple[bool, int]:
-    """
-    Return the requirement for entering an area.
-
-    Returns if Regenerate is needed, and the amount of health required.
-    """
-    area_data = {"MidnightBurrows": (25, False),
-                 "EastHollow": (20, False),
-                 "WestHollow": (20, False),
-                 "WestGlades": (20, False),
-                 "OuterWellspring": (25, False),
-                 "InnerWellspring": (25, False),
-                 "WoodsEntry": (40, True),
-                 "WoodsMain": (40, True),
-                 "LowerReach": (40, True),
-                 "UpperReach": (40, True),
-                 "UpperDepths": (40, True),
-                 "LowerDepths": (40, True),
-                 "PoolsApproach": (25, True),
-                 "EastPools": (40, True),
-                 "UpperPools": (40, True),
-                 "WestPools": (40, True),
-                 "LowerWastes": (50, True),
-                 "UpperWastes": (50, True),
-                 "WindtornRuins": (50, True),
-                 "WeepingRidge": (60, True),
-                 "WillowsEnd": (60, True),
-                 }
-
-    if area in (None, "MarshSpawn", "HowlsDen", "MarshPastOpher", "GladesTown"):
-        return False, 0
-    if diff >= 5:  # Unsafe
-        return False, 0
-    if diff >= 1:
-        if area_data[area][1]:  # Kii, Gorlek
-            return True, 0
-        return False, 0
-
-    if area_data[area][1]:  # Moki
-        return True, area_data[area][0]
-    return False, area_data[area][0]
 
 
 def conv_refill() -> None:
