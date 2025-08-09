@@ -387,13 +387,15 @@ def parse_and() -> None:
         elif elem in combat_name:
             deal_damage, danger = combat_req(elem, value)
             combat_and += deal_damage
-            and_other += danger
-        else:  # Case of an event, or keystone, or spirit light, or ore
+            and_skills += danger  # TODO fix
+        elif "Keystone" in elem or "Ore" in elem or "SpiritLight" in elem:  # Case of an event, or keystone, or spirit light, or ore
             and_other.append(requirement)
+        else:  # Case of an event
+            and_skills.append(elem)  # TODO fix
     and_requirements = (and_skills, and_other, damage_and, combat_and, en_and)  # Update
 
 
-def combat_req(need: str, value: str) -> tuple[list[list[int | str]], list[str]]:
+def combat_req(need: str, value: str) -> list[list[list[int | str]], list[str]]:
     """Parse the combat requirement with the given enemies, return the damage and type of combat."""
     damage: list[list[int | str]] = []
     dangers: list[str] = []
@@ -782,12 +784,15 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
     if should_convert:
         req = req1
         if indent >= 2:
-            if req1:  # req1 can be empty
+            if req1 and req2:  # req1 can be empty, same for req2
                 req += f", {req2}"
             else:
                 req = req2
         if indent >= 3:
-            req += f", {req3}"
+            if req:
+                req += f", {req3}"
+            else:
+                req = req3
         if indent >= 4:
             req += f", {req4}"
         if indent >= 5:
