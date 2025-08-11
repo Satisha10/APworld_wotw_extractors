@@ -391,7 +391,7 @@ def parse_and() -> None:
         elif "Keystone" in elem or "Ore" in elem or "SpiritLight" in elem:  # Case of an event, or keystone, or spirit light, or ore
             and_other.append(requirement)
         else:  # Case of an event
-            and_skills.append(elem)  # TODO fix
+            and_skills.append(elem)
     and_requirements = (and_skills, and_other, damage_and, combat_and, en_and)  # Update
 
 
@@ -487,13 +487,13 @@ def append_rule() -> None:
     if and_other:
         for elem in and_other:
             if "Keystone=" in elem:
-                temp_txt = "can_keystones(s, player)"
+                temp_txt = f"can_open_door({arrival}, s, player)"
             elif "=" in elem:
                 req_name, amount = elem.split("=")
                 amount = int(amount)
                 if req_name == "SpiritLight":
                     if amount == 1200:  # Case of a shop item
-                        temp_txt = "s.count(\"200 Spirit Light\", player) >= 6"  # TODO can buy shop ?
+                        temp_txt = "can_buy_shop(s, player)"
                     else:  # Case of a map from Lupo
                         temp_txt = "can_buy_map(s, player)"
                 elif req_name == "Ore":
@@ -655,8 +655,6 @@ convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
 for i, line in enumerate(source_text):  # Line number is only used for debug
     should_convert = False  # Reset the flag to false
-
-    # TODO also reset the chain, the refill type ?
 
     # Parse the line text
     m = r_comment.search(line)  # Remove the comments
