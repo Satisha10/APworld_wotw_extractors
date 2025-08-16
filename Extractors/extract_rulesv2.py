@@ -312,12 +312,12 @@ def write_files() -> None:
     for door in doors_vanilla:
         door_txt += f"    {door},\n"
     door_txt = door_txt[:-2]
-    door_txt += "\n    ]\n\n"
+    door_txt += "\n    ]\n\n\n"
     door_txt += "doors_map: dict[str, int] = {  # Mapping to door ID\n"
     for door, value in doors_map.items():
         door_txt += f"    \"{door}\": {value},\n"
     door_txt = door_txt[:-2]
-    door_txt += "\n    }\n\n"
+    door_txt += "\n    }\n"
 
     with open("Rules.py", "w") as w_file:
         for j in range(7):
@@ -591,6 +591,18 @@ def append_rule() -> None:
 
     list_rules[difficulty_index] += tot_txt
 
+
+def create_door_rules() -> None:
+    """Add to list_rules and the entrances some connection rules for the doors."""
+    global anchor, path_name, list_rules, entrances
+    # Create the vanilla connection in one way
+    list_rules[0] += f"    add_rule(world.get_entrance(\"{anchor} (Door) -> {path_name} (Door)\", player), lambda s: True)\n"
+    # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
+    list_rules[0] += f"    add_rule(world.get_entrance(\"{anchor} (Door) -> {anchor}\", player), lambda s: True)\n"
+    entrances.append(f"{anchor} (Door) -> {path_name} (Door)")
+    entrances.append(f"{anchor} (Door) -> {anchor}")
+
+
 # %% Main script
 
 
@@ -736,8 +748,10 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             elif "target:" in line:
                 path_name = line[8:]
                 path_type = "conn"
-                doors_vanilla.append(("Door." + anchor, "Door." + path_name))
-                doors_map.setdefault("Door." + anchor, door_id)
+                doors_vanilla.append((anchor + " (Door)", path_name + " (Door)"))
+                doors_map.setdefault(anchor + " (Door)", door_id)
+                create_door_rules()
+                path_name = anchor + " (Door)"  # To connect the anchor to the door, the rest is done in create_door_rules
             elif "free" in line:  # Case of a free door connection
                 should_convert = True
                 req1 = "free"
