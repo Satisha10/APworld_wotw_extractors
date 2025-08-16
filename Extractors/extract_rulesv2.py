@@ -150,7 +150,7 @@ other_glitches = {"WaveDash": "can_wavedash(s, player)",
 header = ("\"\"\"\n"
           "Generated file, do not edit manually.\n\n"
           "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
-          "Generated with `extract_rules.py` by running `parse_rules()`.\n"
+          "Generated with `extract_rules.py`.\n"
           "\"\"\"\n\n\n")
 
 imports = ("from .Rules_Functions import *\n"
@@ -291,13 +291,13 @@ def convert() -> None:
 
 def write_files() -> None:
     """Write the extracted data into output files."""
-    ent_txt = header + "\n" + "entrance_table: list[str] = [\n"
+    ent_txt = header + "entrance_table: list[str] = [\n"
     for entrance in entrances:
         ent_txt += f"    \"{entrance}\",\n"
     ent_txt = ent_txt[:-2]
     ent_txt += "\n    ]\n"
 
-    ref_txt = header + "\n" + "refills: dict[str, tuple[int, int, int]] = {  # key: region name. Tuple: [health restored, energy restored, refill type]\n"
+    ref_txt = header + "refills: dict[str, tuple[int, int, int]] = {  # key: region name. Tuple: [health restored, energy restored, refill type]\n"
     ref_txt += "    # For refill type: 0 is no refill, 1 is Checkpoint, 2 is Full refill.\n"
     for region, info in refills.items():
         ref_txt += f"    \"{region}\": {info},\n"
@@ -309,11 +309,16 @@ def write_files() -> None:
     ref_txt = ref_txt[:-2]
     ref_txt += "\n    ]\n"
 
-    door_txt = header + "\n" + "door_table: list[tuple[str, str, int]] = [\n"
-    for door in doors:
+    door_txt = header + "doors_vanilla: list[tuple[str, str]] = [ # Vanilla door connections\n"
+    for door in doors_vanilla:
         door_txt += f"    {door},\n"
     door_txt = door_txt[:-2]
-    door_txt += "\n    ]\n"
+    door_txt += "\n    ]\n\n"
+    door_txt += "doors_map: dict[str, int] = {  # Mapping to door ID\n"
+    for door, value in doors_map.items():
+        door_txt += f"    \"{door}\": {value},\n"
+    door_txt = door_txt[:-2]
+    door_txt += "\n    }\n\n"
 
     with open("Rules.py", "w") as w_file:
         for j in range(7):
@@ -616,7 +621,8 @@ entrances: list[str] = []
 # Contain the refill info per region in a tuple: (health, energy, type)
 refills: dict[str, tuple[int, int, int]] = {}
 refill_events: list[str] = []  # Store all the names given to the refill events.
-doors: list[tuple[str, str, int]] = []  # For each door, contain base region, target region, door ID
+doors_map: dict[str, int] = {}  # Mapping from door name to door ID
+doors_vanilla: list[tuple[str, str]] = []  # Vanilla connections between the doors
 
 # Global variables
 indent = 0  # Number of indents
@@ -731,7 +737,8 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
                 door_id = int(line[4:])
             elif "target:" in line:
                 arrival = line[8:]
-                doors.append((anchor, arrival, door_id))
+                doors_vanilla.append(("Door." + anchor, "Door." + arrival))
+                doors_map.setdefault("Door." + anchor, door_id)
             elif "free" in line:  # Case of a free door connection
                 should_convert = True
                 req1 = "free"
