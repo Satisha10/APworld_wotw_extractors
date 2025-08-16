@@ -213,7 +213,7 @@ def conv_refill() -> None:
 
 def convert() -> None:
     """Convert the data given by the arguments into an add_rule function, and add it to the right difficulty."""
-    global anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req, glitched, arrival, health_req
+    global anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req, glitched, health_req
     global and_req, or_req, and_requirements, or_requirements
     global or_skills0, or_skills1, or_resource0, or_resource1, or_glitch0, or_glitch1
     global target_area
@@ -249,7 +249,6 @@ def convert() -> None:
     if path_type == "refill":
         path_name = refill_type + anchor
 
-    arrival = path_name
     conn_name = f"{anchor} -> {path_name}"
     if conn_name not in entrances:
         entrances.append(conn_name)
@@ -470,7 +469,7 @@ def append_rule() -> None:
     and_skills, and_other, damage_and, combat_and, en_and = and_requirements
     energy = []
 
-    start_txt = f"    add_rule(world.get_entrance(\"{anchor} -> {arrival}\", player), lambda s: "
+    start_txt = f"    add_rule(world.get_entrance(\"{anchor} -> {path_name}\", player), lambda s: "
     req_txt = ""
 
     if and_skills:
@@ -492,7 +491,7 @@ def append_rule() -> None:
     if and_other:
         for elem in and_other:
             if "Keystone=" in elem:
-                temp_txt = f"can_open_door({arrival}, s, player)"
+                temp_txt = f"can_open_door({path_name}, s, player)"
             elif "=" in elem:
                 req_name, amount = elem.split("=")
                 amount = int(amount)
@@ -628,7 +627,6 @@ doors_vanilla: list[tuple[str, str]] = []  # Vanilla connections between the doo
 indent = 0  # Number of indents
 anchor = ""  # Name of the current anchor
 glitched = False  # Whether the current path involves glitches
-arrival = ""  # Name of the connected anchor for a connection
 difficulty = 0  # Difficulty of the path
 req = ""  # Full requirement
 req1 = ""  # Requirements from first indent
@@ -655,7 +653,7 @@ or_resource1: list[str] = []
 or_glitch0: list[str] = []
 or_glitch1: list[str] = []
 
-target_area = ""  # Area of the arrival anchor
+target_area = ""  # Area of the path_name anchor
 
 convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
 
@@ -736,8 +734,9 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             if "id:" in line:
                 door_id = int(line[4:])
             elif "target:" in line:
-                arrival = line[8:]
-                doors_vanilla.append(("Door." + anchor, "Door." + arrival))
+                path_name = line[8:]
+                path_type = "conn"
+                doors_vanilla.append(("Door." + anchor, "Door." + path_name))
                 doors_map.setdefault("Door." + anchor, door_id)
             elif "free" in line:  # Case of a free door connection
                 should_convert = True
@@ -746,15 +745,15 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             else:  # Case of line == "enter:", the rules are in the next lines
                 is_enter = True
                 is_door = False
-            continue
-        path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
-        difficulty = convert_diff[path_diff]
-        req2 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
-        if req2:
-            if req2[-1] == ":":
-                req2 = req2[:-1]
-            else:
-                should_convert = True
+        else:
+            path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
+            difficulty = convert_diff[path_diff]
+            req2 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
+            if req2:
+                if req2[-1] == ":":
+                    req2 = req2[:-1]
+                else:
+                    should_convert = True
 
     elif indent == 3:
         req3, req4, req5 = "", "", ""
@@ -789,9 +788,9 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
     if should_convert:
         req = req1
         if indent >= 2:
-            if req1 and req2:  # req1 can be empty, same for req2
+            if req and req2:  # req1 can be empty, same for req2
                 req += f", {req2}"
-            else:
+            elif req2:  # Case where req1 empty, req2 non empty
                 req = req2
         if indent >= 3:
             if req:
