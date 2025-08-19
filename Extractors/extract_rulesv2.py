@@ -220,6 +220,7 @@ def convert() -> None:
 
     glitched = False
 
+    # Reset the global values
     or_skills0 = []
     or_skills1 = []
     or_resource0 = []
@@ -308,7 +309,7 @@ def write_files() -> None:
     ref_txt = ref_txt[:-2]
     ref_txt += "\n    ]\n"
 
-    door_txt = header + "doors_vanilla: list[tuple[str, str]] = [ # Vanilla door connections\n"
+    door_txt = header + "doors_vanilla: list[tuple[str, str]] = [  # Vanilla door connections\n"
     for door in doors_vanilla:
         door_txt += f"    {door},\n"
     door_txt = door_txt[:-2]
@@ -391,7 +392,7 @@ def parse_and() -> None:
         elif elem in combat_name:
             deal_damage, danger = combat_req(elem, value)
             combat_and += deal_damage
-            and_skills += danger  # TODO fix
+            and_skills += danger
         elif "Keystone" in elem or "Ore" in elem or "SpiritLight" in elem:  # Case of an event, or keystone, or spirit light, or ore
             and_other.append(requirement)
         else:  # Case of an event
@@ -434,7 +435,7 @@ def combat_req(need: str, value: str) -> list[list[list[int | str]], list[str]]:
 
 
 def order_or(or_chain: list[str]) -> None:
-    """Parse the list of requirements in the `or` chain, and categorize them."""
+    """Parse the list of requirements in the `or` chain, and categorize them between skills and resources."""
     global or_requirements
 
     or_skills = []  # Store inf_skills (skills that don't require energy to use)
@@ -653,8 +654,8 @@ should_convert = False  # If True, convert is called to create a rule
 is_door = False  # True while parsing a door
 is_enter = False  # True when in an enter clause (when parsing the door rules)
 door_id = 0
-and_req: list[str] = []  # Stores the requirements form an and chain
-or_req: list[list[str]] = []  # Stores the requirements form an and chain
+and_req: list[str] = []  # Stores the requirements form an and chain (i.e. coma separated requirements)
+or_req: list[list[str]] = []  # Stores the requirements from each OR chain
 
 and_requirements: tuple[list[str], list[str], list[str], list[str], list[str]] = ([], [], [], [], [])
 or_requirements: tuple[list[str], list[str], list[str]] = ([], [], [])
