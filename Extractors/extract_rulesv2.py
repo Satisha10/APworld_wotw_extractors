@@ -114,18 +114,21 @@ inf_skills = ["Sword",
               "Blaze",]
 
 # Glitches that use resources
-glitches = {"ShurikenBreak": ["Shuriken"],
-            "SentryJump": ["Sentry"],
-            "SwordSJump": ["Sword", "Sentry"],
-            "HammerSJump": ["Hammer", "Sentry"],
-            "SentryBurn": ["Sentry"],
-            "SentryBreak": ["Sentry"],
-            "SpearBreak": ["Spear"],
-            "SentrySwap": ["Sentry"],
-            "BlazeSwap": ["Blaze"],
-            "GrenadeRedirect": ["Grenade"],
-            "SentryRedirect": ["Sentry"],
-            "SpearJump": ["Spear"], }
+energy_glitches = {"SentryJump": "SentryJump",
+                   "SwordSJump": "SwordSJump",
+                   "HammerSJump": "HammerSJump",
+                   "SentryBurn": "Sentry",
+                   "SentryBreak": "Sentry",
+                   "SpearBreak": "Spear",
+                   "SentrySwap": "Sentry",
+                   "BlazeSwap": "Blaze",
+                   "GrenadeRedirect": "Grenade",
+                   "SentryRedirect": "Sentry",
+                   "SpearJump": "Spear", }
+
+# Glitches to break walls
+wall_glitches = {"ShurikenBreak": "shuriken",
+                 "SentryBreak": "sentry"}
 
 # Glitches that can be used infinitely (and only use one skill)
 inf_glitches = {"RemoveKillPlane": "free",
@@ -338,13 +341,9 @@ def write_files() -> None:
 def parse_and() -> None:
     """Parse the list of requirements in the `and` chain, and returns the processed information."""
     and_skills = []  # Stores inf_skills
-    and_other = []  # Stores other requirements (that often have their own event)
-    damage_and = []  # Stores damage boosts
-    combat_and = []  # Stores combat damage to inflict, as a list of each damage to do + the type of combat
-    # The type of combat can be ranged, wall
-    en_and = []  # Stores energy weapon used
+    and_resource = []
     global glitched, difficulty, and_req
-    global and_requirements
+    global and_resource, and_skills, and_other
 
     for requirement in and_req:
         if "=" in requirement:
@@ -355,49 +354,37 @@ def parse_and() -> None:
             elem = requirement
             value = 0
 
-        if elem in other_glitches:  # Handle the glitches
+        # Handle the glitches
+        if elem in other_glitches.keys():  # Glitches that use a function
             glitched = True
             and_other.append(elem)
-        elif elem in inf_glitches.keys():
+        elif elem in inf_glitches.keys():  # Glitches that can be used infinitely and only use one skill
             glitched = True
             current_req = inf_glitches[elem]
             if current_req not in and_skills and current_req != "free":
                 and_skills.append(current_req)
-        elif elem in glitches.keys():
+        elif elem in energy_glitches.keys():
             glitched = True
-            value = int(value)
-            current_req = glitches[elem]
-            for index, skill in enumerate(current_req):
-                if elem == "ShurikenBreak" and difficulty == 5:
-                    combat_and.append([value * 2, "Shuriken"])
-                elif elem == "ShurikenBreak":
-                    combat_and.append([value * 3, "Shuriken"])
-                elif elem == "SentryBreak":
-                    combat_and.append([value * 6.25, "Shuriken"])
-                elif index == len(current_req) - 1:
-                    en_and += [skill] * value
-                else:
-                    if current_req not in and_skills and current_req != "free":
-                        and_skills.append(current_req)
+            and_resource.append(("energy", (energy_glitches[elem], int(value))))
+        elif elem in wall_glitches.keys():
+            glitched = True
+            and_resource.append(("wall", (wall_glitches[elem], int(value))))
 
-        elif requirement in inf_skills:  # Check on requirement to catch the energy skills without the =
+        elif requirement in inf_skills:  # Check on requirement and not on elem to catch the energy skills without the =
             if requirement not in and_skills and requirement != "free":
                 and_skills.append(requirement)
         elif elem in en_skills:
-            value = int(value)
-            en_and += [elem] * value
+            and_resource.append(("energy", (elem, int(value))))
         elif elem == "Damage":
-            value = int(value)
-            damage_and.append(value)
+            and_resource.append(("db", int(value)))
         elif elem in combat_name:
-            deal_damage, danger = combat_req(elem, value)
-            combat_and += deal_damage
-            and_skills += danger
+            and_resource.append(("combat", elem))
+        elif elem == "BreakWall":
+            and_resource.append(("wall", (elem, int(value))))
         elif "Keystone" in elem or "Ore" in elem or "SpiritLight" in elem:  # Case of an event, or keystone, or spirit light, or ore
             and_other.append(requirement)
         else:  # Case of an event
             and_skills.append(elem)
-    and_requirements = (and_skills, and_other, damage_and, combat_and, en_and)  # Update
 
 
 def combat_req(need: str, value: str) -> list[list[list[int | str]], list[str]]:
@@ -450,7 +437,8 @@ def order_or(or_chain: list[str]) -> None:
                 requirement = name_convert[requirement]
             elem = requirement
 
-        if elem in other_glitches or elem in inf_glitches.keys() or elem in glitches.keys():  # Handle the glitches
+        # Handle the glitches
+        if elem in other_glitches or elem in inf_glitches.keys() or elem in energy_glitches.keys() or elem in wall_glitches.keys():
             or_glitch.append(requirement)
 
         elif requirement in inf_skills:  # Check on requirement to catch the energy skills without the =
@@ -573,8 +561,8 @@ def append_rule() -> None:
             or_costs.append([2, int(value)])
 
     if damage_and or combat_and or en_and or or_costs:
-        temp_txt = (f"cost_all(s, player, options, \"{anchor}\", {damage_and}, {energy}, "  # TODO rename
-                    f"{combat_and}, {or_costs}, {difficulty})")
+        temp_txt = (f"has_enough_resources({and_req}, {or_req}, \"{anchor}\", s, player, options, "
+                    "{bool(difficulty == 0)})")  # TODO
         if req_txt:
             req_txt += " and " + temp_txt
         else:
@@ -655,9 +643,12 @@ is_door = False  # True while parsing a door
 is_enter = False  # True when in an enter clause (when parsing the door rules)
 door_id = 0
 and_req: list[str] = []  # Stores the requirements form an and chain (i.e. coma separated requirements)
+and_skills: list[str] = []  # Store the skills, events from the and chain
+and_other: list[str] = []  # Store the requirements that have their own fonction (some glitches, keys, shops...)
+and_resource: list[tuple[str, any]]  # Store the requirements that involve resources from the and chain
 or_req: list[list[str]] = []  # Stores the requirements from each OR chain
 
-and_requirements: tuple[list[str], list[str], list[str], list[str], list[str]] = ([], [], [], [], [])
+
 or_requirements: tuple[list[str], list[str], list[str]] = ([], [], [])
 or_skills0: list[str] = []
 or_skills1: list[str] = []
