@@ -13,36 +13,6 @@ from collections import Counter
 
 # TODO rename glitches, can_open_door, change combat, change resource function
 
-# Enemy data
-ref_en: dict[str, tuple[int, list[str]]] = {
-    "Mantis": (32, ["Free"]),
-    "Slug": (13, ["Free"]),
-    "WeakSlug": (12, ["Free"]),
-    "BombSlug": (1, ["Ranged"]),
-    "CorruptSlug": (1, ["Ranged"]),
-    "SneezeSlug": (32, ["Dangerous"]),
-    "ShieldSlug": (24, ["Free"]),
-    "Lizard": (24, ["Free"]),
-    "Bat": (32, ["Bat", "Aerial", "Ranged"]),
-    "Hornbug": (40, ["Dangerous", "Shielded"]),
-    "Skeeto": (20, ["Aerial"]),
-    "SmallSkeeto": (8, ["Aerial"]),
-    "Bee": (24, ["Aerial"]),
-    "Nest": (25, ["Aerial"]),
-    "Fish": (10, ["Free"]),
-    "Waterworm": (20, ["Free"]),
-    "Crab": (32, ["Dangerous"]),
-    "SpinCrab": (32, ["Dangerous"]),
-    "Tentacle": (40, ["Ranged"]),
-    "Balloon": (1, ["Free"]),
-    "Miner": (40, ["Dangerous"]),
-    "MaceMiner": (60, ["Dangerous"]),
-    "ShieldMiner": (60, ["Dangerous", "Shielded"]),
-    "CrystalMiner": (80, ["Dangerous"]),
-    "ShieldCrystalMiner": (50, ["Dangerous", "Shielded"]),
-    "Sandworm": (20, ["Sand"]),
-    "Spiderling": (12, ["Free"]),
-}
 
 name_convert: dict[str, str] = {  # Translation of the item names
     "DoubleJump": "Double Jump",
@@ -139,11 +109,16 @@ inf_glitches = {"RemoveKillPlane": "free",
                 "GrenadeCancel": "Grenade",
                 "BowCancel": "Bow",
                 "PauseHover": "free",
-                "GlideJump": "Glide", }
+                "GlideJump": "Glide",
+                "CoyoteHammerJump": "Hammer",
+                "WallHammerJump": "Hammer",
+                "GroundedHammerJump": "Hammer",
+                "ExtendedHammer": "Hammer",
+                }
 
 # Glitches that can be used infinitely, and use two skills
 other_glitches = {"WaveDash": "can_wavedash(s, player)",
-                  "HammerJump": "can_hammerjump(s, player)",
+                  "AerialHammerJump": "can_hammerjump(s, player)",
                   "SwordJump": "can_swordjump(s, player)",
                   "GlideHammerJump": "can_glidehammerjump(s, player)", }
 
@@ -387,40 +362,6 @@ def parse_and() -> None:
             and_skills.append(elem)
 
 
-def combat_req(need: str, value: str) -> list[list[list[int | str]], list[str]]:
-    """Parse the combat requirement with the given enemies, return the damage and type of combat."""
-    damage: list[list[int | str]] = []
-    dangers: list[str] = []
-
-    if need == "Combat":
-        enemies = value.split("+")
-
-        for elem in enemies:
-            amount = 1
-            if "EnergyRefill" in elem:
-                amount = int(elem[0])
-                damage.append([amount, "Refill"])
-                continue
-            if elem[1] == "x":
-                amount = int(elem[0])
-                elem = elem[2:]
-            danger = ref_en[elem][1]
-            damage_type = "Combat"
-            damage += ([[ref_en[elem][0], damage_type]] * amount)
-            for dan in danger:
-                dan = "Combat." + dan
-                if dan not in dangers and dan != "Combat.Free":
-                    dangers.append(dan)
-
-    elif need == "Boss":
-        damage.append([int(value), "Boss"])
-
-    elif need == "BreakWall":
-        damage.append([int(value), "Wall"])
-
-    return damage, dangers
-
-
 def order_or(or_chain: list[str]) -> None:
     """Parse the list of requirements in the `or` chain, and categorize them between skills and resources."""
     global or_requirements
@@ -431,22 +372,34 @@ def order_or(or_chain: list[str]) -> None:
 
     for requirement in or_chain:
         if "=" in requirement:
-            elem = requirement.split("=")[0]
+            elem, value = requirement.split("=")
         else:
             if requirement in name_convert.keys():
                 requirement = name_convert[requirement]
             elem = requirement
+            value = 0
 
-        # Handle the glitches
-        if elem in other_glitches or elem in inf_glitches.keys() or elem in energy_glitches.keys() or elem in wall_glitches.keys():
+        # Find the glitches (not parsed here)
+        if (elem in other_glitches
+           or elem in inf_glitches.keys()
+           or elem in energy_glitches.keys()
+           or elem in wall_glitches.keys()):
             or_glitch.append(requirement)
 
-        elif requirement in inf_skills:  # Check on requirement to catch the energy skills without the =
-            or_skills.append(requirement)
-        elif elem in en_skills or elem in combat_name or elem == "Damage":
-            or_resource.append(requirement)
+        elif requirement in inf_skills:  # Check on requirement and not on elem to catch the energy skills without the =
+            if requirement not in and_skills and requirement != "free":
+                or_skills.append(requirement)
+        elif elem in en_skills:
+            or_resource.append(("energy", (elem, int(value))))
+        elif elem == "Damage":
+            or_resource.append(("db", int(value)))
+        elif elem in combat_name:
+            or_resource.append(("combat", elem))
+        elif elem == "BreakWall":
+            or_resource.append(("wall", (elem, int(value))))
         else:  # Case of an event
-            or_skills.append(requirement)
+            or_skills.append(elem)
+        # Keystone, Ore and Spirit Light never appear in an `or` chain
 
         or_requirements = (or_skills, or_glitch, or_resource)
 
