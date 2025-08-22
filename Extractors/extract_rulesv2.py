@@ -190,28 +190,15 @@ def conv_refill() -> None:
 
 
 def convert() -> None:
-    """Convert the data given by the arguments into an add_rule function, and add it to the right difficulty."""
-    global anchor, path_type, path_name, list_rules, entrances, refill_type, difficulty, req, glitched, health_req
-    global and_req, or_req, and_requirements, or_requirements
-    global or_skills0, or_skills1, or_resource0, or_resource1, or_glitch0, or_glitch1
+    """Convert the data from req into lists, and make the calls to append_rules according to the lists' content."""
+    global path_name, health_req
+    global and_req, or_req
     global target_area
 
-    glitched = False
-
     # Reset the global values
-    or_skills0 = []
-    or_skills1 = []
-    or_resource0 = []
-    or_resource1 = []
-    or_glitch0 = []
-    or_glitch1 = []
-    and_requirements = []
-    or_requirements = []
-
     health_req = 0
     and_req = []
     or_req = []
-
     target_area = ""
 
     if path_type == "conn" and "." in path_name:  # Gets the requirements when entering a new area.
@@ -243,28 +230,39 @@ def convert() -> None:
         parse_and()
         append_rule()
 
-    elif len(or_req) == 1:
+    elif len(or_req) == 1:  # One `or` chain in the requirements
         order_or(or_req[0])
-        or_skills0, or_glitch0, or_resource0 = or_requirements
-        parse_and()
-        append_rule()
+        handle_or_chain()
 
     elif len(or_req) == 2:  # Two chains of or
-        order_or(or_req[0])
-        or_skills0, or_glitch0, or_resource0 = or_requirements
+        # Swaps the two chains if it is more efficient to split the second chain
+        if len(or_req[0]) > len(or_req[1]):
+            (or_req[0], or_req[1]) = (or_req[1], or_req[0])
         order_or(or_req[1])
-        or_skills0, or_glitch0, or_resource0 = or_requirements
 
-        # Swaps the two chains if it is more efficient to split the second resource chain
-        if len(or_resource0) > len(or_resource1):
-            (or_skills0, or_glitch0, or_resource0, or_skills1, or_glitch1,
-             or_resource1) = (or_skills1, or_glitch1, or_resource1, or_skills0, or_glitch0, or_resource0)
+        while or_req[0]:  # Split the first or chain into the and chain
+            and_req.append(or_req[0][-1])
+            or_req[0].pop()
+            handle_or_chain()
+            and_req.pop()  # Remove the added requirement from the and chain
 
-        for req in or_glitch0:
-            and_req.append(req)
-            parse_and()
-            and_req.remove(req)
-            append_rule()
+
+def handle_or_chain() -> None:
+    """Split the requirements from the or_chain and make the calls to append_rule."""
+    global and_req
+    temp_glitch = or_glitch.copy()  # Make a copy, so it is safe to empty the list in this scope
+    while temp_glitch:  # If glitches are present, add them one at a time to the and chain
+        and_req.append(temp_glitch[-1])
+        temp_glitch.pop()
+        parse_and()
+        append_rule(use_or_resource=False)
+        and_req.pop()  # Remove the requirement added above
+    if or_skills:
+        parse_and()
+        append_rule(use_or_resource=False)
+    if or_resource:
+        parse_and()
+        append_rule()  # TODO If use_... True, don't use the rest from or
 
 
 def write_files() -> None:
@@ -315,10 +313,14 @@ def write_files() -> None:
 
 def parse_and() -> None:
     """Parse the list of requirements in the `and` chain, and returns the processed information."""
-    and_skills = []  # Stores inf_skills
-    and_resource = []
     global glitched, difficulty, and_req
     global and_resource, and_skills, and_other
+
+    # Reset the global values
+    glitched = False
+    and_skills = []  # Stores inf_skills
+    and_resource = []
+    and_other = []
 
     for requirement in and_req:
         if "=" in requirement:
@@ -364,7 +366,7 @@ def parse_and() -> None:
 
 def order_or(or_chain: list[str]) -> None:
     """Parse the list of requirements in the `or` chain, and categorize them between skills and resources."""
-    global or_requirements
+    global or_skills, or_glitch, or_resource
 
     or_skills = []  # Store inf_skills (skills that don't require energy to use)
     or_glitch = []  # Store the glitches
@@ -401,11 +403,13 @@ def order_or(or_chain: list[str]) -> None:
             or_skills.append(elem)
         # Keystone, Ore and Spirit Light never appear in an `or` chain
 
-        or_requirements = (or_skills, or_glitch, or_resource)
 
-
-def append_rule() -> None:
-    """Add the text to the rules list."""
+def append_rule(use_or_resource: bool = True) -> None:
+    """
+    Add the text to the rules list.
+    When use_or_resource is set to False, only the resources from the and chain are used.
+    This happens when looping through or_glitch or using the or_skills.
+    """
     # TODO checker les glitch autrement qu'avec or_glitch ; séparer les cas avec ressource... ici
     global list_rules, difficulty
     and_skills, and_other, damage_and, combat_and, en_and = and_requirements
@@ -598,17 +602,13 @@ door_id = 0
 and_req: list[str] = []  # Stores the requirements form an and chain (i.e. coma separated requirements)
 and_skills: list[str] = []  # Store the skills, events from the and chain
 and_other: list[str] = []  # Store the requirements that have their own fonction (some glitches, keys, shops...)
-and_resource: list[tuple[str, any]]  # Store the requirements that involve resources from the and chain
+and_resource: list[tuple[str, any]] = []  # Store the requirements that involve resources from the and chain
 or_req: list[list[str]] = []  # Stores the requirements from each OR chain
 
 
-or_requirements: tuple[list[str], list[str], list[str]] = ([], [], [])
-or_skills0: list[str] = []
-or_skills1: list[str] = []
-or_resource0: list[str] = []
-or_resource1: list[str] = []
-or_glitch0: list[str] = []
-or_glitch1: list[str] = []
+or_skills: list[str] = []
+or_resource: list[tuple[str, any]] = []
+or_glitch: list[str] = []
 
 target_area = ""  # Area of the path_name anchor
 
