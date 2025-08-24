@@ -1,20 +1,20 @@
 Name,Amount,Classification,Type,Group,Value
-Sword,1,progression,item,24,100
-Double Jump,1,progression,item,24,5
-Regenerate,1,progression,item,24,77
-Bow,1,progression,item,24,97
-Dash,1,progression,item,24,102
-Bash,1,progression,item,24,0
-Grapple,1,progression,item,24,57
-Glide,1,progression,item,24,14
-Flap,1,progression,item,24,118
-Grenade,1,progression,item,24,51
-Flash,1,progression,item,24,62
-Water Dash,1,progression,item,24,104
-Burrow,1,progression,item,24,101
-Launch,1,progression,item,24,8
-Clean Water,1,progression,item,6,2000
-Hammer,1,progression,item,24,98
+Sword,1,progression_useful,item,24,100
+Double Jump,1,progression_useful,item,24,5
+Regenerate,1,progression_useful,item,24,77
+Bow,1,progression_useful,item,24,97
+Dash,1,progression_useful,item,24,102
+Bash,1,progression_useful,item,24,0
+Grapple,1,progression_useful,item,24,57
+Glide,1,progression_useful,item,24,14
+Flap,1,progression_useful,item,24,118
+Grenade,1,progression_useful,item,24,51
+Flash,1,progression_useful,item,24,62
+Water Dash,1,progression_useful,item,24,104
+Burrow,1,progression_useful,item,24,101
+Launch,1,progression_useful,item,24,8
+Clean Water,1,progression_useful,item,6,2000
+Hammer,1,progression_useful,item,24,98
 Sentry,1,progression,item,24,116
 Shuriken,1,progression,item,24,106
 Spear,1,progression,item,24,74

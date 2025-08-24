@@ -26,7 +26,7 @@ def extract_items(override=False):
               "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
               "Generated with `extract_items.py` by running `extract_items()`.\n"
               "\"\"\"\n\n\n"
-              "from BaseClasses import ItemClassification\n\n")
+              "from BaseClasses import ItemClassification as IC\n\n")
 
     with open("./Items_data.csv", "r") as file:
         temp = file.readlines()
@@ -40,36 +40,13 @@ def extract_items(override=False):
             raise ValueError(f"{item_id} duplicated.\n"
                              f"Group = {data[4]}, State = {data[5]},  Item = {data[0]}")
         store.append(item_id)
-        item_txt += f"    \"{data[0]}\": ({int(data[1])}, ItemClassification.{data[2]}, {item_id}),\n"
+        if data[2] == "progression_useful":
+            classification = "IC.progression | IC.useful"
+        else:
+            classification = f"IC.{data[2]}"
+        item_txt += f"    \"{data[0]}\": ({int(data[1])}, {classification}, {item_id}),\n"
     item_txt = item_txt[:-2]
-    item_txt += "\n    }\n\n\n"
-
-    item_txt += ('group_table = {\n'
-                 '    "skills": ["Sword", "Double Jump", "Regenerate", "Bow", "Dash", "Bash", "Grapple", "Glide", "Flap", "Grenade",\n'
-                 '               "Flash", "Water Dash", "Burrow", "Launch", "Clean Water", "Water Breath", "Hammer", "Sentry",\n'
-                 '               "Shuriken", "Spear", "Blaze"],\n'
-                 '    "collectibles": ["Health Fragment", "Energy Fragment", "Keystone", "Gorlek Ore", "Shard Slot",\n'
-                 '                     "Ancestral Light 1", "Ancestral Light 2"],\n'
-                 '    "spirit_light": ["1 Spirit Light", "50 Spirit Light", "100 Spirit Light", "200 Spirit Light"],\n'
-                 '    "shards": ["Overcharge", "Triple Jump", "Wingclip", "Bounty", "Swap", "Magnet", "Splinter", "Reckless", "Quickshot",\n'
-                 '               "Resilience", "Light Harvest", "Vitality", "Life Harvest", "Energy Harvest", "Energy (Shard)",\n'
-                 '               "Life Pact", "Last Stand", "Sense", "Ultra Bash", "Ultra Grapple", "Overflow", "Thorn", "Catalyst",\n'
-                 '               "Turmoil", "Sticky", "Finesse", "Spirit Surge", "Lifeforce", "Deflector", "Fracture", "Arcing"],\n'
-                 '    "teleporters": ["Midnight Burrows TP", "Howl\'s Den TP", "Central Luma TP", "Mouldwood Depths TP",\n'
-                 '                    "Wellspring TP", "Baur\'s Reach TP", "Kwolok\'s Hollow TP", "Woods Entrance TP", "Woods Exit TP",\n'
-                 '                    "Feeding Grounds TP", "Central Wastes TP", "Outer Ruins TP", "Willow\'s End TP",\n'
-                 '                    "Inkwater Marsh TP", "Glades TP"],\n'
-                 '    "extra_tp": ["Luma Boss TP", "Inner Ruins TP", "Shriek TP"],\n'
-                 '    "weapon_upgrades": ["Exploding Spear", "Hammer Shockwave", "Static Shuriken", "Charge Blaze", "Rapid Sentry"],\n'
-                 '    "bonus": ["Health Regeneration", "Energy Regeneration", "Extra Double Jump", "Extra Air Dash", "Blaze Efficiency",\n'
-                 '              "Spear Efficiency", "Shuriken Efficiency", "Sentry Efficiency", "Bow Efficiency", "Regenerate Efficiency",\n'
-                 '              "Flash Efficiency", "Grenade Efficiency"],\n'
-                 '    "bonus+": ["Rapid Sword", "Rapid Hammer", "Rapid Spear", "Rapid Grenade", "Quickshot Upgrade", "Rapid Regenerate",\n'
-                 '               "Melting Bow", "Melting Blaze", "Melting Sword", "Melting Hammer", "Melting Spear", "Melting Shuriken",\n'
-                 '               "Uncharged Bashnades", "Extra Grenade", "Splinter Grenade", "Unlimited Sentries", "Sentry Burst Upgrade",\n'
-                 '               "Sentry Fire Rate", "Extra Shurikens", "Splinter Shurikens", "Bashable Shurikens"],\n'
-                 '    "skill_upgrades": ["Jumpgrade", "Skill Velocity"]\n'
-                 '    }\n')
+    item_txt += "\n    }\n"
 
     with open("Items.py", "w") as file:
         file.write(item_txt)
