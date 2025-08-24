@@ -10,8 +10,6 @@ from typing import Pattern
 
 # %% Data and global variables
 
-# TODO rename glitches, can_open_door, change combat, change resource function
-
 
 name_convert: dict[str, str] = {  # Translation of the item names
     "DoubleJump": "Double Jump",
@@ -268,7 +266,7 @@ def handle_or_chain() -> None:
         append_rule(use_or_resource=False)
     if or_resource:
         parse_and()
-        append_rule()  # TODO If use_... True, don't use the rest from or
+        append_rule()
 
 
 def write_files() -> None:
@@ -534,7 +532,8 @@ def parse_combat(content: str) -> list[tuple[str, str]]:
             amount = int(elem[0])
             elem = elem[2:]
         for _ in range(amount):
-            result.append(("combat", elem))
+            if elem != "EnergyRefill":
+                result.append(("combat", elem))
     return result
 
 
