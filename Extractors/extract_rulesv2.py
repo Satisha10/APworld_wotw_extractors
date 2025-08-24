@@ -7,7 +7,6 @@ See https://github.com/ori-community/wotw-seedgen/tree/main/wotw_seedgen to get 
 
 import re
 from typing import Pattern
-from collections import Counter
 
 # %% Data and global variables
 
@@ -88,7 +87,6 @@ energy_glitches = {"SentryJump": "SentryJump",
                    "SwordSJump": "SwordSJump",
                    "HammerSJump": "HammerSJump",
                    "SentryBurn": "Sentry",
-                   "SentryBreak": "Sentry",
                    "SpearBreak": "Spear",
                    "SentrySwap": "Sentry",
                    "BlazeSwap": "Blaze",
@@ -194,11 +192,19 @@ def convert() -> None:
     global path_name, health_req
     global and_req, or_req
     global target_area
+    global or_skills, or_resource, or_glitch
+    global and_resource, and_skills, and_other
 
     # Reset the global values
     health_req = 0
     and_req = []
     or_req = []
+    or_skills = []
+    or_resource = []
+    or_glitch = []
+    and_resource = []
+    and_skills = []
+    and_other = []
     target_area = ""
 
     if path_type == "conn" and "." in path_name:  # Gets the requirements when entering a new area.
@@ -329,7 +335,7 @@ def parse_and() -> None:
             if requirement in name_convert.keys():
                 requirement = name_convert[requirement]
             elem = requirement
-            value = 0
+            value = "1"
 
         # Handle the glitches
         if elem in other_glitches.keys():  # Glitches that use a function
@@ -354,12 +360,14 @@ def parse_and() -> None:
             and_resource.append(("energy", (elem, int(value))))
         elif elem == "Damage":
             and_resource.append(("db", int(value)))
-        elif elem in combat_name:
-            and_resource.append(("combat", elem))
-        elif elem == "BreakWall":
+        elif elem in ("BreakWall", "Boss"):
             and_resource.append(("wall", (elem, int(value))))
-        elif "Keystone" in elem or "Ore" in elem or "SpiritLight" in elem:  # Case of an event, or keystone, or spirit light, or ore
+        elif ("Keystone=" in requirement
+              or "Ore=" in requirement
+              or "SpiritLight=" in requirement):  # Case of a keystone door, or spirit light, or ore
             and_other.append(requirement)
+        elif elem == "Combat":
+            and_resource += parse_combat(value)
         else:  # Case of an event
             and_skills.append(elem)
 
@@ -395,10 +403,10 @@ def order_or(or_chain: list[str]) -> None:
             or_resource.append(("energy", (elem, int(value))))
         elif elem == "Damage":
             or_resource.append(("db", int(value)))
-        elif elem in combat_name:
-            or_resource.append(("combat", elem))
-        elif elem == "BreakWall":
+        elif elem in ("BreakWall", "Boss"):
             or_resource.append(("wall", (elem, int(value))))
+        elif elem == "Combat":
+            or_resource += parse_combat(value)
         else:  # Case of an event
             or_skills.append(elem)
         # Keystone, Ore and Spirit Light never appear in an `or` chain
@@ -407,13 +415,11 @@ def order_or(or_chain: list[str]) -> None:
 def append_rule(use_or_resource: bool = True) -> None:
     """
     Add the text to the rules list.
+
     When use_or_resource is set to False, only the resources from the and chain are used.
     This happens when looping through or_glitch or using the or_skills.
     """
-    # TODO checker les glitch autrement qu'avec or_glitch ; séparer les cas avec ressource... ici
-    global list_rules, difficulty
-    and_skills, and_other, damage_and, combat_and, en_and = and_requirements
-    energy = []
+    global list_rules
 
     start_txt = f"    add_rule(world.get_entrance(\"{anchor} -> {path_name}\", player), lambda s: "
     req_txt = ""
@@ -450,35 +456,21 @@ def append_rule(use_or_resource: bool = True) -> None:
                     temp_txt = f"s.count(\"Gorlek Ore\", player) >= {amount}"
                 else:
                     raise ValueError(f"Invalid input: {elem}")
+            elif elem in other_glitches.keys():
+                temp_txt = other_glitches[elem]
             else:
-                temp_txt = f"s.has(\"{elem}\", player)"
+                raise ValueError(f"Invalid input: {elem}")
             if req_txt:
                 req_txt += " and " + temp_txt
             else:
                 req_txt += temp_txt
 
-    if or_skills0:
+    if or_skills and not use_or_resource:
         temp_txt = ""
-        if len(or_skills0) == 1:
-            temp_txt = f"s.has(\"{or_skills0[0]}\", player)"
+        if len(or_skills) == 1:
+            temp_txt = f"s.has(\"{or_skills[0]}\", player)"
         else:
-            for elem in or_skills0:
-                if temp_txt:
-                    temp_txt += f", \"{elem}\""
-                else:
-                    temp_txt += f"s.has_any((\"{elem}\""
-            temp_txt += "), player)"
-        if req_txt:
-            req_txt += " and " + temp_txt
-        else:
-            req_txt += temp_txt
-
-    if or_skills1:
-        temp_txt = ""
-        if len(or_skills1) == 1:
-            temp_txt = f"s.has(\"{or_skills1[0]}\", player)"
-        else:
-            for elem in or_skills1:
+            for elem in or_skills:
                 if temp_txt:
                     temp_txt += f", \"{elem}\""
                 else:
@@ -495,31 +487,13 @@ def append_rule(use_or_resource: bool = True) -> None:
         else:
             req_txt += f"can_enter_area({target_area}, s, player, options)"
 
-    if en_and:
-        counter = Counter(en_and)
-        for weapon in en_skills:
-            amount = counter[weapon]
-            if amount != 0:
-                energy.append([weapon, amount])
-
-    or_costs = []  # List of list, each element is a possibility. The first element of the lists codes the type of cost.
-    for requirement in or_resource0:  # TODO rename, handle special cases
-        if "=" in requirement:
-            elem, value = requirement.split("=")
-        else:
-            elem = requirement
-            value = 0
-        if elem == "Combat":
-            deal_damage, danger = combat_req(elem, value)
-            or_costs.append([0, deal_damage, danger])
-        elif elem in en_skills:
-            or_costs.append([1, elem, int(value)])
-        elif elem == "Damage":
-            or_costs.append([2, int(value)])
-
-    if damage_and or combat_and or en_and or or_costs:
-        temp_txt = (f"has_enough_resources({and_req}, {or_req}, \"{anchor}\", s, player, options, "
-                    "{bool(difficulty == 0)})")  # TODO
+    if use_or_resource:
+        used_or_res = or_resource
+    else:
+        used_or_res = []
+    if and_resource or used_or_res:
+        temp_txt = (f"has_enough_resources({and_resource}, {used_or_res}, \"{anchor}\", s, player, options, "
+                    f"{bool(difficulty == 0)})")
         if req_txt:
             req_txt += " and " + temp_txt
         else:
@@ -547,6 +521,21 @@ def create_door_rules() -> None:
     list_rules[0] += f"    add_rule(world.get_entrance(\"{anchor} (Door) -> {anchor}\", player), lambda s: True)\n"
     entrances.append(f"{anchor} (Door) -> {path_name} (Door)")
     entrances.append(f"{anchor} (Door) -> {anchor}")
+
+
+def parse_combat(content: str) -> list[tuple[str, str]]:
+    """Parse the combat requirement with the given enemies, return a list to add to the resources."""
+    result: list[tuple[str, str]] = []
+    enemies = content.split("+")
+
+    for elem in enemies:
+        amount = 1
+        if elem[1] == "x":
+            amount = int(elem[0])
+            elem = elem[2:]
+        for _ in range(amount):
+            result.append(("combat", elem))
+    return result
 
 
 # %% Main script
