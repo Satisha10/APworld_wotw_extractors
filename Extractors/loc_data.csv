@@ -91,6 +91,7 @@ EastHollow.RightKwolokEX, Kwoloks Hollow, SpiritLight, 100, _petrifiedForestGrou
 EastHollow.SilentSwimEC, Kwoloks Hollow, Resource, Energy, _petrifiedForestGroup, 58674, energyContainerA, 9583, , 331.9, -4191.3, 331.87, -4190.344
 EastHollow.SplinterShard, Kwoloks Hollow, Shard, Splinter, pickupsGroup, 23987, splinterShardPickup, 62973, , 216.2, -4307.3, 216.17882, -4306.3125
 EastHollow.ForestsVoice, Kwoloks Hollow, Wisp, Voice, kwoloksCavernThroneRoomGroup, 46462, wispRewardPickup, 59806, , 191, -4212, 191, -4212
+EastHollow.WellspringDoneTalk, Kwoloks Hollow, Quest, SL500, kwolokGroupDescriptor, 937, cleanseWellspringQuestUberstate, 34641, 4, 180, -4215, 180.054, -4215.027
 EastHollow.KwolokSwimOre, Kwoloks Hollow, Resource, Ore, kwoloksCavernThroneRoomGroup, 46462, gorlekOreA, 37897, , 243.4, -4223.5, 243.44835, -4223.517
 EastHollow.KwolokSwimLeftEX, Kwoloks Hollow, SpiritLight, 200, kwoloksCavernThroneRoomGroup, 46462, largeExpA, 29054, , 113.0, -4228.5, 113, -4228.5
 EastHollow.KwolokSwimRightEX, Kwoloks Hollow, SpiritLight, 50, kwoloksCavernThroneRoomGroup, 46462, smallExpA, 20780, , 161.5, -4244.8, 161.49835, -4244.7866
@@ -98,7 +99,7 @@ EastHollow.DepthsExteriorEX, Kwoloks Hollow, SpiritLight, 100, mouldwoodDepthsGr
 GladesTown.HandToHandPouch, Wellspring Glades, Quest, Pouch, questUberStateGroup, 14019, tradeSequenceQuest, 26318, 2, -282, -4155, -285.9, -4153.8
 GladesTown.HandToHandLantern, Wellspring Glades, Quest, Lantern, questUberStateGroup, 14019, tradeSequenceQuest, 26318, 6, -426, -4155, -428.7, -4153.2
 GladesTown.HandToHandCanteen, Wellspring Glades, Quest, Canteen, questUberStateGroup, 14019, tradeSequenceQuest, 26318, 9, -410, -4142, -403.2, -4142
-GladesTown.FamilyReunionKey, Wellspring Glades, Quest, Key, questUberStateGroup, 14019, familyReunionQuest, 27804, 2, -385, -4161, -382, -4155.3
+GladesTown.FamilyReunionKey, Wellspring Glades, Quest, Key, randoState, 6, canOpenMokiFatherHut, 500, , -385, -4161, -382, -4155.3
 GladesTown.AcornQI, Wellspring Glades, Quest, Acorn, questUberStateGroup, 14019, darkCaveQuestItemCollected, 2782, , -10.5, -4549.7, -366, -4183.6
 GladesTown.MokiAcornQuest, Wellspring Glades, Quest, SL500, questUberStateGroup, 14019, darkCaveQuest, 33776, 3, -358, -4185, -360.1, -4183.6
 GladesTown.HoleHutEC, Wellspring Glades, Resource, Energy, hubUberStateGroup, 42178, energyCellA, 52786, , -116.0, -4538.5, -227.72, -4092.33
@@ -351,7 +352,7 @@ UpperWastes.SpinLasersLowerEX, Windswept Wastes, SpiritLight, 100, desertAGroup,
 UpperWastes.FlowersSeed, Windswept Wastes, Quest, Seed, questUberStateGroup, 14019, gardenerSeedFlowersCollected, 20601, , 1995.7, -3650.6, 1995.6826, -3650.5928
 UpperWastes.WallOre, Windswept Wastes, Resource, Ore, desertAGroup, 7228, gorlekOre, 8370, , 1951.6, -3615.8, 1951.6055, -3615.8252
 WindtornRuins.EscapeRevisitEC, Windtorn Ruins, Resource, Energy, windtornRuinsGroup, 10289, energyHalfCell, 44555, , 2053.7, -4050.2, 2053.74, -4049.1924
-WindtornRuins.Seir, Windtorn Ruins, Wisp, Seir, windtornRuinsGroup, 10289, wispRewardPickup, 22102, , 2056, -3568, 2056, -3568
+WindtornRuins.Seir, Windtorn Ruins, Wisp, Seir, windtornRuinsGroup, 10289, wispRewardPickup, 22102, , 2151, -3568, 2151, -3568
 WindtornRuins.HandToHandComplete, Windtorn Ruins, Quest, Secrets, questUberStateGroup, 14019, tradeSequenceQuest, 26318, 11, 1969, -4024, 1969, -4024
 WeepingRidge.Ore, Silent Woods, Resource, Ore, corruptedPeakGroup, 36153, gorlekOreA, 3013, , 1305.5, -3732.6, 1305.48, -3732.58
 WeepingRidge.LaunchTree, Silent Woods, Ability, Launch, trees, 0, Launch, 8, , 1363, -3815, 1362.97, -3809.77
