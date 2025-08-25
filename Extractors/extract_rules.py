@@ -440,8 +440,10 @@ def append_rule(use_or_resource: bool = True) -> None:
 
     if and_other:
         for elem in and_other:
+            temp_txt = ""
             if "Keystone=" in elem:
-                temp_txt = f"can_open_door({path_name}, s, player)"
+                if path_name != "MidnightBurrows.Teleporter":
+                    temp_txt = f"can_open_door(\"{path_name}\", s, player)"
             elif "=" in elem:
                 req_name, amount = elem.split("=")
                 amount = int(amount)
@@ -458,7 +460,7 @@ def append_rule(use_or_resource: bool = True) -> None:
                 temp_txt = other_glitches[elem]
             else:
                 raise ValueError(f"Invalid input: {elem}")
-            if req_txt:
+            if req_txt and temp_txt:
                 req_txt += " and " + temp_txt
             else:
                 req_txt += temp_txt
@@ -481,9 +483,9 @@ def append_rule(use_or_resource: bool = True) -> None:
 
     if target_area:
         if req_txt:
-            req_txt += " and " + f"can_enter_area({target_area}, s, player, options)"
+            req_txt += " and " + f"can_enter_area(\"{target_area}\", s, player, options)"
         else:
-            req_txt += f"can_enter_area({target_area}, s, player, options)"
+            req_txt += f"can_enter_area(\"{target_area}\", s, player, options)"
 
     if use_or_resource:
         used_or_res = or_resource
