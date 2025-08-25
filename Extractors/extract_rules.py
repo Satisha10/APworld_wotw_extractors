@@ -127,7 +127,7 @@ header = ("\"\"\"\n"
           "Generated with `extract_rules.py`.\n"
           "\"\"\"\n\n\n")
 
-imports = ("from .Rules_Functions import *\n"
+imports = ("from .RulesFunctions import *\n"
            "from worlds.generic.Rules import add_rule\n\n"
            "from typing import TYPE_CHECKING\n"
            "if TYPE_CHECKING:\n"
@@ -544,19 +544,19 @@ with open("./areas.wotw", "r") as file:
     source_text = file.readlines()
 
 # Moki, Gorlek, Kii and Unsafe rules respectively
-moki = (header + imports + "def set_moki_rules(world: Multiworld, player: int, options: WotWOptions):\n"
+moki = (header + imports + "def set_moki_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
         "    \"\"\"Moki (or easy, default) rules.\"\"\"\n")
-gorlek = ("\n\ndef set_gorlek_rules(world: Multiworld, player: int, options: WotWOptions):\n"
+gorlek = ("\n\ndef set_gorlek_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
           "    \"\"\"Gorlek (or medium) rules.\"\"\"\n")
-gorlek_glitch = ("\n\ndef set_gorlek_glitched_rules(world: Multiworld, player: int, options: WotWOptions):\n"
+gorlek_glitch = ("\n\ndef set_gorlek_glitched_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
                  "    \"\"\"Gorlek (or medium) rules with glitches\"\"\"\n")
-kii = ("\n\ndef set_kii_rules(world: Multiworld, player: int, options: WotWOptions):\n"
+kii = ("\n\ndef set_kii_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
        "    \"\"\"Kii (or hard) rules\"\"\"\n")
-kii_glitch = ("\n\ndef set_kii_glitched_rules(world: Multiworld, player: int, options: WotWOptions):\n"
+kii_glitch = ("\n\ndef set_kii_glitched_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
               "    \"\"\"Kii (or hard) rules with glitches.\"\"\"\n")
-unsafe = ("\n\ndef set_unsafe_rules(world: Multiworld, player: int, options: WotWOptions):\n"
+unsafe = ("\n\ndef set_unsafe_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
           "    \"\"\"Unsafe rules.\"\"\"\n")
-unsafe_glitch = ("\n\ndef set_unsafe_glitched_rules(world: Multiworld, player: int, options: WotWOptions):\n"
+unsafe_glitch = ("\n\ndef set_unsafe_glitched_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
                  "    \"\"\"Unsafe rules with glitches.\"\"\"\n")
 
 # Store the parsed text for each difficulty
