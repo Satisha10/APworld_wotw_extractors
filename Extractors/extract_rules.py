@@ -515,11 +515,8 @@ def append_rule(use_or_resource: bool = True) -> None:
 def create_door_rules() -> None:
     """Add to list_rules and the entrances some connection rules for the doors."""
     global anchor, path_name, list_rules, entrances
-    # Create the vanilla connection in one way
-    list_rules[0] += f"    add_rule(world.get_entrance(\"{anchor} (Door) -> {path_name} (Door)\", player), lambda s: True)\n"
     # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
     list_rules[0] += f"    add_rule(world.get_entrance(\"{anchor} (Door) -> {anchor}\", player), lambda s: True)\n"
-    entrances.append(f"{anchor} (Door) -> {path_name} (Door)")
     entrances.append(f"{anchor} (Door) -> {anchor}")
 
 
