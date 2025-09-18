@@ -113,10 +113,10 @@ inf_glitches = {"RemoveKillPlane": "free",
                 }
 
 # Glitches that can be used infinitely, and use two skills
-other_glitches = {"WaveDash": "can_wavedash(s, player)",
-                  "AerialHammerJump": "can_hammerjump(s, player)",
-                  "SwordJump": "can_swordjump(s, player)",
-                  "GlideHammerJump": "can_glidehammerjump(s, player)", }
+other_glitches = {"WaveDash": "can_wavedash(s, p)",
+                  "AerialHammerJump": "can_hammerjump(s, p)",
+                  "SwordJump": "can_swordjump(s, p)",
+                  "GlideHammerJump": "can_glidehammerjump(s, p)", }
 
 
 # %% Text initialisations
@@ -131,8 +131,7 @@ imports = ("from .RulesFunctions import *\n"
            "from worlds.generic.Rules import add_rule\n\n"
            "from typing import TYPE_CHECKING\n"
            "if TYPE_CHECKING:\n"
-           "    from BaseClasses import MultiWorld\n"
-           "    from .Options import WotWOptions\n\n\n")
+           "    from . import WotWWorld\n\n\n")
 
 # %% Helpers
 
@@ -277,7 +276,8 @@ def write_files() -> None:
     ent_txt = ent_txt[:-2]
     ent_txt += "\n    ]\n"
 
-    ref_txt = header + "refills: dict[str, tuple[int, int, int]] = {  # key: region name. Tuple: [health restored, energy restored, refill type]\n"
+    ref_txt = header + \
+        "refills: dict[str, tuple[int, int, int]] = {  # key: region name. Tuple: [health restored, energy restored, refill type]\n"
     ref_txt += "    # For refill type: 0 is no refill, 1 is Checkpoint, 2 is Full refill.\n"
     for region, info in refills.items():
         ref_txt += f"    \"{region}\": {info},\n"
@@ -419,20 +419,20 @@ def append_rule(use_or_resource: bool = True) -> None:
     """
     global list_rules
 
-    start_txt = f"    add_rule(world.get_entrance(\"{anchor} -> {path_name}\", player), lambda s: "
+    start_txt = f"    add_rule(w.get_entrance(\"{anchor} -> {path_name}\"), lambda s: "
     req_txt = ""
 
     if and_skills:
         temp_txt = ""
         if len(and_skills) == 1:
-            temp_txt = f"s.has(\"{and_skills[0]}\", player)"
+            temp_txt = f"s.has(\"{and_skills[0]}\", p)"
         else:
             for elem in and_skills:
                 if temp_txt:
                     temp_txt += f", \"{elem}\""
                 else:
                     temp_txt += f"s.has_all((\"{elem}\""
-            temp_txt += "), player)"
+            temp_txt += "), p)"
         if req_txt:
             req_txt += " and " + temp_txt
         else:
@@ -443,17 +443,17 @@ def append_rule(use_or_resource: bool = True) -> None:
             temp_txt = ""
             if "Keystone=" in elem:
                 if path_name != "MidnightBurrows.Teleporter":
-                    temp_txt = f"can_open_door(\"{path_name}\", s, player)"
+                    temp_txt = f"can_open_door(\"{path_name}\", s, p, o.spawn.value)"
             elif "=" in elem:
                 req_name, amount = elem.split("=")
                 amount = int(amount)
                 if req_name == "SpiritLight":
                     if amount == 1200:  # Case of a shop item
-                        temp_txt = "can_buy_shop(s, player)"
+                        temp_txt = "can_buy_shop(s, p)"
                     else:  # Case of a map from Lupo
-                        temp_txt = "can_buy_map(s, player)"
+                        temp_txt = "can_buy_map(s, p)"
                 elif req_name == "Ore":
-                    temp_txt = f"s.count(\"Gorlek Ore\", player) >= {amount}"
+                    temp_txt = f"s.count(\"Gorlek Ore\", p) >= {amount}"
                 else:
                     raise ValueError(f"Invalid input: {elem}")
             elif elem in other_glitches.keys():
@@ -468,14 +468,14 @@ def append_rule(use_or_resource: bool = True) -> None:
     if or_skills and not use_or_resource:
         temp_txt = ""
         if len(or_skills) == 1:
-            temp_txt = f"s.has(\"{or_skills[0]}\", player)"
+            temp_txt = f"s.has(\"{or_skills[0]}\", p)"
         else:
             for elem in or_skills:
                 if temp_txt:
                     temp_txt += f", \"{elem}\""
                 else:
                     temp_txt += f"s.has_any((\"{elem}\""
-            temp_txt += "), player)"
+            temp_txt += "), p)"
         if req_txt:
             req_txt += " and " + temp_txt
         else:
@@ -483,16 +483,16 @@ def append_rule(use_or_resource: bool = True) -> None:
 
     if target_area:
         if req_txt:
-            req_txt += " and " + f"can_enter_area(\"{target_area}\", s, player, options)"
+            req_txt += " and " + f"can_enter_area(\"{target_area}\", s, p, o)"
         else:
-            req_txt += f"can_enter_area(\"{target_area}\", s, player, options)"
+            req_txt += f"can_enter_area(\"{target_area}\", s, p, o)"
 
     if use_or_resource:
         used_or_res = or_resource
     else:
         used_or_res = []
     if and_resource or used_or_res:
-        temp_txt = (f"has_enough_resources({and_resource}, {used_or_res}, \"{anchor}\", s, player, options, "
+        temp_txt = (f"has_enough_resources({and_resource}, {used_or_res}, \"{anchor}\", s, p, o, "
                     f"{bool(difficulty == 0)})")
         if req_txt:
             req_txt += " and " + temp_txt
@@ -516,7 +516,7 @@ def create_door_rules() -> None:
     """Add to list_rules and the entrances some connection rules for the doors."""
     global anchor, path_name, list_rules, entrances
     # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
-    list_rules[0] += f"    add_rule(world.get_entrance(\"{anchor} (Door) -> {anchor}\", player), lambda s: True)\n"
+    list_rules[0] += f"    add_rule(w.get_entrance(\"{anchor} (Door) -> {anchor}\"), lambda s: True, \"or\")\n"
     entrances.append(f"{anchor} (Door) -> {anchor}")
 
 
@@ -543,20 +543,34 @@ with open("./areas.wotw", "r") as file:
     source_text = file.readlines()
 
 # Moki, Gorlek, Kii and Unsafe rules respectively
-moki = (header + imports + "def set_moki_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
-        "    \"\"\"Moki (or easy, default) rules.\"\"\"\n")
-gorlek = ("\n\ndef set_gorlek_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
-          "    \"\"\"Gorlek (or medium) rules.\"\"\"\n")
-gorlek_glitch = ("\n\ndef set_gorlek_glitched_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
-                 "    \"\"\"Gorlek (or medium) rules with glitches\"\"\"\n")
-kii = ("\n\ndef set_kii_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
-       "    \"\"\"Kii (or hard) rules\"\"\"\n")
-kii_glitch = ("\n\ndef set_kii_glitched_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
-              "    \"\"\"Kii (or hard) rules with glitches.\"\"\"\n")
-unsafe = ("\n\ndef set_unsafe_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
-          "    \"\"\"Unsafe rules.\"\"\"\n")
-unsafe_glitch = ("\n\ndef set_unsafe_glitched_rules(world: \"Multiworld\", player: int, options: \"WotWOptions\"):\n"
-                 "    \"\"\"Unsafe rules with glitches.\"\"\"\n")
+moki = (header + imports + "def set_moki_rules(w: \"WotWWorld\"):\n"
+        "    \"\"\"Moki (or easy, default) rules.\"\"\"\n"
+        "    p = w.player\n"
+        "    o = w.options\n")
+gorlek = ("\n\ndef set_gorlek_rules(w: \"WotWWorld\"):\n"
+          "    \"\"\"Gorlek (or medium) rules.\"\"\"\n"
+          "    p = w.player\n"
+          "    o = w.options\n")
+gorlek_glitch = ("\n\ndef set_gorlek_glitched_rules(w: \"WotWWorld\"):\n"
+                 "    \"\"\"Gorlek (or medium) rules with glitches\"\"\"\n"
+                 "    p = w.player\n"
+                 "    o = w.options\n")
+kii = ("\n\ndef set_kii_rules(w: \"WotWWorld\"):\n"
+       "    \"\"\"Kii (or hard) rules\"\"\"\n"
+       "    p = w.player\n"
+       "    o = w.options\n")
+kii_glitch = ("\n\ndef set_kii_glitched_rules(w: \"WotWWorld\"):\n"
+              "    \"\"\"Kii (or hard) rules with glitches.\"\"\"\n"
+              "    p = w.player\n"
+              "    o = w.options\n")
+unsafe = ("\n\ndef set_unsafe_rules(w: \"WotWWorld\"):\n"
+          "    \"\"\"Unsafe rules.\"\"\"\n"
+          "    p = w.player\n"
+          "    o = w.options\n")
+unsafe_glitch = ("\n\ndef set_unsafe_glitched_rules(w: \"WotWWorld\"):\n"
+                 "    \"\"\"Unsafe rules with glitches.\"\"\"\n"
+                 "    p = w.player\n"
+                 "    o = w.options\n")
 
 # Store the parsed text for each difficulty
 list_rules: list[str] = [moki, gorlek, gorlek_glitch, kii, kii_glitch, unsafe, unsafe_glitch]
@@ -683,7 +697,8 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
                 doors_vanilla.append((anchor + " (Door)", path_name + " (Door)"))
                 doors_map.setdefault(anchor + " (Door)", door_id)
                 create_door_rules()
-                path_name = anchor + " (Door)"  # To connect the anchor to the door, the rest is done in create_door_rules
+                # To connect the anchor to the door, the rest is done in create_door_rules
+                path_name = anchor + " (Door)"
             elif "free" in line:  # Case of a free door connection
                 should_convert = True
                 req1 = "free"
