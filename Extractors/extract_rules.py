@@ -104,19 +104,24 @@ inf_glitches = {"RemoveKillPlane": "free",
                 "GrenadeJump": "Grenade",
                 "GrenadeCancel": "Grenade",
                 "BowCancel": "Bow",
-                "PauseHover": "free",
                 "GlideJump": "Glide",
                 "CoyoteHammerJump": "Hammer",
                 "WallHammerJump": "Hammer",
                 "GroundedHammerJump": "Hammer",
-                "ExtendedHammer": "Hammer",
+                "HammerExtension": "Hammer",
+                "Unpopular": "free",
                 }
 
 # Glitches that can be used infinitely, and use two skills
 other_glitches = {"WaveDash": "can_wavedash(s, p)",
                   "AerialHammerJump": "can_hammerjump(s, p)",
                   "SwordJump": "can_swordjump(s, p)",
-                  "GlideHammerJump": "can_glidehammerjump(s, p)", }
+                  "GlideHammerJump": "can_glidehammerjump(s, p)",
+                  "GlideBashChain": "can_glidebashchain(s, p)",
+                  "DoubleJumpBashChain": "can_doublejumpbashchain(s, p)",
+                  "LaunchBashChain": "can_launchbashchain(s, p)",
+                  "PauseFloat": "can_pausefloat(s, p)",
+                  }
 
 
 # %% Text initialisations
@@ -316,7 +321,7 @@ def write_files() -> None:
 
 
 def parse_and() -> None:
-    """Parse the list of requirements in the `and` chain, and returns the processed information."""
+    """Parse the list of requirements in the `and` chain, and put the processed information in the and lists."""
     global glitched, difficulty, and_req
     global and_resource, and_skills, and_other
 
@@ -388,7 +393,7 @@ def order_or(or_chain: list[str]) -> None:
             value = 0
 
         # Find the glitches (not parsed here)
-        if (elem in other_glitches
+        if (elem in other_glitches.keys()
            or elem in inf_glitches.keys()
            or elem in energy_glitches.keys()
            or elem in wall_glitches.keys()):
