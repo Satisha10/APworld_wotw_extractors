@@ -15,11 +15,11 @@ Burrow,1,progression_useful,item,24,101
 Launch,1,progression_useful,item,24,8
 Clean Water,1,progression_useful,item,6,2000
 Hammer,1,progression_useful,item,24,98
-Sentry,1,progression,item,24,116
-Shuriken,1,progression,item,24,106
-Spear,1,progression,item,24,74
-Blaze,1,progression,item,24,115
-Water Breath,1,progression,item,24,23
+Sentry,1,progression_useful,item,24,116
+Shuriken,1,progression_useful,item,24,106
+Spear,1,progression_useful,item,24,74
+Blaze,1,progression_useful,item,24,115
+Water Breath,1,progression_deprioritized,item,24,23
 Ancestral Light 1,1,useful,item,24,120
 Ancestral Light 2,1,useful,item,24,121
 Overcharge,1,useful,item,25,1
@@ -27,7 +27,7 @@ Triple Jump,1,progression,item,25,2
 Wingclip,1,useful,item,25,3
 Bounty,1,useful,item,25,4
 Swap,1,useful,item,25,5
-Magnet,1,progression,item,25,8
+Magnet,1,progression_deprioritized,item,25,8
 Splinter,1,useful,item,25,9
 Reckless,1,useful,item,25,13
 Quickshot,1,useful,item,25,14
@@ -50,27 +50,27 @@ Sticky,1,useful,item,25,39
 Finesse,1,useful,item,25,40
 Spirit Surge,1,useful,item,25,41
 Lifeforce,1,useful,item,25,43
-Deflector,1,progression,item,25,44
+Deflector,1,progression_deprioritized,item,25,44
 Fracture,1,useful,item,25,46
 Arcing,1,useful,item,25,47
-Midnight Burrows TP,1,progression,item,24922,42531
-Howl's Den TP,1,progression,item,11666,61594
-Central Luma TP,1,progression,item,945,58183
-Mouldwood Depths TP,1,progression,item,18793,38871
-Wellspring TP,1,progression,item,53632,18181
-Baur's Reach TP,1,progression,item,28895,54235
-Kwolok's Hollow TP,1,progression,item,937,26601
-Woods Entrance TP,1,progression,item,58674,7071
-Woods Exit TP,1,progression,item,58674,1965
-Feeding Grounds TP,1,progression,item,58674,10029
-Central Wastes TP,1,progression,item,20120,49994
-Outer Ruins TP,1,progression,item,20120,41398
-Willow's End TP,1,progression,item,16155,41465
-Inkwater Marsh TP,1,progression,item,21786,10185
-Glades TP,1,progression,item,42178,42096
-Luma Boss TP,1,progression,item,945,1370
-Inner Ruins TP,1,progression,item,10289,4928
-Shriek TP,1,progression,item,16155,50867
+Midnight Burrows TP,1,progression_deprioritized,item,24922,42531
+Howl's Den TP,1,progression_deprioritized,item,11666,61594
+Central Luma TP,1,progression_deprioritized,item,945,58183
+Mouldwood Depths TP,1,progression_deprioritized,item,18793,38871
+Wellspring TP,1,progression_deprioritized,item,53632,18181
+Baur's Reach TP,1,progression_deprioritized,item,28895,54235
+Kwolok's Hollow TP,1,progression_deprioritized,item,937,26601
+Woods Entrance TP,1,progression_deprioritized,item,58674,7071
+Woods Exit TP,1,progression_deprioritized,item,58674,1965
+Feeding Grounds TP,1,progression_deprioritized,item,58674,10029
+Central Wastes TP,1,progression_deprioritized,item,20120,49994
+Outer Ruins TP,1,progression_deprioritized,item,20120,41398
+Willow's End TP,1,progression_deprioritized,item,16155,41465
+Inkwater Marsh TP,1,progression_deprioritized,item,21786,10185
+Glades TP,1,progression_deprioritized,item,42178,42096
+Luma Boss TP,1,progression_deprioritized,item,945,1370
+Inner Ruins TP,1,progression_deprioritized,item,10289,4928
+Shriek TP,1,progression_deprioritized,item,16155,50867
 Exploding Spear,1,useful,item,3440,5687
 Hammer Shockwave,1,useful,item,3440,46488
 Static Shuriken,1,useful,item,3440,10776
@@ -111,14 +111,14 @@ Splinter Shurikens,2,useful,upgrade,4,48
 Bashable Shurikens,1,useful,item,4,95
 Jumpgrade,3,useful,upgrade,9,8
 Skill Velocity,3,useful,upgrade,9,5
-200 Spirit Light,20,progression_skip_balancing,resource,1,200
+200 Spirit Light,20,progression_deprioritized_skip_balancing,resource,1,200
 100 Spirit Light,0,filler,resource,1,100
 50 Spirit Light,0,filler,resource,1,50
 1 Spirit Light,1,filler,resource,1,1
-Gorlek Ore,40,progression_skip_balancing,resource,2,0
-Keystone,40,progression_skip_balancing,resource,3,0
+Gorlek Ore,40,progression_deprioritized_skip_balancing,resource,2,0
+Keystone,40,progression_deprioritized_skip_balancing,resource,3,0
 Shard Slot,5,useful,resource,4,0
-Health Fragment,24,progression_skip_balancing,resource,5,0
-Energy Fragment,24,progression_skip_balancing,resource,6,0
+Health Fragment,24,progression_deprioritized_skip_balancing,resource,5,0
+Energy Fragment,24,progression_deprioritized_skip_balancing,resource,6,0
 Nothing,0,filler,resource,0,0
 Relic,0,progression,resource,7,0
