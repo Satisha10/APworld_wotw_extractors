@@ -44,8 +44,8 @@ Ori and the Will of the Wisps:
     # - **Gorlek** (or medium): Harder paths that can use sword and hammer as movement options, and damage boosts.
     # - **Kii** (or hard): Hard and precise paths that use energy weapons as movement.
     # - **Unsafe**: Very hard and unverified paths. Warning: some paths are **extremely hard**.
-    moki: 0
-    gorlek: 50
+    moki: 50
+    gorlek: 0
     kii: 0
     unsafe: 0
 
