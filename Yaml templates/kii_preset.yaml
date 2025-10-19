@@ -1,114 +1,301 @@
-name: Kii
-description: Ori and the Will of the Wisps .yaml file for Kii preset.
+﻿name: Ori{number}
+
+description: Ori and the Will of the Wisps Template for Moki difficulty
+
 game: Ori and the Will of the Wisps
 requires:
-  version: 0.5.0
+  version: 0.6.3 # Version of Archipelago required for this yaml to work as expected.
 
 Ori and the Will of the Wisps:
-  progression_balancing: normal
-  # Using minimal is recommanded, as it greatly increses the probability that the generation is successful.
-  accessibility: minimal
+  ################
+  # Game Options #
+  ################
+  progression_balancing:
+    # A system that can move progression earlier, to try and prevent the player from getting stuck and bored early.
+    # 
+    # A lower setting means more getting stuck. A higher setting means less getting stuck.
+    #
+    # You can define additional values between the minimum and maximum values.
+    # Minimum value is 0
+    # Maximum value is 99
+    random: 0
+    random-low: 0
+    random-high: 0
+    disabled: 0 # equivalent to 0
+    normal: 50 # equivalent to 50
+    extreme: 0 # equivalent to 99
 
-  # Difficulty of the logic.
-  # - moki (or easy): Recommended for beginners, who only played the game casually.
-  # - gorlek (or medium): Harder paths that can use sword and hammer as movement options, and damage boosts.
-  # - kii (or hard): Hard and precise paths that use energy weapons as movement.
-  # - unsafe: Very hard and unverified paths. Warning: some paths are extremely hard.
-  difficulty: kii
+  accessibility:
+    # Set rules for reachability of your items/locations.
+    # 
+    # **Full:** ensure everything can be reached and acquired.
+    # 
+    # **Minimal:** ensure what is needed to reach your goal can be acquired.
+    full: 50
+    minimal: 0
 
-  # Whether the logic includes paths with glitches.
-  # - Gorlek: includes grounded sentry jumps, sentry as a fire source, breaking walls with Shuriken, and removing the kill plane in Feeding Grounds.
-  # - Kii: glitches are not included in Kii logic yet.
-  # - Unsafe: everything else.
-  glitches: 'false'
+  #################
+  # Seed Settings #
+  #################
+  difficulty:
+    # Difficulty of the logic.
+    # 
+    # - **Moki** (or easy): Recommended for beginners, who only played the game casually.
+    # - **Gorlek** (or medium): Harder paths that can use sword and hammer as movement options, and damage boosts.
+    # - **Kii** (or hard): Hard and precise paths that use energy weapons as movement.
+    # - **Unsafe**: Very hard and unverified paths. Warning: some paths are **extremely hard**.
+    moki: 0
+    gorlek: 0
+    kii: 50
+    unsafe: 0
 
-  # Spawn options: random, marsh, burrows, howlsden, hollow, glades, wellspring, westwoods,
-  # eastwoods, reach, depths, eastpools, westpools, westwastes, eastwastes, outerruins, innerruins, willow
-  spawn: random
+  glitches:
+    # Whether the logic includes paths with glitches.
+    # 
+    # - **Gorlek**: includes grounded sentry jumps, sentry as a fire source, breaking walls with Shuriken, and removing the kill plane in Feeding Grounds.
+    # - **Kii**: glitches are not included in Kii logic yet.
+    # - **Unsafe**: everything else.
+    'false': 50
+    'true': 0
 
-  # Set conditions for entering the final boss. Use the rando wheel (with V) to check goal progress.
-  # - trees: All trees must be collected.
-  # - wisps: All wisps must be collected.
-  # - quests: All quests have to be finished.
-  # - random: Choose one goal at random among the other selected ones.
-  #   e.g. [random, trees, wisps] will give trees or wisps.
-  #   If only random is selected, it will choose among all goals.
+  spawn:
+    # Choose the starting location.
+    marsh: 0
+    burrows: 0
+    howlsden: 0
+    hollow: 0
+    glades: 0
+    wellspring: 0
+    westwoods: 0
+    eastwoods: 0
+    reach: 0
+    depths: 0
+    eastpools: 0
+    westpools: 0
+    westwastes: 0
+    eastwastes: 0
+    outerruins: 0
+    innerruins: 0
+    willow: 0
+    random: 50
+
   goal:
-  - trees
+    # Set conditions for entering the final boss. Use the rando wheel (with **V**) to check goal progress.
+    # 
+    # - **trees**: All trees must be collected.
+    # - **wisps**: All wisps must be collected.
+    # - **quests**: All quests have to be finished.
+    # - **relics**: Place relics in some areas, all of them must be collected.
+    # - **random**: Choose one goal at random among the other selected ones.
+    #   e.g. [random, trees, wisps] will give trees or wisps.
+    #   If only random is selected, it will choose among all goals.
+    ['trees']
 
-  # Play the game in hard difficulty.
-  hard_mode: 'false'
+  relic_count:
+    # How many areas contain a relic (no effect without the relic goal).
+    #
+    # You can define additional values between the minimum and maximum values.
+    # Minimum value is 1
+    # Maximum value is 11
+    7: 50
+    random: 0
+    random-low: 0
+    random-high: 0
 
-  # Activate QOL features and gameplay improvements.
-  qol: 'true'
+  hard_mode:
+    # Play the game in hard difficulty.
+    'false': 50
+    'true': 0
 
-  # Display the reward for shrines and trials when activating them.
-  hints: 'true'
+  door_rando:
+    # Enable door randomizer.
+    'false': 50
+    'true': 0
 
-  # Display useful hints on randomizer knowledge while playing the seed.
-  knowledge_hints: 'true'
+  qol:
+    # Activate QOL features and gameplay improvements.
+    'false': 0
+    'true': 50
 
-  # Add most teleporters to the item pool.
-  tp: 'true'
+  hints:
+    # Display the reward for shrines and trials when activating them.
+    'false': 0
+    'true': 50
 
-  # Add Ruins, West Pools and Shriek teleporters to the pool.
-  extratp: 'false'
+  knowledge_hints:
+    # Display useful hints on randomizer knowledge while playing the seed.
+    'false': 0
+    'true': 50
 
-  # Add to the pool items specific to the randomizer (e.g. health renegeneration, extra dash).
-  bonus: 'true'
+  death_link:
+    # Disable/enable death link. Set this to a non-zero integer to specify how many deaths are needed to trigger it.
+    #
+    # You can define additional values between the minimum and maximum values.
+    # Minimum value is 0
+    # Maximum value is 10
+    random: 0
+    random-low: 0
+    random-high: 0
+    disable: 50 # equivalent to 0
+    enable: 0 # equivalent to 1
 
-  # Add to the pool powerful items specific to the randomizer.
-  extra_bonus: 'false'
+  #############
+  # Item Pool #
+  #############
+  tp:
+    # Add most teleporters to the item pool.
+    'false': 0
+    'true': 50
 
-  # Add to the pool upgrades to skills specific to the randomizer (to make them go really fast).
-  skill_upgrade: 'false'
+  extratp:
+    # Add Ruins, West Pools and Shriek teleporters to the pool.
+    'false': 50
+    'true': 0
 
-  # Open some doors so random spawn works better.
-  better_spawn: 'true'
+  bonus:
+    # Add to the pool items specific to the randomizer.
+    'false': 0
+    'true': 50
 
-  # The top door of Wellspring Glades is opened by default.
-  better_wellspring: 'false'
+  extra_bonus:
+    # Add to the pool powerful items specific to the randomizer.
+    'false': 50
+    'true': 0
 
-  # Remove the rain in Marsh, and remove Howl.
-  no_rain: 'false'
+  skill_upgrade:
+    # Add to the pool upgrades to skills specific to the randomizer.
+    'false': 50
+    'true': 0
 
-  # Skip all combat heavy parts.
-  # - Everything: the same as if you include all the following
-  # - Shrines: Shrine have their pickup floating above them before the fight
-  # - Arenas: the arenas start as completed
-  # - Demi Bosses: Demi Bosses like Howl, Beetle and Rock boss start as defeated
-  # - Bosses: Bosses like Kwolok, Mora and Shriek's combat phases are skipped
-  no_combat: []
+  #################
+  # World Changes #
+  #################
+  better_spawn:
+    # Open some doors so random spawn works better.
+    'false': 0
+    'true': 50
 
-  # Trials are already completed.
-  no_trials: 'false'
+  better_wellspring:
+    # The top door of Wellspring Glades is opened by default.
+    'false': 50
+    'true': 0
 
-  # Willow hearts are already destroyed.
-  no_hearts: 'false'
+  no_rain:
+    # Remove the rain in Marsh, and remove Howl.
+    'false': 50
+    'true': 0
 
-  # Change which quests are in the location pool.
-  # - all: All quests are present.
-  # - no_hand: Remove the Hand-to-hand questline from the locations.
-  # - none: Remove all quests that involve talking to NPCs. Main quests (e.g. wisps) or rebuilding Glades are still in the pool.
-  quests: all
+  no_combat:
+    # Skip all combat heavy parts.
+    # 
+    # - **everything**: the same as if you include all the following
+    # - **shrines**: Shrine have their pickup floating above them before the fight
+    # - **arenas**: the arenas start as completed
+    # - **demi bosses**: Demi Bosses like Howl, Beetle and Rock boss start as defeated
+    # - **bosses**: Bosses like Kwolok, Mora and Shriek's combat phases are skipped
+    []
 
-  # Open keystone doors by default (and remove keystones from the pool).
-  no_ks: 'false'
+  no_trials:
+    # Trials are already completed.
+    'false': 50
+    'true': 0
 
-  # Start with Glades rebuilt and regrown.
-  glades_done: 'false'
+  no_hearts:
+    # Willow hearts are already destroyed.
+    'false': 50
+    'true': 0
 
-  # Open most of the doors and obstacles.
-  open_mode: 'false'
+  quests:
+    # Change which quests are in the location pool.
+    # 
+    # - **all**: All quests are present.
+    # - **no hand**: Remove the Hand-to-hand questline from the locations.
+    # - **none**: Remove all quests that involve talking to NPCs. Main quests (e.g. wisps) or rebuilding Glades are still in the pool.
+    all: 50
+    no_hand: 0
+    none: 0
 
-  # Change the shop icons for some non local items.
-  shop_keywords: 'false'
+  no_ks:
+    # Open keystone doors by default (and remove keystones from the pool).
+    'false': 50
+    'true': 0
 
-  # Spawn with sword.
-  sword: 'false'
+  open_mode:
+    # Open most of the doors and obstacles.
+    'false': 50
+    'true': 0
 
-  # Weapon upgrades and shards in shops are not randomized.
-  vanilla_shop_upgrades: 'false'
+  glades_done:
+    # Start with Glades rebuilt and regrown.
+    'false': 50
+    'true': 0
 
-  # Place launch on Seir (i.e. the wisp in the ruins).
-  launch_on_seir: 'false'
+  shop_keywords:
+    # Have the non-local items in the shops attempt to use a keyword system to choose icons.
+    # For example, item with 'map' in their name will have a map icon.
+    # If no keyword fit, then the icon fall back to Classification.
+    'false': 50
+    'true': 0
+
+  ###################
+  # Item Placements #
+  ###################
+  sword:
+    # Choose to have Sword at the beginning.
+    'false': 50
+    'true': 0
+
+  vanilla_shop_upgrades:
+    # Weapon upgrades and shards in shops are not randomized.
+    'false': 50
+    'true': 0
+
+  launch_on_seir:
+    # Place launch on Seir (i.e. the wisp in the ruins).
+    'false': 50
+    'true': 0
+
+  ###########################
+  # Item & Location Options #
+  ###########################
+  local_items:
+    # Forces these items to be in their native world.
+    []
+
+  non_local_items:
+    # Forces these items to be outside their native world.
+    []
+
+  start_inventory:
+    # Start with these items.
+    {}
+
+  start_inventory_from_pool:
+    # Start with these items and don't place them in the world.
+    # 
+    # The game decides what the replacement items will be.
+    {}
+
+  start_hints:
+    # Start with these item's locations prefilled into the ``!hint`` command.
+    []
+
+  start_location_hints:
+    # Start with these locations and their item prefilled into the ``!hint`` command.
+    []
+
+  exclude_locations:
+    # Prevent these locations from having an important item.
+    []
+
+  priority_locations:
+    # Prevent these locations from having an unimportant item.
+    []
+
+  item_links:
+    # Share part of your item pool with other players.
+    []
+
+  plando_items:
+    # Generic items plando.
+    []
