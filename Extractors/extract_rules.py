@@ -109,7 +109,7 @@ inf_glitches = {"RemoveKillPlane": "free",
                 "WallHammerJump": "Hammer",
                 "GroundedHammerJump": "Hammer",
                 "HammerExtension": "Hammer",
-                "Unpopular": "free",
+                "Unpopular": "Unpopular",
                 }
 
 # Glitches that can be used infinitely, and use two skills
@@ -712,9 +712,14 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
                 is_enter = True
                 is_door = False
         else:
-            path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
-            difficulty = convert_diff[path_diff]
-            req2 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
+            try:
+                path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
+                difficulty = convert_diff[path_diff]
+                req2 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
+            except RuntimeError as e:
+                print(f"Failed to fint the difficulty in line {i}.\nReason: {e}")
+                difficulty = convert_diff["moki"]
+                req2 = line  # Can be empty
             if req2:
                 if req2[-1] == ":":
                     req2 = req2[:-1]
