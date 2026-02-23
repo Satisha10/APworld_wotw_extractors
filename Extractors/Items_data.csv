@@ -20,6 +20,7 @@ Shuriken,1,progression_useful,item,24,106
 Spear,1,progression_useful,item,24,74
 Blaze,1,progression_useful,item,24,115
 Water Breath,1,progression_deprioritized,item,24,23
+Launch Fragment,0,progression_useful,upgrade,26,1
 Ancestral Light 1,1,useful,item,24,120
 Ancestral Light 2,1,useful,item,24,121
 Overcharge,1,useful,item,25,1
