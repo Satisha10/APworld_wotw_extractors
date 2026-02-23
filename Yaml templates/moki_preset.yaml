@@ -5,12 +5,14 @@ description: Ori and the Will of the Wisps Template for Moki difficulty
 game: Ori and the Will of the Wisps
 requires:
   version: 0.6.3 # Version of Archipelago required for this yaml to work as expected.
+  game:
+    Ori and the Will of the Wisps: 0.5.0 # Version of the world required for this yaml to work as expected.
 
 Ori and the Will of the Wisps:
   ################
   # Game Options #
   ################
-  progression_balancing:
+  progression_balancing: 50
     # A system that can move progression earlier, to try and prevent the player from getting stuck and bored early.
     # 
     # A lower setting means more getting stuck. A higher setting means less getting stuck.
@@ -18,49 +20,35 @@ Ori and the Will of the Wisps:
     # You can define additional values between the minimum and maximum values.
     # Minimum value is 0
     # Maximum value is 99
-    random: 0
-    random-low: 0
-    random-high: 0
-    disabled: 0 # equivalent to 0
-    normal: 50 # equivalent to 50
-    extreme: 0 # equivalent to 99
 
-  accessibility:
+  accessibility: full
     # Set rules for reachability of your items/locations.
     # 
     # **Full:** ensure everything can be reached and acquired.
     # 
     # **Minimal:** ensure what is needed to reach your goal can be acquired.
-    full: 50
-    minimal: 0
 
   #################
   # Seed Settings #
   #################
-  difficulty:
+  difficulty: moki
     # Difficulty of the logic.
     # 
     # - **Moki** (or easy): Recommended for beginners, who only played the game casually.
     # - **Gorlek** (or medium): Harder paths that can use sword and hammer as movement options, and damage boosts.
     # - **Kii** (or hard): Hard and precise paths that use energy weapons as movement.
     # - **Unsafe**: Very hard and unverified paths. Warning: some paths are **extremely hard**.
-    moki: 50
-    gorlek: 0
-    kii: 0
-    unsafe: 0
 
-  glitches:
+  glitches: 'false'
     # Whether the logic includes paths with glitches.
     # 
     # - **Gorlek**: includes grounded sentry jumps, sentry as a fire source, breaking walls with Shuriken, and removing the kill plane in Feeding Grounds.
     # - **Kii**: glitches are not included in Kii logic yet.
     # - **Unsafe**: everything else.
-    'false': 50
-    'true': 0
 
   spawn:
     # Choose the starting location.
-    marsh: 0
+    marsh: 50
     burrows: 0
     howlsden: 0
     hollow: 0
@@ -77,7 +65,7 @@ Ori and the Will of the Wisps:
     outerruins: 0
     innerruins: 0
     willow: 0
-    random: 50
+    random: 0
 
   goal:
     # Set conditions for entering the final boss. Use the rando wheel (with **V**) to check goal progress.
@@ -91,99 +79,90 @@ Ori and the Will of the Wisps:
     #   If only random is selected, it will choose among all goals.
     ['trees']
 
-  relic_count:
+  relic_count: 7
     # How many areas contain a relic (no effect without the relic goal).
     #
     # You can define additional values between the minimum and maximum values.
     # Minimum value is 1
     # Maximum value is 11
-    7: 50
-    random: 0
-    random-low: 0
-    random-high: 0
 
-  hard_mode:
+  launch_fragments: 'false'
+    # Spilt Launch into multiple fragments.
+
+  fragments_required: 3
+    # Set the amount of launch fragments needed to get Launch.
+    #
+    # You can define additional values between the minimum and maximum values.
+    # Minimum value is 1
+    # Maximum value is 10
+
+  fragments_count: 5
+    # Set the amount of launch fragments in the pool. Launch is in logic when all fragments are accessible.
+    #
+    # You can define additional values between the minimum and maximum values.
+    # Minimum value is 1
+    # Maximum value is 10
+
+  hard_mode: 'false'
     # Play the game in hard difficulty.
-    'false': 50
-    'true': 0
 
-  door_rando:
+  door_rando: 'false'
     # Enable door randomizer.
-    'false': 50
-    'true': 0
 
-  qol:
+  qol: 'true'
     # Activate QOL features and gameplay improvements.
-    'false': 0
-    'true': 50
 
-  hints:
+  hints: 'true'
     # Display the reward for shrines and trials when activating them.
-    'false': 0
-    'true': 50
 
-  knowledge_hints:
+  zone_hints: 'true'
+    # Lupo sells hints that indicate how many progression items are in the area.
+
+  knowledge_hints: 'true'
     # Display useful hints on randomizer knowledge while playing the seed.
-    'false': 0
-    'true': 50
 
-  death_link:
+  unpopular: 'false'
+    # Enable unpopular paths for unsafe.
+    # 
+    # These involve tedious or extremely hard tricks, and remove the restrictions on teleporter logic.
+    # No effect without unsafe and glitches.
+
+  death_link: 'disable'
     # Disable/enable death link. Set this to a non-zero integer to specify how many deaths are needed to trigger it.
     #
     # You can define additional values between the minimum and maximum values.
     # Minimum value is 0
-    # Maximum value is 10
-    random: 0
-    random-low: 0
-    random-high: 0
-    disable: 50 # equivalent to 0
-    enable: 0 # equivalent to 1
+    # Maximum value is 99
 
   #############
   # Item Pool #
   #############
-  tp:
+  tp: 'true'
     # Add most teleporters to the item pool.
-    'false': 0
-    'true': 50
 
-  extratp:
+  extratp: 'false'
     # Add Ruins, West Pools and Shriek teleporters to the pool.
-    'false': 50
-    'true': 0
 
-  bonus:
+  bonus: 'true'
     # Add to the pool items specific to the randomizer.
-    'false': 0
-    'true': 50
 
-  extra_bonus:
+  extra_bonus: 'false'
     # Add to the pool powerful items specific to the randomizer.
-    'false': 50
-    'true': 0
 
-  skill_upgrade:
+  skill_upgrade: 'false'
     # Add to the pool upgrades to skills specific to the randomizer.
-    'false': 50
-    'true': 0
 
   #################
   # World Changes #
   #################
-  better_spawn:
+  better_spawn: 'true'
     # Open some doors so random spawn works better.
-    'false': 50
-    'true': 0
 
-  better_wellspring:
+  better_wellspring: 'false'
     # The top door of Wellspring Glades is opened by default.
-    'false': 50
-    'true': 0
 
-  no_rain:
+  no_rain: 'false'
     # Remove the rain in Marsh, and remove Howl.
-    'false': 50
-    'true': 0
 
   no_combat:
     # Skip all combat heavy parts.
@@ -195,65 +174,44 @@ Ori and the Will of the Wisps:
     # - **bosses**: Bosses like Kwolok, Mora and Shriek's combat phases are skipped
     []
 
-  no_trials:
+  no_trials: 'true'
     # Trials are already completed.
-    'false': 50
-    'true': 0
 
-  no_hearts:
+  no_hearts: 'false'
     # Willow hearts are already destroyed.
-    'false': 50
-    'true': 0
 
-  quests:
+  quests: none
     # Change which quests are in the location pool.
     # 
     # - **all**: All quests are present.
     # - **no hand**: Remove the Hand-to-hand questline from the locations.
     # - **none**: Remove all quests that involve talking to NPCs. Main quests (e.g. wisps) or rebuilding Glades are still in the pool.
-    all: 0
-    no_hand: 0
-    none: 50
 
-  no_ks:
+  no_ks: 'false'
     # Open keystone doors by default (and remove keystones from the pool).
-    'false': 50
-    'true': 0
 
-  open_mode:
+  open_mode: 'false'
     # Open most of the doors and obstacles.
-    'false': 50
-    'true': 0
 
-  glades_done:
+  glades_done: 'false'
     # Start with Glades rebuilt and regrown.
-    'false': 50
-    'true': 0
 
-  shop_keywords:
+  shop_keywords: 'false'
     # Have the non-local items in the shops attempt to use a keyword system to choose icons.
     # For example, item with 'map' in their name will have a map icon.
     # If no keyword fit, then the icon fall back to Classification.
-    'false': 50
-    'true': 0
 
   ###################
   # Item Placements #
   ###################
-  sword:
+  sword: 'true'
     # Choose to have Sword at the beginning.
-    'false': 0
-    'true': 50
 
-  vanilla_shop_upgrades:
+  vanilla_shop_upgrades: 'false'
     # Weapon upgrades and shards in shops are not randomized.
-    'false': 50
-    'true': 0
 
-  launch_on_seir:
+  launch_on_seir: 'false'
     # Place launch on Seir (i.e. the wisp in the ruins).
-    'false': 50
-    'true': 0
 
   ###########################
   # Item & Location Options #
@@ -267,11 +225,11 @@ Ori and the Will of the Wisps:
     []
 
   start_inventory:
-    # Start with these items.
+    # Start with the specified amount of these items. Example: "Bomb: 1"
     {}
 
   start_inventory_from_pool:
-    # Start with these items and don't place them in the world.
+    # Start with the specified amount of these items and don't place them in the world. Example: "Bomb: 1"
     # 
     # The game decides what the replacement items will be.
     {}
