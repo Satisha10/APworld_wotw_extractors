@@ -209,15 +209,19 @@ def convert() -> None:
     and_other = []
     target_area = ""
 
-    if path_type == "conn" and "." in path_name:  # Gets the requirements when entering a new area.
+    # Get the requirements when entering a new area.
+    if path_type == "conn" and "." in path_name:
         dot_position = path_name.find(".")
-        f_area = path_name[:dot_position]
+        f_area = path_name[:dot_position]  # Extract the name of the target area
         if "." in anchor:
             dot_position = anchor.find(".")
-            i_area = anchor[:dot_position]  # Extracts the name of the starting area
+            i_area = anchor[:dot_position]  # Extract the name of the starting area
         else:
             i_area = ""
-        if i_area != f_area:
+
+        # Apply the danger requirements if the regions differ, or if exiting a door (in case door rando is used).
+        # Skip it for MarshSpawn and MarshPastOpher as they don't have any danger requirement.
+        if (i_area != f_area or is_door) and f_area not in ("MarshSpawn", "MarshPastOpher"):
             target_area = f_area
 
     if path_type == "refill":
@@ -281,8 +285,8 @@ def write_files() -> None:
     ent_txt = ent_txt[:-2]
     ent_txt += "\n    ]\n"
 
-    ref_txt = header + \
-        "refills: dict[str, tuple[int, int, int]] = {  # key: region name. Tuple: [health restored, energy restored, refill type]\n"
+    ref_txt = header + ("refills: dict[str, tuple[int, int, int]] = {  "
+                        "# key: region name. Tuple: [health restored, energy restored, refill type]\n")
     ref_txt += "    # For refill type: 0 is no refill, 1 is Checkpoint, 2 is Full refill.\n"
     for region, info in refills.items():
         ref_txt += f"    \"{region}\": {info},\n"
@@ -333,7 +337,7 @@ def parse_and() -> None:
 
     for requirement in and_req:
         if "=" in requirement:
-            elem, value = requirement.split("=")
+            elem, value = requirement.split("=")  # elem: type of path ; value: value associated
         else:
             if requirement in name_convert.keys():
                 requirement = name_convert[requirement]
@@ -367,7 +371,8 @@ def parse_and() -> None:
             and_resource.append(("wall", (elem, int(value))))
         elif ("Keystone=" in requirement
               or "Ore=" in requirement
-              or "SpiritLight=" in requirement):  # Case of a keystone door, or spirit light, or ore
+              or "SpiritLight=" in requirement
+              or "Danger=" in requirement):  # Case of a keystone door, or spirit light, or ore, or danger value
             and_other.append(requirement)
         elif elem == "Combat":
             and_resource += parse_combat(value)
@@ -385,7 +390,7 @@ def order_or(or_chain: list[str]) -> None:
 
     for requirement in or_chain:
         if "=" in requirement:
-            elem, value = requirement.split("=")
+            elem, value = requirement.split("=")  # elem: type of path ; value: value associated
         else:
             if requirement in name_convert.keys():
                 requirement = name_convert[requirement]
@@ -459,6 +464,8 @@ def append_rule(use_or_resource: bool = True) -> None:
                         temp_txt = "can_buy_map(s, p)"
                 elif req_name == "Ore":
                     temp_txt = f"s.count(\"Gorlek Ore\", p) >= {amount}"
+                elif req_name == "Danger":
+                    temp_txt = f"has_enough_max_health(s, p, {amount})"
                 else:
                     raise ValueError(f"Invalid input: {elem}")
             elif elem in other_glitches.keys():
@@ -486,11 +493,11 @@ def append_rule(use_or_resource: bool = True) -> None:
         else:
             req_txt += temp_txt
 
-    if target_area:
+    if target_area:  # Entering a new area: check that it can be entered
         if req_txt:
-            req_txt += " and " + f"can_enter_area(\"{target_area}\", s, p, o)"
+            req_txt += " and " + f"s.has(\"danger_{target_area}\", p)"
         else:
-            req_txt += f"can_enter_area(\"{target_area}\", s, p, o)"
+            req_txt += f"s.has(\"danger_{target_area}\", p)"
 
     if use_or_resource:
         used_or_res = or_resource
@@ -542,6 +549,10 @@ def parse_combat(content: str) -> list[tuple[str, str]]:
 
 
 # %% Main script
+
+
+# Note: the code in this section is very messy and hard to understand. I might refactor it at some point to solve that.
+# It is probably best to reach out to me and ask me questions about how this work rather than figuring out yourself.
 
 
 with open("./areas.wotw", "r") as file:
@@ -605,6 +616,7 @@ should_convert = False  # If True, convert is called to create a rule
 is_door = False  # True while parsing a door
 is_enter = False  # True when in an enter clause (when parsing the door rules)
 door_id = 0
+is_region = False  # True when parsing a region requirement
 and_req: list[str] = []  # Stores the requirements form an and chain (i.e. coma separated requirements)
 and_skills: list[str] = []  # Store the skills, events from the and chain
 and_other: list[str] = []  # Store the requirements that have their own fonction (some glitches, keys, shops...)
@@ -647,14 +659,22 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
 
     if indent == 0:  # Always anchor, except for requirement or region (which are ignored)
         req1, req2, req3, req4, req5 = "", "", "", "", ""
+        is_region = False
         if "anchor" in line:
-            name = try_group(r_colon, line, 1, -1)
+            name = try_group(r_colon, line, 1, -1)  # the space and colon are captured, to remove them with 1, -1
             s = r_separate.search(name)  # Detect and remove the ` at <coord>` part if it exists.
             if s:
                 anchor = name[:s.start()]
             else:
                 anchor = name
             refills.setdefault(anchor, (0, 0, 0))
+        elif "region" in line:
+            anchor = "Menu"
+            region_name = try_group(r_colon, line, 1, -1)
+            path_name = f"danger_{region_name}"
+            path_type = "conn"
+            is_region = True
+
         else:
             anchor = ""
 
@@ -670,24 +690,40 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             is_door = True
             continue
         is_door = False
-        path_type = try_group(r_type, line, end=-1)  # Connection type
-        if path_type not in ("conn", "state", "pickup", "refill", "quest"):
-            raise ValueError(f"{path_type} (line {i}) is not an appropriate path type.\n\"{line}\"")
-        if path_type == "refill":
-            if ":" in line:
-                path_name = try_group(r_name, line, 1, -1)  # Checkpoint, Full, Energy=x...
-                conv_refill()
+
+        if is_region:
+            try:  # Copied from indent 2, by applying it to req1 instead
+                path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
+                difficulty = convert_diff[path_diff]
+                req1 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
+            except RuntimeError as e:
+                print(f"Failed to find the difficulty in line {i}.\nReason: {e}")
+                difficulty = convert_diff["moki"]
+                req1 = line  # Can be empty
+            if req1:
+                if req1[-1] == ":":
+                    req1 = req1[:-1]
+                else:
+                    should_convert = True
+        else:
+            path_type = try_group(r_type, line, end=-1)  # Connection type
+            if path_type not in ("conn", "state", "pickup", "refill", "quest"):
+                raise ValueError(f"{path_type} (line {i}) is not an appropriate path type.\n\"{line}\"")
+            if path_type == "refill":
+                if ":" in line:
+                    path_name = try_group(r_name, line, 1, -1)  # Checkpoint, Full, Energy=x...
+                    conv_refill()
+                else:
+                    path_name = try_group(r_refill, line, 1)  # Checkpoint, Full, Energy=x...
+                    conv_refill()
+                    should_convert = True
+                    req1 = "free"
             else:
-                path_name = try_group(r_refill, line, 1)  # Checkpoint, Full, Energy=x...
-                conv_refill()
+                path_name = try_group(r_name, line, 1, -1)  # Name
+
+            if "free" in line:
                 should_convert = True
                 req1 = "free"
-        else:
-            path_name = try_group(r_name, line, 1, -1)  # Name
-
-        if "free" in line:
-            should_convert = True
-            req1 = "free"
 
     elif indent == 2:  # When not a door, this contains the path difficulty
         req2, req3, req4, req5 = "", "", "", ""
@@ -711,13 +747,21 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             else:  # Case of line == "enter:", the rules are in the next lines
                 is_enter = True
                 is_door = False
+
+        elif is_region:  # Copied from indent 3, by applying it to req2 instead
+            if line[-1] == ":":
+                req2 = line[:-1]
+            else:
+                req2 = line
+                should_convert = True
+
         else:
             try:
                 path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
                 difficulty = convert_diff[path_diff]
                 req2 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
             except RuntimeError as e:
-                print(f"Failed to fint the difficulty in line {i}.\nReason: {e}")
+                print(f"Failed to find the difficulty in line {i}.\nReason: {e}")
                 difficulty = convert_diff["moki"]
                 req2 = line  # Can be empty
             if req2:
