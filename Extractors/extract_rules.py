@@ -57,86 +57,95 @@ combat_name = ["BreakWall", "Combat", "Boss"]
 
 # Skills that can be used infinitely (note: Regenerate is here because of how the logic is written)
 # The energy skills are also there because they are sometimes without a number of uses specified
-inf_skills = ["Sword",
-              "Double Jump",
-              "Regenerate",
-              "Dash",
-              "Bash",
-              "Grapple",
-              "Glide",
-              "Flap",
-              "Water Dash",
-              "Burrow",
-              "Launch",
-              "Clean Water",
-              "Water Breath",
-              "Hammer",
-              "free",
-              "Bow",
-              "Grenade",
-              "Flash",
-              "Sentry",
-              "Shuriken",
-              "Spear",
-              "Blaze",]
+inf_skills = [
+    "Sword",
+    "Double Jump",
+    "Regenerate",
+    "Dash",
+    "Bash",
+    "Grapple",
+    "Glide",
+    "Flap",
+    "Water Dash",
+    "Burrow",
+    "Launch",
+    "Clean Water",
+    "Water Breath",
+    "Hammer",
+    "free",
+    "Bow",
+    "Grenade",
+    "Flash",
+    "Sentry",
+    "Shuriken",
+    "Spear",
+    "Blaze",
+]
 
 # Glitches that use resources
-energy_glitches = {"SentryJump": "SentryJump",
-                   "SwordSJump": "SwordSJump",
-                   "HammerSJump": "HammerSJump",
-                   "SentryBurn": "Sentry",
-                   "SpearBreak": "Spear",
-                   "SentrySwap": "Sentry",
-                   "BlazeSwap": "Blaze",
-                   "GrenadeRedirect": "Grenade",
-                   "SentryRedirect": "Sentry",
-                   "SpearJump": "Spear", }
+energy_glitches = {
+    "SentryJump": "SentryJump",
+    "SwordSJump": "SwordSJump",
+    "HammerSJump": "HammerSJump",
+    "SentryBurn": "Sentry",
+    "SpearBreak": "Spear",
+    "SentrySwap": "Sentry",
+    "BlazeSwap": "Blaze",
+    "GrenadeRedirect": "Grenade",
+    "SentryRedirect": "Sentry",
+    "SpearJump": "Spear",
+}
 
 # Glitches to break walls
-wall_glitches = {"ShurikenBreak": "shuriken",
-                 "SentryBreak": "sentry"}
+wall_glitches = {"ShurikenBreak": "shuriken", "SentryBreak": "sentry"}
 
 # Glitches that can be used infinitely (and only use one skill)
-inf_glitches = {"RemoveKillPlane": "free",
-                "HammerBreak": "Hammer",
-                "LaunchSwap": "Launch",
-                "FlashSwap": "Flash",
-                "GrenadeJump": "Grenade",
-                "GrenadeCancel": "Grenade",
-                "BowCancel": "Bow",
-                "GlideJump": "Glide",
-                "CoyoteHammerJump": "Hammer",
-                "WallHammerJump": "Hammer",
-                "GroundedHammerJump": "Hammer",
-                "HammerExtension": "Hammer",
-                "Unpopular": "Unpopular",
-                }
+inf_glitches = {
+    "RemoveKillPlane": "free",
+    "HammerBreak": "Hammer",
+    "LaunchSwap": "Launch",
+    "FlashSwap": "Flash",
+    "GrenadeJump": "Grenade",
+    "GrenadeCancel": "Grenade",
+    "BowCancel": "Bow",
+    "GlideJump": "Glide",
+    "CoyoteHammerJump": "Hammer",
+    "WallHammerJump": "Hammer",
+    "GroundedHammerJump": "Hammer",
+    "HammerExtension": "Hammer",
+    "Unpopular": "Unpopular",
+}
 
 # Glitches that can be used infinitely, and use two skills
-other_glitches = {"WaveDash": "can_wavedash(s, p)",
-                  "AerialHammerJump": "can_hammerjump(s, p)",
-                  "SwordJump": "can_swordjump(s, p)",
-                  "GlideHammerJump": "can_glidehammerjump(s, p)",
-                  "GlideBashChain": "can_glidebashchain(s, p)",
-                  "DoubleJumpBashChain": "can_doublejumpbashchain(s, p)",
-                  "LaunchBashChain": "can_launchbashchain(s, p)",
-                  "PauseFloat": "can_pausefloat(s, p)",
-                  }
+other_glitches = {
+    "WaveDash": "can_wavedash(s, p)",
+    "AerialHammerJump": "can_hammerjump(s, p)",
+    "SwordJump": "can_swordjump(s, p)",
+    "GlideHammerJump": "can_glidehammerjump(s, p)",
+    "GlideBashChain": "can_glidebashchain(s, p)",
+    "DoubleJumpBashChain": "can_doublejumpbashchain(s, p)",
+    "LaunchBashChain": "can_launchbashchain(s, p)",
+    "PauseFloat": "can_pausefloat(s, p)",
+}
 
 
 # %% Text initialisations
 
-header = ("\"\"\"\n"
-          "Generated file, do not edit manually.\n\n"
-          "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
-          "Generated with `extract_rules.py`.\n"
-          "\"\"\"\n\n\n")
+header = (
+    '"""\n'
+    "Generated file, do not edit manually.\n\n"
+    "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
+    "Generated with `extract_rules.py`.\n"
+    '"""\n\n\n'
+)
 
-imports = ("from .RulesFunctions import *\n"
-           "from worlds.generic.Rules import add_rule\n\n"
-           "from typing import TYPE_CHECKING\n"
-           "if TYPE_CHECKING:\n"
-           "    from . import WotWWorld\n\n\n")
+imports = (
+    "from .RulesFunctions import *\n"
+    "from worlds.generic.Rules import add_rule\n\n"
+    "from typing import TYPE_CHECKING\n"
+    "if TYPE_CHECKING:\n"
+    "    from . import WotWWorld\n\n\n"
+)
 
 # %% Helpers
 
@@ -150,7 +159,7 @@ def try_group(regex: Pattern[str], text: str, begin=0, end=0) -> str:
         begin = 0
     if end == 0:
         end = len(match.group()) + 1
-    return match.group()[begin: end]
+    return match.group()[begin:end]
 
 
 def try_end(regex: Pattern[str], text: str) -> int:
@@ -249,7 +258,7 @@ def convert() -> None:
     elif len(or_req) == 2:  # Two chains of or
         # Swaps the two chains if it is more efficient to split the second chain
         if len(or_req[0]) > len(or_req[1]):
-            (or_req[0], or_req[1]) = (or_req[1], or_req[0])
+            or_req[0], or_req[1] = (or_req[1], or_req[0])
         order_or(or_req[1])
 
         while or_req[0]:  # Split the first or chain into the and chain
@@ -281,20 +290,21 @@ def write_files() -> None:
     """Write the extracted data into output files."""
     ent_txt = header + "entrance_table: list[str] = [\n"
     for entrance in entrances:
-        ent_txt += f"    \"{entrance}\",\n"
+        ent_txt += f'    "{entrance}",\n'
     ent_txt = ent_txt[:-2]
     ent_txt += "\n    ]\n"
 
-    ref_txt = header + ("refills: dict[str, tuple[int, int, int]] = {  "
-                        "# key: region name. Tuple: [health restored, energy restored, refill type]\n")
+    ref_txt = header + (
+        "refills: dict[str, tuple[int, int, int]] = {  "
+        "# key: region name. Tuple: [health restored, energy restored, refill type]\n"
+    )
     ref_txt += "    # For refill type: 0 is no refill, 1 is Checkpoint, 2 is Full refill.\n"
     for region, info in refills.items():
-        ref_txt += f"    \"{region}\": {info},\n"
+        ref_txt += f'    "{region}": {info},\n'
     ref_txt = ref_txt[:-2]
-    ref_txt += ("\n    }\n\n"
-                "refill_events: list[str] = [\n")
+    ref_txt += "\n    }\n\n" "refill_events: list[str] = [\n"
     for refill_name in refill_events:
-        ref_txt += f"    \"{refill_name}\",\n"
+        ref_txt += f'    "{refill_name}",\n'
     ref_txt = ref_txt[:-2]
     ref_txt += "\n    ]\n"
 
@@ -305,7 +315,7 @@ def write_files() -> None:
     door_txt += "\n    ]\n\n\n"
     door_txt += "doors_map: dict[str, int] = {  # Mapping to door ID\n"
     for door, value in doors_map.items():
-        door_txt += f"    \"{door}\": {value},\n"
+        door_txt += f'    "{door}": {value},\n'
     door_txt = door_txt[:-2]
     door_txt += "\n    }\n"
 
@@ -369,10 +379,12 @@ def parse_and() -> None:
             and_resource.append(("db", int(value)))
         elif elem in ("BreakWall", "Boss"):
             and_resource.append(("wall", (elem, int(value))))
-        elif ("Keystone=" in requirement
-              or "Ore=" in requirement
-              or "SpiritLight=" in requirement
-              or "Danger=" in requirement):  # Case of a keystone door, or spirit light, or ore, or danger value
+        elif (
+            "Keystone=" in requirement
+            or "Ore=" in requirement
+            or "SpiritLight=" in requirement
+            or "Danger=" in requirement
+        ):  # Case of a keystone door, or spirit light, or ore, or danger value
             and_other.append(requirement)
         elif elem == "Combat":
             and_resource += parse_combat(value)
@@ -398,10 +410,12 @@ def order_or(or_chain: list[str]) -> None:
             value = 0
 
         # Find the glitches (not parsed here)
-        if (elem in other_glitches.keys()
-           or elem in inf_glitches.keys()
-           or elem in energy_glitches.keys()
-           or elem in wall_glitches.keys()):
+        if (
+            elem in other_glitches.keys()
+            or elem in inf_glitches.keys()
+            or elem in energy_glitches.keys()
+            or elem in wall_glitches.keys()
+        ):
             or_glitch.append(requirement)
 
         elif requirement in inf_skills:  # Check on requirement and not on elem to catch the energy skills without the =
@@ -429,19 +443,19 @@ def append_rule(use_or_resource: bool = True) -> None:
     """
     global list_rules
 
-    start_txt = f"    add_rule(w.get_entrance(\"{anchor} -> {path_name}\"), lambda s: "
+    start_txt = f'    add_rule(w.get_entrance("{anchor} -> {path_name}"), lambda s: '
     req_txt = ""
 
     if and_skills:
         temp_txt = ""
         if len(and_skills) == 1:
-            temp_txt = f"s.has(\"{and_skills[0]}\", p)"
+            temp_txt = f's.has("{and_skills[0]}", p)'
         else:
             for elem in and_skills:
                 if temp_txt:
-                    temp_txt += f", \"{elem}\""
+                    temp_txt += f', "{elem}"'
                 else:
-                    temp_txt += f"s.has_all((\"{elem}\""
+                    temp_txt += f's.has_all(("{elem}"'
             temp_txt += "), p)"
         if req_txt:
             req_txt += " and " + temp_txt
@@ -453,7 +467,7 @@ def append_rule(use_or_resource: bool = True) -> None:
             temp_txt = ""
             if "Keystone=" in elem:
                 if path_name != "MidnightBurrows.Teleporter":
-                    temp_txt = f"can_open_door(\"{path_name}\", s, p, o.spawn.value)"
+                    temp_txt = f'can_open_door("{path_name}", s, p, o.spawn.value)'
             elif "=" in elem:
                 req_name, amount = elem.split("=")
                 amount = int(amount)
@@ -463,7 +477,7 @@ def append_rule(use_or_resource: bool = True) -> None:
                     else:  # Case of a map from Lupo
                         temp_txt = "can_buy_map(s, p)"
                 elif req_name == "Ore":
-                    temp_txt = f"s.count(\"Gorlek Ore\", p) >= {amount}"
+                    temp_txt = f's.count("Gorlek Ore", p) >= {amount}'
                 elif req_name == "Danger":
                     temp_txt = f"has_enough_max_health(s, p, {amount})"
                 else:
@@ -480,13 +494,13 @@ def append_rule(use_or_resource: bool = True) -> None:
     if or_skills and not use_or_resource:
         temp_txt = ""
         if len(or_skills) == 1:
-            temp_txt = f"s.has(\"{or_skills[0]}\", p)"
+            temp_txt = f's.has("{or_skills[0]}", p)'
         else:
             for elem in or_skills:
                 if temp_txt:
-                    temp_txt += f", \"{elem}\""
+                    temp_txt += f', "{elem}"'
                 else:
-                    temp_txt += f"s.has_any((\"{elem}\""
+                    temp_txt += f's.has_any(("{elem}"'
             temp_txt += "), p)"
         if req_txt:
             req_txt += " and " + temp_txt
@@ -495,26 +509,27 @@ def append_rule(use_or_resource: bool = True) -> None:
 
     if target_area:  # Entering a new area: check that it can be entered
         if req_txt:
-            req_txt += " and " + f"s.has(\"danger_{target_area}\", p)"
+            req_txt += " and " + f's.has("danger_{target_area}", p)'
         else:
-            req_txt += f"s.has(\"danger_{target_area}\", p)"
+            req_txt += f's.has("danger_{target_area}", p)'
 
     if use_or_resource:
         used_or_res = or_resource
     else:
         used_or_res = []
     if and_resource or used_or_res:
-        temp_txt = (f"has_enough_resources({and_resource}, {used_or_res}, \"{anchor}\", s, p, o, "
-                    f"{bool(difficulty == 0)})")
+        temp_txt = (
+            f'has_enough_resources({and_resource}, {used_or_res}, "{anchor}", s, p, o, ' f"{bool(difficulty == 0)})"
+        )
         if req_txt:
             req_txt += " and " + temp_txt
         else:
             req_txt += temp_txt
 
     if req_txt:
-        tot_txt = start_txt + req_txt + ", \"or\")\n"
+        tot_txt = start_txt + req_txt + ', "or")\n'
     else:
-        tot_txt = start_txt + "True, \"or\")\n"
+        tot_txt = start_txt + 'True, "or")\n'
 
     if glitched:
         difficulty_index = difficulty + 1
@@ -528,7 +543,7 @@ def create_door_rules() -> None:
     """Add to list_rules and the entrances some connection rules for the doors."""
     global anchor, path_name, list_rules, entrances
     # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
-    list_rules[0] += f"    add_rule(w.get_entrance(\"{anchor} (Door) -> {anchor}\"), lambda s: True, \"or\")\n"
+    list_rules[0] += f'    add_rule(w.get_entrance("{anchor} (Door) -> {anchor}"), lambda s: True, "or")\n'
     entrances.append(f"{anchor} (Door) -> {anchor}")
 
 
@@ -559,34 +574,45 @@ with open("./areas.wotw", "r") as file:
     source_text = file.readlines()
 
 # Moki, Gorlek, Kii and Unsafe rules respectively
-moki = (header + imports + "def set_moki_rules(w: \"WotWWorld\"):\n"
-        "    \"\"\"Moki (or easy, default) rules.\"\"\"\n"
-        "    p = w.player\n"
-        "    o = w.options\n")
-gorlek = ("\n\ndef set_gorlek_rules(w: \"WotWWorld\"):\n"
-          "    \"\"\"Gorlek (or medium) rules.\"\"\"\n"
-          "    p = w.player\n"
-          "    o = w.options\n")
-gorlek_glitch = ("\n\ndef set_gorlek_glitched_rules(w: \"WotWWorld\"):\n"
-                 "    \"\"\"Gorlek (or medium) rules with glitches\"\"\"\n"
-                 "    p = w.player\n"
-                 "    o = w.options\n")
-kii = ("\n\ndef set_kii_rules(w: \"WotWWorld\"):\n"
-       "    \"\"\"Kii (or hard) rules\"\"\"\n"
-       "    p = w.player\n"
-       "    o = w.options\n")
-kii_glitch = ("\n\ndef set_kii_glitched_rules(w: \"WotWWorld\"):\n"
-              "    \"\"\"Kii (or hard) rules with glitches.\"\"\"\n"
-              "    p = w.player\n"
-              "    o = w.options\n")
-unsafe = ("\n\ndef set_unsafe_rules(w: \"WotWWorld\"):\n"
-          "    \"\"\"Unsafe rules.\"\"\"\n"
-          "    p = w.player\n"
-          "    o = w.options\n")
-unsafe_glitch = ("\n\ndef set_unsafe_glitched_rules(w: \"WotWWorld\"):\n"
-                 "    \"\"\"Unsafe rules with glitches.\"\"\"\n"
-                 "    p = w.player\n"
-                 "    o = w.options\n")
+moki = (
+    header + imports + 'def set_moki_rules(w: "WotWWorld"):\n'
+    '    """Moki (or easy, default) rules."""\n'
+    "    p = w.player\n"
+    "    o = w.options\n"
+)
+gorlek = (
+    '\n\ndef set_gorlek_rules(w: "WotWWorld"):\n'
+    '    """Gorlek (or medium) rules."""\n'
+    "    p = w.player\n"
+    "    o = w.options\n"
+)
+gorlek_glitch = (
+    '\n\ndef set_gorlek_glitched_rules(w: "WotWWorld"):\n'
+    '    """Gorlek (or medium) rules with glitches"""\n'
+    "    p = w.player\n"
+    "    o = w.options\n"
+)
+kii = (
+    '\n\ndef set_kii_rules(w: "WotWWorld"):\n'
+    '    """Kii (or hard) rules"""\n'
+    "    p = w.player\n"
+    "    o = w.options\n"
+)
+kii_glitch = (
+    '\n\ndef set_kii_glitched_rules(w: "WotWWorld"):\n'
+    '    """Kii (or hard) rules with glitches."""\n'
+    "    p = w.player\n"
+    "    o = w.options\n"
+)
+unsafe = (
+    '\n\ndef set_unsafe_rules(w: "WotWWorld"):\n' '    """Unsafe rules."""\n' "    p = w.player\n" "    o = w.options\n"
+)
+unsafe_glitch = (
+    '\n\ndef set_unsafe_glitched_rules(w: "WotWWorld"):\n'
+    '    """Unsafe rules with glitches."""\n'
+    "    p = w.player\n"
+    "    o = w.options\n"
+)
 
 # Store the parsed text for each difficulty
 list_rules: list[str] = [moki, gorlek, gorlek_glitch, kii, kii_glitch, unsafe, unsafe_glitch]
@@ -638,10 +664,10 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
     # Parse the line text
     m = r_comment.search(line)  # Remove the comments
     if m:
-        line = line[:m.start()]
+        line = line[: m.start()]
     m = r_trailing.search(line)  # Remove the trailing spaces
     if m:
-        line = line[:m.start()]
+        line = line[: m.start()]
     if line == "":
         continue
 
@@ -650,7 +676,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
         indent = 0
     else:
         indent = (m.end() + 1) // 2
-        line = line[m.end():]  # Remove the indents from the text
+        line = line[m.end() :]  # Remove the indents from the text
         if is_enter:  # When in parsing a door connection, there is one extra indent, it is easier to remove it there
             if indent < 3:  # Exited from enter clause, so set it to false
                 is_enter = False
@@ -664,7 +690,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             name = try_group(r_colon, line, 1, -1)  # the space and colon are captured, to remove them with 1, -1
             s = r_separate.search(name)  # Detect and remove the ` at <coord>` part if it exists.
             if s:
-                anchor = name[:s.start()]
+                anchor = name[: s.start()]
             else:
                 anchor = name
             refills.setdefault(anchor, (0, 0, 0))
@@ -695,7 +721,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             try:  # Copied from indent 2, by applying it to req1 instead
                 path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
                 difficulty = convert_diff[path_diff]
-                req1 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
+                req1 = line[try_end(r_difficulty, line) + 1 :]  # Can be empty
             except RuntimeError as e:
                 print(f"Failed to find the difficulty in line {i}.\nReason: {e}")
                 difficulty = convert_diff["moki"]
@@ -708,7 +734,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
         else:
             path_type = try_group(r_type, line, end=-1)  # Connection type
             if path_type not in ("conn", "state", "pickup", "refill", "quest"):
-                raise ValueError(f"{path_type} (line {i}) is not an appropriate path type.\n\"{line}\"")
+                raise ValueError(f'{path_type} (line {i}) is not an appropriate path type.\n"{line}"')
             if path_type == "refill":
                 if ":" in line:
                     path_name = try_group(r_name, line, 1, -1)  # Checkpoint, Full, Energy=x...
@@ -759,7 +785,7 @@ for i, line in enumerate(source_text):  # Line number is only used for debug
             try:
                 path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
                 difficulty = convert_diff[path_diff]
-                req2 = line[try_end(r_difficulty, line) + 1:]  # Can be empty
+                req2 = line[try_end(r_difficulty, line) + 1 :]  # Can be empty
             except RuntimeError as e:
                 print(f"Failed to find the difficulty in line {i}.\nReason: {e}")
                 difficulty = convert_diff["moki"]

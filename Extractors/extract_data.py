@@ -8,7 +8,6 @@ See https://github.com/ori-community/wotw-seedgen/tree/main/wotw_seedgen to get 
 import re
 import os
 
-
 com = re.compile(" *#")  # Detects comments
 sp = re.compile("^ *")  # Used for indents
 col = re.compile(" .*:")  # name between space and colon
@@ -31,11 +30,13 @@ def extract_quests(override=False):
         else:
             raise FileExistsError("The file `Quests.py` already exists. Use `override=True` to override it.")
 
-    header = ("\"\"\"\n"
-              "Generated file, do not edit manually.\n\n"
-              "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
-              "Generated with `extract_data.py` by running `extract_quests()`.\n"
-              "\"\"\"\n\n\n")
+    header = (
+        '"""\n'
+        "Generated file, do not edit manually.\n\n"
+        "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
+        "Generated with `extract_data.py` by running `extract_quests()`.\n"
+        '"""\n\n\n'
+    )
 
     quests = []
 
@@ -47,10 +48,10 @@ def extract_quests(override=False):
     for p in temp:
         m = com.search(p)  # Removes the comments
         if m:
-            p = p[:m.start()]
+            p = p[: m.start()]
         m = tra.search(p)  # Removes the trailing spaces
         if m:
-            p = p[:m.start()]
+            p = p[: m.start()]
         if p == "":
             continue
 
@@ -67,7 +68,7 @@ def extract_quests(override=False):
                     quests.append(name)
 
     for quest in quests:
-        quest_txt += f"    \"{quest}\",\n"
+        quest_txt += f'    "{quest}",\n'
     quest_txt = quest_txt[:-2]
     quest_txt += "\n    ]\n"
 
@@ -84,14 +85,22 @@ def extract_events(override=False):
         else:
             raise FileExistsError("The file `Events.py` already exists. Use `override=True` to override it.")
 
-    header = ("\"\"\"\n"
-              "Generated file, do not edit manually.\n\n"
-              "See https://github.com/Satisha10/AP_world_wotw_extractors for the code.\n"
-              "Generated with `extract_data.py` by running `extract_events()`.\n"
-              "\"\"\"\n\n\n")
+    header = (
+        '"""\n'
+        "Generated file, do not edit manually.\n\n"
+        "See https://github.com/Satisha10/AP_world_wotw_extractors for the code.\n"
+        "Generated with `extract_data.py` by running `extract_events()`.\n"
+        '"""\n\n\n'
+    )
 
-    combat_events = ["Combat.Ranged", "Combat.Aerial", "Combat.Dangerous", "Combat.Shielded", "Combat.Bat",
-                     "Combat.Sand"]
+    combat_events = [
+        "Combat.Ranged",
+        "Combat.Aerial",
+        "Combat.Dangerous",
+        "Combat.Shielded",
+        "Combat.Bat",
+        "Combat.Sand",
+    ]
     other_events = ["BreakCrystal"]
     events = combat_events + other_events
 
@@ -103,10 +112,10 @@ def extract_events(override=False):
     for p in temp:
         m = com.search(p)  # Removes the comments
         if m:
-            p = p[:m.start()]
+            p = p[: m.start()]
         m = tra.search(p)  # Removes the trailing spaces
         if m:
-            p = p[:m.start()]
+            p = p[: m.start()]
         if p == "":
             continue
 
@@ -128,7 +137,7 @@ def extract_events(override=False):
                     events.append(name)
 
     for event in events:
-        event_txt += f"    \"{event}\",\n"
+        event_txt += f'    "{event}",\n'
 
     event_txt = event_txt[:-2]
     event_txt += "\n    ]\n"
@@ -146,11 +155,13 @@ def extract_regions(override=False):
         else:
             raise FileExistsError("The file `Regions.py` already exists. Use `override=True` to override it.")
 
-    header = ("\"\"\"\n"
-              "Generated file, do not edit manually.\n\n"
-              "See https://github.com/Satisha10/AP_world_wotw_extractors for the code.\n"
-              "Generated with `extract_data.py` by running `extract_regions()`.\n"
-              "\"\"\"\n\n\n")
+    header = (
+        '"""\n'
+        "Generated file, do not edit manually.\n\n"
+        "See https://github.com/Satisha10/AP_world_wotw_extractors for the code.\n"
+        "Generated with `extract_data.py` by running `extract_regions()`.\n"
+        '"""\n\n\n'
+    )
 
     regions = []
 
@@ -160,10 +171,10 @@ def extract_regions(override=False):
     for p in temp:
         m = com.search(p)  # Removes the comments
         if m:
-            p = p[:m.start()]
+            p = p[: m.start()]
         m = tra.search(p)  # Removes the trailing spaces
         if m:
-            p = p[:m.start()]
+            p = p[: m.start()]
         if p == "":
             continue
 
@@ -178,7 +189,7 @@ def extract_regions(override=False):
                 name = col.search(p).group()[1:-1]
                 s = sep.search(name)
                 if s:
-                    anc = name[:s.start()]
+                    anc = name[: s.start()]
                 else:
                     anc = name
                 if anc not in regions:
@@ -187,7 +198,7 @@ def extract_regions(override=False):
     region_txt = header + "region_table = [\n"
 
     for region in regions:
-        region_txt += f"    \"{region}\",\n"
+        region_txt += f'    "{region}",\n'
 
     region_txt = region_txt[:-2]
     region_txt += "\n    ]\n"

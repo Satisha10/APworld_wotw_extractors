@@ -5,8 +5,8 @@ The data is extracted from the `Items_data.csv` and `loc_data.csv` files.
 See https://github.com/ori-community/wotw-seedgen/tree/main/wotw_seedgen for loc_data.csv.
 """
 
-
 import os
+
 # base_id = int(prefix + "0000000000000000000000000000000000", 2)
 
 
@@ -21,12 +21,14 @@ def extract_items(override=False):
     prefix = "101111110010101001"
     store = []  # Stores the IDs to check for duplicates
 
-    header = ("\"\"\"\n"
-              "Generated file, do not edit manually.\n\n"
-              "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
-              "Generated with `extract_items.py` by running `extract_items()`.\n"
-              "\"\"\"\n\n\n"
-              "from BaseClasses import ItemClassification as IC\n\n")
+    header = (
+        '"""\n'
+        "Generated file, do not edit manually.\n\n"
+        "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
+        "Generated with `extract_items.py` by running `extract_items()`.\n"
+        '"""\n\n\n'
+        "from BaseClasses import ItemClassification as IC\n\n"
+    )
 
     with open("./Items_data.csv", "r") as file:
         temp = file.readlines()
@@ -37,14 +39,13 @@ def extract_items(override=False):
         data = line.split(",")
         item_id = compute_id(prefix, data[3], data[4], data[5])
         if item_id in store:
-            raise ValueError(f"{item_id} duplicated.\n"
-                             f"Group = {data[4]}, State = {data[5]},  Item = {data[0]}")
+            raise ValueError(f"{item_id} duplicated.\n" f"Group = {data[4]}, State = {data[5]},  Item = {data[0]}")
         store.append(item_id)
         if data[2] == "progression_useful":
             classification = "IC.progression | IC.useful"
         else:
             classification = f"IC.{data[2]}"
-        item_txt += f"    \"{data[0]}\": ({int(data[1])}, {classification}, {item_id}),\n"
+        item_txt += f'    "{data[0]}": ({int(data[1])}, {classification}, {item_id}),\n'
     item_txt = item_txt[:-2]
     item_txt += "\n    }\n"
 
@@ -64,11 +65,13 @@ def extract_locs(override=False):
     prefix = "101111110010101001"
     store = []  # Stores the IDs to check for duplicates
 
-    header = ("\"\"\"\n"
-              "Generated file, do not edit manually.\n\n"
-              "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
-              "Generated with `extract_items.py` by running `extract_locs()`.\n"
-              "\"\"\"\n\n\n")
+    header = (
+        '"""\n'
+        "Generated file, do not edit manually.\n\n"
+        "See https://github.com/Satisha10/APworld_wotw_extractors for the code.\n"
+        "Generated with `extract_items.py` by running `extract_locs()`.\n"
+        '"""\n\n\n'
+    )
 
     with open("./loc_data.csv", "r") as file:
         temp = file.readlines()
@@ -79,10 +82,12 @@ def extract_locs(override=False):
         data = line.split(", ")
         loc_id = compute_id(prefix, "location", data[5], data[7], data[8])
         if loc_id in store:
-            raise ValueError(f"{loc_id} duplicated.\n"
-                             f"Group = {data[5]}, State = {data[7]}, Value = {data[8]}, Location = {data[0]}")
+            raise ValueError(
+                f"{loc_id} duplicated.\n"
+                f"Group = {data[5]}, State = {data[7]}, Value = {data[8]}, Location = {data[0]}"
+            )
         store.append(loc_id)
-        loc_txt += f"    \"{data[0]}\": {loc_id},\n"
+        loc_txt += f'    "{data[0]}": {loc_id},\n'
     loc_txt = loc_txt[:-2]
     loc_txt += "\n    }\n"
 
