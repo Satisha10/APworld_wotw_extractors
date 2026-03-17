@@ -128,6 +128,8 @@ other_glitches = {
     "PauseFloat": "can_pausefloat(s, p)",
 }
 
+regions_free = {"MarshSpawn", "MarshPastOpher", "GladesTown"}  # Regions without requirements on Regenerate/max health
+
 
 # %% Text initialisations
 
@@ -228,9 +230,9 @@ def convert() -> None:
         else:
             i_area = ""
 
-        # Apply the danger requirements if the regions differ, or if exiting a door (in case door rando is used).
-        # Skip it for MarshSpawn and MarshPastOpher as they don't have any danger requirement.
-        if (i_area != f_area or is_door) and f_area not in ("MarshSpawn", "MarshPastOpher"):
+        # Apply the region requirements if the regions differ, or if exiting a door (in case door rando is used).
+        # Skip it for some regions as they don't have any danger requirement.
+        if i_area != f_area and f_area not in regions_free:
             target_area = f_area
 
     if path_type == "refill":
@@ -542,8 +544,17 @@ def append_rule(use_or_resource: bool = True) -> None:
 def create_door_rules() -> None:
     """Add to list_rules and the entrances some connection rules for the doors."""
     global anchor, path_name, list_rules, entrances
+    dot_position = anchor.find(".")
+    area = anchor[:dot_position]  # Extract the name of the area
     # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
-    list_rules[0] += f'    add_rule(w.get_entrance("{anchor} (Door) -> {anchor}"), lambda s: True, "or")\n'
+    # Also check for the region requirements when exiting a door
+    if area in regions_free:
+        list_rules[0] += f'    add_rule(w.get_entrance("{anchor} (Door) -> {anchor}"), lambda s: True, "or")\n'
+    else:
+        list_rules[0] += (
+            f'    add_rule(w.get_entrance("{anchor} (Door) -> {anchor}"), '
+            'lambda s: s.has("danger_{area}", p), "or")\n'
+        )
     entrances.append(f"{anchor} (Door) -> {anchor}")
 
 

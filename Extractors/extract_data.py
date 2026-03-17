@@ -101,7 +101,11 @@ def extract_events(override=False):
         "Combat.Bat",
         "Combat.Sand",
     ]
-    other_events = ["BreakCrystal"]
+
+    other_events = [
+        "BreakCrystal",
+    ]
+
     events = combat_events + other_events
 
     event_txt = "event_table = [\n"
@@ -130,6 +134,10 @@ def extract_events(override=False):
                 name = col.search(p).group()[1:-1]
                 if name not in events:
                     events.append(name)
+            elif "region" in p:
+                name = col.search(p).group()[1:-1]
+                if name not in events:
+                    events.append(f"danger_{name}")
         elif ind == 1:
             if "state" in p:
                 name = col.search(p[2:]).group()[1:-1]
