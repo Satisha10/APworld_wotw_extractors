@@ -109,6 +109,12 @@ Ori and the Will of the Wisps:
   door_rando: 'false'
     # Enable door randomizer.
 
+  regenerate_requirements: 'kii'
+    # Set a logic difficulty at and above which Regenerate is ignored in region requirements.
+
+  free_teleporters: 'false'
+    # Remove the requirements on teleporters for their hard lock skill (e.g. Reach TP requires Flap)
+
   qol: 'true'
     # Activate QOL features and gameplay improvements.
 
@@ -206,6 +212,9 @@ Ori and the Will of the Wisps:
   ###################
   sword: 'true'
     # Choose to have Sword at the beginning.
+
+  regenerate: 'true'
+    # Choose to have Regenerate at the beginning.
 
   vanilla_shop_upgrades: 'false'
     # Weapon upgrades and shards in shops are not randomized.

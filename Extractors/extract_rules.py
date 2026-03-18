@@ -128,7 +128,13 @@ other_glitches = {
     "PauseFloat": "can_pausefloat(s, p)",
 }
 
-regions_free = {"MarshSpawn", "MarshPastOpher", "GladesTown"}  # Regions without requirements on Regenerate/max health
+regions_free = {
+    "MarshSpawn",
+    "MarshPastOpher",
+    "HowlsDen",
+    "GladesTown",
+    "WindtornRuins",
+}  # Regions without requirements on Regenerate/max health
 
 
 # %% Text initialisations
@@ -481,7 +487,7 @@ def append_rule(use_or_resource: bool = True) -> None:
                 elif req_name == "Ore":
                     temp_txt = f's.count("Gorlek Ore", p) >= {amount}'
                 elif req_name == "Danger":
-                    temp_txt = f"has_enough_max_health(s, p, {amount})"
+                    temp_txt = f"has_enough_max_health(s, p, o, {amount})"
                 else:
                     raise ValueError(f"Invalid input: {elem}")
             elif elem in other_glitches.keys():
@@ -553,7 +559,7 @@ def create_door_rules() -> None:
     else:
         list_rules[0] += (
             f'    add_rule(w.get_entrance("{anchor} (Door) -> {anchor}"), '
-            'lambda s: s.has("danger_{area}", p), "or")\n'
+            f'lambda s: s.has("danger_{area}", p), "or")\n'
         )
     entrances.append(f"{anchor} (Door) -> {anchor}")
 
