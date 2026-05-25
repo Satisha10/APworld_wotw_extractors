@@ -15,14 +15,14 @@ tra = re.compile(" *$")  # Trailing space
 sep = re.compile(" at ")
 
 
-def extract_all(override=False):
+def extract_all(override=False) -> None:
     """Extract the data on events, regions and locations."""
     extract_events(override)
     extract_quests(override)
     extract_regions(override)
 
 
-def extract_quests(override=False):
+def extract_quests(override=False) -> None:
     """Extract the data from `areas.wotw` and write a file with the quest table."""
     if os.path.exists("./Quests.py"):
         if override:
@@ -38,33 +38,33 @@ def extract_quests(override=False):
         '"""\n\n\n'
     )
 
-    quests = []
+    quests: list[str] = []
 
-    quest_txt = header + "quest_table = [\n"
+    quest_txt = header + "quest_table: list[str] = [\n"
 
     with open("./areas.wotw", "r") as file:
         temp = file.readlines()
 
-    for p in temp:
-        m = com.search(p)  # Removes the comments
-        if m:
-            p = p[: m.start()]
-        m = tra.search(p)  # Removes the trailing spaces
-        if m:
-            p = p[: m.start()]
-        if p == "":
+    for line in temp:
+        temp_txt = com.search(line)  # Removes the comments
+        if temp_txt:
+            line = line[: temp_txt.start()]
+        temp_txt = tra.search(line)  # Removes the trailing spaces
+        if temp_txt:
+            line = line[: temp_txt.start()]
+        if line == "":
             continue
 
-        m = sp.match(p)  # Counts the indents
-        if m is None:
+        indent_txt = sp.match(line)  # Counts the indents
+        if indent_txt is None:
             ind = 0
         else:
-            ind = (m.end() + 1) // 2
+            ind = (indent_txt.end() + 1) // 2
 
         if ind == 1:
-            if "pickup" in p or "quest" in p:
-                name = col.search(p[2:]).group()[1:-1]
-                if "quest" in p and name not in quests:
+            if "pickup" in line or "quest" in line:
+                name = col.search(line[2:]).group()[1:-1]
+                if "quest" in line and name not in quests:
                     quests.append(name)
 
     for quest in quests:
@@ -77,7 +77,7 @@ def extract_quests(override=False):
         print("The file Quests.py has been successfully created.")
 
 
-def extract_events(override=False):
+def extract_events(override=False) -> None:
     """Extract the data and write them as a table with the events."""
     if os.path.exists("./Events.py"):
         if override:
@@ -106,41 +106,41 @@ def extract_events(override=False):
         "BreakCrystal",
     ]
 
-    events = combat_events + other_events
+    events: list[str] = combat_events + other_events
 
-    event_txt = "event_table = [\n"
+    event_txt = "event_table: list[str] = [\n"
 
     with open("./areas.wotw", "r") as file:
         temp = file.readlines()
 
-    for p in temp:
-        m = com.search(p)  # Removes the comments
-        if m:
-            p = p[: m.start()]
-        m = tra.search(p)  # Removes the trailing spaces
-        if m:
-            p = p[: m.start()]
-        if p == "":
+    for line in temp:
+        temp_txt = com.search(line)  # Removes the comments
+        if temp_txt:
+            line = line[: temp_txt.start()]
+        temp_txt = tra.search(line)  # Removes the trailing spaces
+        if temp_txt:
+            line = line[: temp_txt.start()]
+        if line == "":
             continue
 
-        m = sp.match(p)  # Counts the indents
-        if m is None:
+        indent_txt = sp.match(line)  # Counts the indents
+        if indent_txt is None:
             ind = 0
         else:
-            ind = (m.end() + 1) // 2
+            ind = (indent_txt.end() + 1) // 2
 
         if ind == 0:
-            if "requirement" in p:
-                name = col.search(p).group()[1:-1]
+            if "requirement" in line:
+                name = col.search(line).group()[1:-1]
                 if name not in events:
                     events.append(name)
-            elif "region" in p:
-                name = col.search(p).group()[1:-1]
+            elif "region" in line:
+                name = col.search(line).group()[1:-1]
                 if name not in events:
                     events.append(f"danger_{name}")
         elif ind == 1:
-            if "state" in p:
-                name = col.search(p[2:]).group()[1:-1]
+            if "state" in line:
+                name = col.search(line[2:]).group()[1:-1]
                 if name not in events:
                     events.append(name)
 
@@ -155,7 +155,7 @@ def extract_events(override=False):
         print("The file Events.py has been successfully created.")
 
 
-def extract_regions(override=False):
+def extract_regions(override=False) -> None:
     """Extract the data and write a file with the regions."""
     if os.path.exists("./Regions.py"):
         if override:
