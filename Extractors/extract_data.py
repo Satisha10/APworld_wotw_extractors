@@ -171,45 +171,55 @@ def extract_regions(override=False):
         '"""\n\n\n'
     )
 
-    regions = []
+    regions: dict[str, tuple[bool, int, int]] = {}
+    previous_line_flag = False
+    anc: str = ""
+    x_coord, y_coord = 0, 0
 
     with open("./areas.wotw", "r") as file:
         temp = file.readlines()
 
-    for p in temp:
-        m = com.search(p)  # Removes the comments
-        if m:
-            p = p[: m.start()]
-        m = tra.search(p)  # Removes the trailing spaces
-        if m:
-            p = p[: m.start()]
-        if p == "":
+    for line in temp:
+        temp_txt = com.search(line)  # Removes the comments
+        if temp_txt:
+            line = line[: temp_txt.start()]
+        temp_txt = tra.search(line)  # Removes the trailing spaces
+        if temp_txt:
+            line = line[: temp_txt.start()]
+        if line == "":
             continue
 
-        m = sp.match(p)  # Counts the indents
-        if m is None:
+        indent_txt = sp.match(line)  # Counts the indents
+        if indent_txt is None:
             ind = 0
         else:
-            ind = (m.end() + 1) // 2
+            ind = (indent_txt.end() + 1) // 2
+
+        if previous_line_flag:  # Non-empty line after an anchor: check if 'nospawn' is there
+            can_spawn = bool("nospawn" not in line and x_coord != 0)
+            regions.setdefault(anc, (can_spawn, x_coord, y_coord))
+            previous_line_flag = False
 
         if ind == 0:
-            if "anchor" in p:
-                name = col.search(p).group()[1:-1]
-                s = sep.search(name)
-                if s:
-                    anc = name[: s.start()]
+            if "anchor" in line:
+                previous_line_flag = True
+                name = col.search(line).group()[1:-1]
+                trimmed_txt = sep.search(name)
+                if trimmed_txt:
+                    anc = name[: trimmed_txt.start()]
+                    coord = name[trimmed_txt.end():].split(",")  # Take the part after ' at ' and split the two coords
+                    x_coord, y_coord = int(coord[0]), int(coord[1])
                 else:
                     anc = name
-                if anc not in regions:
-                    regions.append(anc)
+                    x_coord, y_coord = 0, 0
 
-    region_txt = header + "region_table = [\n"
+    region_txt = header + "region_table: dict[str, tuple[bool, int, int]] = {\n"
 
-    for region in regions:
-        region_txt += f'    "{region}",\n'
+    for region, data in regions.items():
+        region_txt += f'    "{region}": {data},\n'
 
     region_txt = region_txt[:-2]
-    region_txt += "\n    ]\n"
+    region_txt += "\n    }\n"
 
     with open("Regions.py", "w") as file:
         file.write(region_txt)
