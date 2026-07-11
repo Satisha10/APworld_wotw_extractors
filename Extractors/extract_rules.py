@@ -150,7 +150,7 @@ header = (
 imports = (
     "from __future__ import annotations\n\n"
     "from .RulesFunctions import *\n"
-    "from worlds.generic.Rules import add_rule\n\n"
+    "from worlds.generic.Rules import add_rule as ar\n\n"
     "from typing import TYPE_CHECKING\n"
     "if TYPE_CHECKING:\n"
     "    from . import WotWWorld\n\n\n"
@@ -452,7 +452,7 @@ def append_rule(use_or_resource: bool = True) -> None:
     """
     global list_rules
 
-    start_txt = f'    add_rule(w.get_entrance("{anchor} -> {path_name}"), lambda s: '
+    start_txt = f'    ar(w.get_entrance("{anchor} -> {path_name}"), lambda s: '
     req_txt = ""
 
     if and_skills:
@@ -476,7 +476,7 @@ def append_rule(use_or_resource: bool = True) -> None:
             temp_txt = ""
             if "Keystone=" in elem:
                 if path_name != "MidnightBurrows.Teleporter":
-                    temp_txt = f'can_open_door("{path_name}", s, p, o.spawn.value)'
+                    temp_txt = f'can_open_door("{path_name}", s, p, w)'
             elif "=" in elem:
                 req_name, amount = elem.split("=")
                 amount = int(amount)
@@ -556,10 +556,10 @@ def create_door_rules() -> None:
     # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
     # Also check for the region requirements when exiting a door
     if area in regions_free:
-        list_rules[0] += f'    add_rule(w.get_entrance("{anchor} (Door) -> {anchor}"), lambda s: True, "or")\n'
+        list_rules[0] += f'    ar(w.get_entrance("{anchor} (Door) -> {anchor}"), lambda s: True, "or")\n'
     else:
         list_rules[0] += (
-            f'    add_rule(w.get_entrance("{anchor} (Door) -> {anchor}"), '
+            f'    ar(w.get_entrance("{anchor} (Door) -> {anchor}"), '
             f'lambda s: s.has("danger_{area}", p), "or")\n'
         )
     entrances.append(f"{anchor} (Door) -> {anchor}")
