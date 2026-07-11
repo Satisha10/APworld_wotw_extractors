@@ -148,6 +148,7 @@ header = (
 )
 
 imports = (
+    "from __future__ import annotations\n\n"
     "from .RulesFunctions import *\n"
     "from worlds.generic.Rules import add_rule\n\n"
     "from typing import TYPE_CHECKING\n"
@@ -592,40 +593,40 @@ with open("./areas.wotw", "r") as file:
 
 # Moki, Gorlek, Kii and Unsafe rules respectively
 moki = (
-    header + imports + 'def set_moki_rules(w: "WotWWorld"):\n'
+    header + imports + 'def set_moki_rules(w: WotWWorld):\n'
     '    """Moki (or easy, default) rules."""\n'
     "    p = w.player\n"
     "    o = w.options\n"
 )
 gorlek = (
-    '\n\ndef set_gorlek_rules(w: "WotWWorld"):\n'
+    '\n\ndef set_gorlek_rules(w: WotWWorld):\n'
     '    """Gorlek (or medium) rules."""\n'
     "    p = w.player\n"
     "    o = w.options\n"
 )
 gorlek_glitch = (
-    '\n\ndef set_gorlek_glitched_rules(w: "WotWWorld"):\n'
+    '\n\ndef set_gorlek_glitched_rules(w: WotWWorld):\n'
     '    """Gorlek (or medium) rules with glitches"""\n'
     "    p = w.player\n"
     "    o = w.options\n"
 )
 kii = (
-    '\n\ndef set_kii_rules(w: "WotWWorld"):\n'
+    '\n\ndef set_kii_rules(w: WotWWorld):\n'
     '    """Kii (or hard) rules"""\n'
     "    p = w.player\n"
     "    o = w.options\n"
 )
 kii_glitch = (
-    '\n\ndef set_kii_glitched_rules(w: "WotWWorld"):\n'
+    '\n\ndef set_kii_glitched_rules(w: WotWWorld):\n'
     '    """Kii (or hard) rules with glitches."""\n'
     "    p = w.player\n"
     "    o = w.options\n"
 )
 unsafe = (
-    '\n\ndef set_unsafe_rules(w: "WotWWorld"):\n' '    """Unsafe rules."""\n' "    p = w.player\n" "    o = w.options\n"
+    '\n\ndef set_unsafe_rules(w: WotWWorld):\n' '    """Unsafe rules."""\n' "    p = w.player\n" "    o = w.options\n"
 )
 unsafe_glitch = (
-    '\n\ndef set_unsafe_glitched_rules(w: "WotWWorld"):\n'
+    '\n\ndef set_unsafe_glitched_rules(w: WotWWorld):\n'
     '    """Unsafe rules with glitches."""\n'
     "    p = w.player\n"
     "    o = w.options\n"
