@@ -88,6 +88,13 @@ def extract_locs(override=False):
             )
         store.append(loc_id)
         loc_txt += f'    "{data[0]}": {loc_id},\n'
+
+    spawn_count = 10
+    base_id = int(prefix + "0000000000000000000000000000000000", 2)
+    for i in range(1, spawn_count + 1):
+        spawn_id = base_id - i
+        loc_txt += f'    "Spawn item {i}": {spawn_id},\n'
+
     loc_txt = loc_txt[:-2]
     loc_txt += "\n    }\n"
 
