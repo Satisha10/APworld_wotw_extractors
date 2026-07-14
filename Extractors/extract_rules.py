@@ -149,7 +149,7 @@ header = (
 
 imports = (
     "from __future__ import annotations\n\n"
-    "from .RulesFunctions import *\n"
+    "from ..RulesFunctions import *\n"
     "from worlds.generic.Rules import add_rule as ar\n\n"
     "from typing import TYPE_CHECKING\n"
     "if TYPE_CHECKING:\n"
