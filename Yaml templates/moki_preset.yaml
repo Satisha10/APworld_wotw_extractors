@@ -48,7 +48,14 @@ Ori and the Will of the Wisps:
 
   spawn:
     # Choose the starting location.
-    marsh: 50
+    # 
+    # - **vanilla**: spawn in Inkwater Marsh.
+    # - Teleporter name: spawn in this teleporter.
+    #   Possible values: marsh, burrows, howlsden, hollow, glades, wellspring, westwoods, eastwoods,
+    #   reach, depths, eastpools, westpools, westwastes, eastwastes, outerruins, innerruins, willow, shriek.
+    # - **random_tp**: Spawn at a random teleporter (there are weights applied internally for this option).
+    # - **random_loc**: Spawn at a random location (usually placed on a checkpoint).
+    vanilla: 50
     burrows: 0
     howlsden: 0
     hollow: 0
@@ -65,7 +72,9 @@ Ori and the Will of the Wisps:
     outerruins: 0
     innerruins: 0
     willow: 0
-    random: 0
+    shriek: 0
+    random_tp: 0
+    random_loc: 0
 
   goal:
     # Set conditions for entering the final boss. Use the rando wheel (with **V**) to check goal progress.
@@ -109,8 +118,8 @@ Ori and the Will of the Wisps:
   door_rando: 'false'
     # Enable door randomizer.
 
-  regenerate_requirements: 'kii'
-    # Set a logic difficulty at and above which Regenerate is ignored in region requirements.
+  free_regenerate: 'false'
+    # Ignore Regenerate in the region requirements.
 
   free_teleporters: 'false'
     # Remove the requirements on teleporters for their hard lock skill (e.g. Reach TP requires Flap)
@@ -123,9 +132,6 @@ Ori and the Will of the Wisps:
 
   zone_hints: 'true'
     # Lupo sells hints that indicate how many progression items are in the area.
-
-  knowledge_hints: 'true'
-    # Display useful hints on randomizer knowledge while playing the seed.
 
   unpopular: 'false'
     # Enable unpopular paths for unsafe.
@@ -190,8 +196,9 @@ Ori and the Will of the Wisps:
     # Change which quests are in the location pool.
     # 
     # - **all**: All quests are present.
-    # - **no hand**: Remove the Hand-to-hand questline from the locations.
-    # - **none**: Remove all quests that involve talking to NPCs. Main quests (e.g. wisps) or rebuilding Glades are still in the pool.
+    # - **no_hand**: Remove the Hand-to-hand questline from the locations.
+    # - **none**: Remove all quests that involve talking to NPCs. Main quests (e.g. wisps) or rebuilding Glades are
+    #   still in the pool.
 
   no_ks: 'false'
     # Open keystone doors by default (and remove keystones from the pool).
@@ -201,11 +208,6 @@ Ori and the Will of the Wisps:
 
   glades_done: 'false'
     # Start with Glades rebuilt and regrown.
-
-  shop_keywords: 'false'
-    # Have the non-local items in the shops attempt to use a keyword system to choose icons.
-    # For example, item with 'map' in their name will have a map icon.
-    # If no keyword fit, then the icon fall back to Classification.
 
   ###################
   # Item Placements #
@@ -221,6 +223,20 @@ Ori and the Will of the Wisps:
 
   launch_on_seir: 'false'
     # Place launch on Seir (i.e. the wisp in the ruins).
+
+  #################
+  # Miscellaneous #
+  #################
+  knowledge_hints: 'true'
+    # Display useful hints on randomizer knowledge while playing the seed.
+
+  shop_keywords: 'false'
+    # Have the non-local items in the shops attempt to use a keyword system to choose icons.
+    # For example, item with 'map' in their name will have a map icon.
+    # If no keyword fit, then the icon fall back to Classification.
+
+  skip_cutscenes: 'true'
+    # Skip most cutscenes, and makes then skippable in the pause menu.
 
   ###########################
   # Item & Location Options #
