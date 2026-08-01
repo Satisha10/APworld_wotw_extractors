@@ -195,56 +195,58 @@ def parse_combat(content: str) -> list[tuple[str, str]]:
     return result
 
 
+# %% Extractor
+
 class RuleExtractor:
-    """TODO."""
+    """Rule extractor. Use the `run` method to parse the data."""
 
     def __init__(self, is_ut: bool = False):
 
         # Moki, Gorlek, Kii and Unsafe rules respectively
         moki = (
-                header + imports + 'def set_moki_rules(w: WotWWorld):\n'
-                                   '    """Moki (or easy, default) rules."""\n'
-                                   "    p = w.player\n"
-                                   "    o = w.options\n"
+            header + imports + "def set_moki_rules(w: WotWWorld):\n"
+            '    """Moki (or easy, default) rules."""\n'
+            "    p = w.player\n"
+            "    o = w.options\n"
         )
         gorlek = (
-            '\n\ndef set_gorlek_rules(w: WotWWorld):\n'
+            "\n\ndef set_gorlek_rules(w: WotWWorld):\n"
             '    """Gorlek (or medium) rules."""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         gorlek_glitch = (
-            '\n\ndef set_gorlek_glitched_rules(w: WotWWorld):\n'
+            "\n\ndef set_gorlek_glitched_rules(w: WotWWorld):\n"
             '    """Gorlek (or medium) rules with glitches"""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         kii = (
-            '\n\ndef set_kii_rules(w: WotWWorld):\n'
+            "\n\ndef set_kii_rules(w: WotWWorld):\n"
             '    """Kii (or hard) rules"""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         kii_glitch = (
-            '\n\ndef set_kii_glitched_rules(w: WotWWorld):\n'
+            "\n\ndef set_kii_glitched_rules(w: WotWWorld):\n"
             '    """Kii (or hard) rules with glitches."""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         unsafe = (
-            '\n\ndef set_unsafe_rules(w: WotWWorld):\n'
+            "\n\ndef set_unsafe_rules(w: WotWWorld):\n"
             '    """Unsafe rules."""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         unsafe_glitch = (
-            '\n\ndef set_unsafe_glitched_rules(w: WotWWorld):\n'
+            "\n\ndef set_unsafe_glitched_rules(w: WotWWorld):\n"
             '    """Unsafe rules with glitches."""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
 
-        self.is_ut = is_ut
+        self.is_ut = is_ut  # Generate output files for UT, which consist in adding the glitched item.
 
         # Store the parsed text for each difficulty
         self.list_rules: list[str] = [moki, gorlek, gorlek_glitch, kii, kii_glitch, unsafe, unsafe_glitch]
@@ -278,7 +280,6 @@ class RuleExtractor:
         self.or_glitch: list[str] = []
 
         self.target_area = ""  # Area of the path_name anchor
-
 
     def conv_refill(self) -> None:
         """Get the refill type (to add before the region name) and update the data tables."""
@@ -369,7 +370,6 @@ class RuleExtractor:
                 self.handle_or_chain()
                 self.and_req.pop()  # Remove the added requirement from the `and` chain
 
-
     def handle_or_chain(self) -> None:
         """Split the requirements from or_chain and make the calls to append_rule."""
         temp_glitch = self.or_glitch.copy()  # Make a copy, so it is safe to empty the list in this scope
@@ -385,7 +385,6 @@ class RuleExtractor:
         if self.or_resource:
             self.parse_and()
             self.append_rule()
-
 
     def write_files(self) -> None:
         """Write the extracted data into output files."""
@@ -433,7 +432,6 @@ class RuleExtractor:
         with open("DoorData.py", "w") as w_file:
             w_file.write(door_txt)
             print("The file `DoorData.py` has been successfully created.")
-
 
     def parse_and(self) -> None:
         """Parse the list of requirements in the `and` chain, and put the processed information in the `and` lists."""
@@ -491,7 +489,6 @@ class RuleExtractor:
             else:  # Case of an event
                 self.and_skills.append(elem)
 
-
     def order_or(self, or_chain: list[str]) -> None:
         """Parse the list of requirements in the `or` chain, and categorize them between skills and resources."""
 
@@ -532,7 +529,6 @@ class RuleExtractor:
             else:  # Case of an event
                 self.or_skills.append(elem)
             # Keystone, Ore and Spirit Light never appear in an `or` chain
-
 
     def append_rule(self, use_or_resource: bool = True) -> None:
         """
@@ -617,7 +613,8 @@ class RuleExtractor:
             used_or_res = []
         if self.and_resource or used_or_res:
             temp_txt = (
-                f'has_enough_resources({self.and_resource}, {used_or_res}, "{self.anchor}", s, p, o, ' f"{bool(self.difficulty == 0)})"
+                f'has_enough_resources({self.and_resource}, {used_or_res}, "{self.anchor}", s, p, o, '
+                f"{bool(self.difficulty == 0)})"
             )
             if req_txt:
                 req_txt += " and " + temp_txt
@@ -636,7 +633,6 @@ class RuleExtractor:
 
         self.list_rules[difficulty_index] += tot_txt
 
-
     def create_door_rules(self) -> None:
         """Add to list_rules and the entrances some connection rules for the doors."""
         dot_position = self.anchor.find(".")
@@ -644,7 +640,9 @@ class RuleExtractor:
         # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
         # Also check for the region requirements when exiting a door
         if area in regions_free:
-            self.list_rules[0] += f'    ar(w.get_entrance("{self.anchor} (Door) -> {self.anchor}"), lambda s: True, "or")\n'
+            self.list_rules[
+                0
+            ] += f'    ar(w.get_entrance("{self.anchor} (Door) -> {self.anchor}"), lambda s: True, "or")\n'
         else:
             self.list_rules[0] += (
                 f'    ar(w.get_entrance("{self.anchor} (Door) -> {self.anchor}"), '
@@ -652,14 +650,10 @@ class RuleExtractor:
             )
         self.entrances.append(f"{self.anchor} (Door) -> {self.anchor}")
 
-
-
-
-    def main_loop(self) -> None:  # TODO Doc
+    def run(self) -> None:
+        """Execute the main loop for the extractor, which will create the files at the end."""
         with open("./areas.wotw", "r") as file:
             source_text = file.readlines()
-
-
 
         req1 = ""  # Requirements from first indent
         req2 = ""  # Requirements from second indent
@@ -862,13 +856,17 @@ class RuleExtractor:
                     self.req += f", {req4}"
                 if indent >= 5:
                     self.req += f", {req5}"
-                self.req = self.req.replace(":", ",")  # In some cases, a colon is used in place of a coma, regroup the two cases
+                self.req = self.req.replace(
+                    ":", ","
+                )  # In some cases, a colon is used in place of a coma, regroup the two cases
                 self.convert()
 
         self.write_files()
 
         # Convert the parsed line into lists of requirements
 
+
 def generate_rules(is_ut=False):
+    """Generate the extracted files by running a RuleExtractor instance."""
     extractor = RuleExtractor(is_ut=is_ut)
-    extractor.main_loop()
+    extractor.run()
