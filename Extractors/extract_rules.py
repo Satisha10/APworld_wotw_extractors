@@ -179,392 +179,6 @@ def try_end(regex: Pattern[str], text: str) -> int:
     return match.end()
 
 
-def conv_refill() -> None:
-    """Get the refill type (to add before the region name) and update the data tables."""
-    global refill_type
-    current = refills[anchor]
-    if "=" in path_name:
-        value = int(path_name[-1])
-        if path_name[:-2] == "Health":
-            if current[0] == 0:
-                refills.update({anchor: (value, current[1], current[2])})
-                refill_events.append(f"H.{anchor}")
-            refill_type = "H."
-        if path_name[:-2] == "Energy":
-            if current[1] == 0:
-                refills.update({anchor: (current[0], value, current[2])})
-                refill_events.append(f"E.{anchor}")
-            refill_type = "E."
-    elif path_name == "Checkpoint":
-        refills.update({anchor: (current[0], current[1], 1)})
-        refill_events.append(f"C.{anchor}")
-        refill_type = "C."
-    elif path_name == "Full":
-        refills.update({anchor: (current[0], current[1], 2)})
-        refill_events.append(f"F.{anchor}")
-        refill_type = "F."
-    else:
-        raise ValueError(f"{path_name} is not a valid refill type (at anchor {anchor}).")
-
-
-def convert() -> None:
-    """Convert the data from req into lists, and make the calls to append_rules according to the lists' content."""
-    global path_name, health_req
-    global and_req, or_req
-    global target_area
-    global or_skills, or_resource, or_glitch
-    global and_resource, and_skills, and_other
-
-    # Reset the global values
-    health_req = 0
-    and_req = []
-    or_req = []
-    or_skills = []
-    or_resource = []
-    or_glitch = []
-    and_resource = []
-    and_skills = []
-    and_other = []
-    target_area = ""
-
-    # Get the requirements when entering a new area.
-    if path_type == "conn" and "." in path_name:
-        dot_position = path_name.find(".")
-        f_area = path_name[:dot_position]  # Extract the name of the target area
-        if "." in anchor:
-            dot_position = anchor.find(".")
-            i_area = anchor[:dot_position]  # Extract the name of the starting area
-        else:
-            i_area = ""
-
-        # Apply the region requirements if the regions differ, or if exiting a door (in case door rando is used).
-        # Skip it for some regions as they don't have any danger requirement.
-        if i_area != f_area and f_area not in regions_free:
-            target_area = f_area
-
-    if path_type == "refill":
-        path_name = refill_type + anchor
-
-    conn_name = f"{anchor} -> {path_name}"
-    if conn_name not in entrances:
-        entrances.append(conn_name)
-
-    s_req = req.split(", ")
-    for elem in s_req:
-        if " OR " in elem:
-            or_req.append(elem.split(" OR "))
-        else:
-            and_req.append(elem)
-
-    if len(or_req) == 0:
-        parse_and()
-        append_rule()
-
-    elif len(or_req) == 1:  # One `or` chain in the requirements
-        order_or(or_req[0])
-        handle_or_chain()
-
-    elif len(or_req) == 2:  # Two chains of or
-        # Swaps the two chains if it is more efficient to split the second chain
-        if len(or_req[0]) > len(or_req[1]):
-            or_req[0], or_req[1] = (or_req[1], or_req[0])
-        order_or(or_req[1])
-
-        while or_req[0]:  # Split the first or chain into the and chain
-            and_req.append(or_req[0][-1])
-            or_req[0].pop()
-            handle_or_chain()
-            and_req.pop()  # Remove the added requirement from the and chain
-
-
-def handle_or_chain() -> None:
-    """Split the requirements from the or_chain and make the calls to append_rule."""
-    global and_req
-    temp_glitch = or_glitch.copy()  # Make a copy, so it is safe to empty the list in this scope
-    while temp_glitch:  # If glitches are present, add them one at a time to the and chain
-        and_req.append(temp_glitch[-1])
-        temp_glitch.pop()
-        parse_and()
-        append_rule(use_or_resource=False)
-        and_req.pop()  # Remove the requirement added above
-    if or_skills:
-        parse_and()
-        append_rule(use_or_resource=False)
-    if or_resource:
-        parse_and()
-        append_rule()
-
-
-def write_files() -> None:
-    """Write the extracted data into output files."""
-    ent_txt = header + "entrance_table: list[str] = [\n"
-    for entrance in entrances:
-        ent_txt += f'    "{entrance}",\n'
-    ent_txt = ent_txt[:-2]
-    ent_txt += "\n    ]\n"
-
-    ref_txt = header + (
-        "refills: dict[str, tuple[int, int, int]] = {  "
-        "# key: region name. Tuple: [health restored, energy restored, refill type]\n"
-    )
-    ref_txt += "    # For refill type: 0 is no refill, 1 is Checkpoint, 2 is Full refill.\n"
-    for region, info in refills.items():
-        ref_txt += f'    "{region}": {info},\n'
-    ref_txt = ref_txt[:-2]
-    ref_txt += "\n    }\n\n" "refill_events: list[str] = [\n"
-    for refill_name in refill_events:
-        ref_txt += f'    "{refill_name}",\n'
-    ref_txt = ref_txt[:-2]
-    ref_txt += "\n    ]\n"
-
-    door_txt = header + "doors_vanilla: list[tuple[str, str]] = [  # Vanilla door connections\n"
-    for door in doors_vanilla:
-        door_txt += f"    {door},\n"
-    door_txt = door_txt[:-2]
-    door_txt += "\n    ]\n\n\n"
-    door_txt += "doors_map: dict[str, int] = {  # Mapping to door ID\n"
-    for door, value in doors_map.items():
-        door_txt += f'    "{door}": {value},\n'
-    door_txt = door_txt[:-2]
-    door_txt += "\n    }\n"
-
-    with open("Rules.py", "w") as w_file:
-        for j in range(7):
-            w_file.write(list_rules[j])
-        print("The file `Rules.py` has been successfully created.")
-    with open("Entrances.py", "w") as w_file:
-        w_file.write(ent_txt)
-        print("The file `Entrances.py` has been successfully created.")
-    with open("Refills.py", "w") as w_file:
-        w_file.write(ref_txt)
-        print("The file `Refills.py` has been successfully created.")
-    with open("DoorData.py", "w") as w_file:
-        w_file.write(door_txt)
-        print("The file `DoorData.py` has been successfully created.")
-
-
-def parse_and() -> None:
-    """Parse the list of requirements in the `and` chain, and put the processed information in the and lists."""
-    global glitched, difficulty, and_req
-    global and_resource, and_skills, and_other
-
-    # Reset the global values
-    glitched = False
-    and_skills = []  # Stores inf_skills
-    and_resource = []
-    and_other = []
-
-    for requirement in and_req:
-        if "=" in requirement:
-            elem, value = requirement.split("=")  # elem: type of path ; value: value associated
-        else:
-            if requirement in name_convert.keys():
-                requirement = name_convert[requirement]
-            elem = requirement
-            value = "1"
-
-        # Handle the glitches
-        if elem in other_glitches.keys():  # Glitches that use a function
-            glitched = True
-            and_other.append(elem)
-        elif elem in inf_glitches.keys():  # Glitches that can be used infinitely and only use one skill
-            glitched = True
-            current_req = inf_glitches[elem]
-            if current_req not in and_skills and current_req != "free":
-                and_skills.append(current_req)
-        elif elem in energy_glitches.keys():
-            glitched = True
-            and_resource.append(("energy", (energy_glitches[elem], int(value))))
-        elif elem in wall_glitches.keys():
-            glitched = True
-            and_resource.append(("wall", (wall_glitches[elem], int(value))))
-
-        elif requirement in inf_skills:  # Check on requirement and not on elem to catch the energy skills without the =
-            if requirement not in and_skills and requirement != "free":
-                and_skills.append(requirement)
-        elif elem in en_skills:
-            and_resource.append(("energy", (elem, int(value))))
-        elif elem == "Damage":
-            and_resource.append(("db", int(value)))
-        elif elem in ("BreakWall", "Boss"):
-            and_resource.append(("wall", (elem, int(value))))
-        elif (
-            "Keystone=" in requirement
-            or "Ore=" in requirement
-            or "SpiritLight=" in requirement
-            or "Danger=" in requirement
-        ):  # Case of a keystone door, or spirit light, or ore, or danger value
-            and_other.append(requirement)
-        elif elem == "Combat":
-            and_resource += parse_combat(value)
-        else:  # Case of an event
-            and_skills.append(elem)
-
-
-def order_or(or_chain: list[str]) -> None:
-    """Parse the list of requirements in the `or` chain, and categorize them between skills and resources."""
-    global or_skills, or_glitch, or_resource
-
-    or_skills = []  # Store inf_skills (skills that don't require energy to use)
-    or_glitch = []  # Store the glitches
-    or_resource = []  # Store requirements that need resources
-
-    for requirement in or_chain:
-        if "=" in requirement:
-            elem, value = requirement.split("=")  # elem: type of path ; value: value associated
-        else:
-            if requirement in name_convert.keys():
-                requirement = name_convert[requirement]
-            elem = requirement
-            value = 0
-
-        # Find the glitches (not parsed here)
-        if (
-            elem in other_glitches.keys()
-            or elem in inf_glitches.keys()
-            or elem in energy_glitches.keys()
-            or elem in wall_glitches.keys()
-        ):
-            or_glitch.append(requirement)
-
-        elif requirement in inf_skills:  # Check on requirement and not on elem to catch the energy skills without the =
-            if requirement not in and_skills and requirement != "free":
-                or_skills.append(requirement)
-        elif elem in en_skills:
-            or_resource.append(("energy", (elem, int(value))))
-        elif elem == "Damage":
-            or_resource.append(("db", int(value)))
-        elif elem in ("BreakWall", "Boss"):
-            or_resource.append(("wall", (elem, int(value))))
-        elif elem == "Combat":
-            or_resource += parse_combat(value)
-        else:  # Case of an event
-            or_skills.append(elem)
-        # Keystone, Ore and Spirit Light never appear in an `or` chain
-
-
-def append_rule(use_or_resource: bool = True) -> None:
-    """
-    Add the text to the rules list.
-
-    When use_or_resource is set to False, only the resources from the and chain are used.
-    This happens when looping through or_glitch or using the or_skills.
-    """
-    global list_rules
-
-    start_txt = f'    ar(w.get_entrance("{anchor} -> {path_name}"), lambda s: '
-    req_txt = ""
-
-    if and_skills:
-        temp_txt = ""
-        if len(and_skills) == 1:
-            temp_txt = f's.has("{and_skills[0]}", p)'
-        else:
-            for elem in and_skills:
-                if temp_txt:
-                    temp_txt += f', "{elem}"'
-                else:
-                    temp_txt += f's.has_all(("{elem}"'
-            temp_txt += "), p)"
-        if req_txt:
-            req_txt += " and " + temp_txt
-        else:
-            req_txt += temp_txt
-
-    if and_other:
-        for elem in and_other:
-            temp_txt = ""
-            if "Keystone=" in elem:
-                if path_name != "MidnightBurrows.Teleporter":
-                    temp_txt = f'can_open_door("{path_name}", s, p, w)'
-            elif "=" in elem:
-                req_name, amount = elem.split("=")
-                amount = int(amount)
-                if req_name == "SpiritLight":
-                    if amount == 1200:  # Case of a shop item
-                        temp_txt = "can_buy_shop(s, p)"
-                    else:  # Case of a map from Lupo
-                        temp_txt = "can_buy_map(s, p)"
-                elif req_name == "Ore":
-                    temp_txt = f's.count("Gorlek Ore", p) >= {amount}'
-                elif req_name == "Danger":
-                    temp_txt = f"has_enough_max_health(s, p, o, {amount})"
-                else:
-                    raise ValueError(f"Invalid input: {elem}")
-            elif elem in other_glitches.keys():
-                temp_txt = other_glitches[elem]
-            else:
-                raise ValueError(f"Invalid input: {elem}")
-            if req_txt and temp_txt:
-                req_txt += " and " + temp_txt
-            else:
-                req_txt += temp_txt
-
-    if or_skills and not use_or_resource:
-        temp_txt = ""
-        if len(or_skills) == 1:
-            temp_txt = f's.has("{or_skills[0]}", p)'
-        else:
-            for elem in or_skills:
-                if temp_txt:
-                    temp_txt += f', "{elem}"'
-                else:
-                    temp_txt += f's.has_any(("{elem}"'
-            temp_txt += "), p)"
-        if req_txt:
-            req_txt += " and " + temp_txt
-        else:
-            req_txt += temp_txt
-
-    if target_area:  # Entering a new area: check that it can be entered
-        if req_txt:
-            req_txt += " and " + f's.has("danger_{target_area}", p)'
-        else:
-            req_txt += f's.has("danger_{target_area}", p)'
-
-    if use_or_resource:
-        used_or_res = or_resource
-    else:
-        used_or_res = []
-    if and_resource or used_or_res:
-        temp_txt = (
-            f'has_enough_resources({and_resource}, {used_or_res}, "{anchor}", s, p, o, ' f"{bool(difficulty == 0)})"
-        )
-        if req_txt:
-            req_txt += " and " + temp_txt
-        else:
-            req_txt += temp_txt
-
-    if req_txt:
-        tot_txt = start_txt + req_txt + ', "or")\n'
-    else:
-        tot_txt = start_txt + 'True, "or")\n'
-
-    if glitched:
-        difficulty_index = difficulty + 1
-    else:
-        difficulty_index = difficulty
-
-    list_rules[difficulty_index] += tot_txt
-
-
-def create_door_rules() -> None:
-    """Add to list_rules and the entrances some connection rules for the doors."""
-    global anchor, path_name, list_rules, entrances
-    dot_position = anchor.find(".")
-    area = anchor[:dot_position]  # Extract the name of the area
-    # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
-    # Also check for the region requirements when exiting a door
-    if area in regions_free:
-        list_rules[0] += f'    ar(w.get_entrance("{anchor} (Door) -> {anchor}"), lambda s: True, "or")\n'
-    else:
-        list_rules[0] += (
-            f'    ar(w.get_entrance("{anchor} (Door) -> {anchor}"), '
-            f'lambda s: s.has("danger_{area}", p), "or")\n'
-        )
-    entrances.append(f"{anchor} (Door) -> {anchor}")
-
-
 def parse_combat(content: str) -> list[tuple[str, str]]:
     """Parse the combat requirement with the given enemies, return a list to add to the resources."""
     result: list[tuple[str, str]] = []
@@ -581,288 +195,680 @@ def parse_combat(content: str) -> list[tuple[str, str]]:
     return result
 
 
-# %% Main script
+class RuleExtractor:
+    """TODO."""
+
+    def __init__(self, is_ut: bool = False):
+
+        # Moki, Gorlek, Kii and Unsafe rules respectively
+        moki = (
+                header + imports + 'def set_moki_rules(w: WotWWorld):\n'
+                                   '    """Moki (or easy, default) rules."""\n'
+                                   "    p = w.player\n"
+                                   "    o = w.options\n"
+        )
+        gorlek = (
+            '\n\ndef set_gorlek_rules(w: WotWWorld):\n'
+            '    """Gorlek (or medium) rules."""\n'
+            "    p = w.player\n"
+            "    o = w.options\n"
+        )
+        gorlek_glitch = (
+            '\n\ndef set_gorlek_glitched_rules(w: WotWWorld):\n'
+            '    """Gorlek (or medium) rules with glitches"""\n'
+            "    p = w.player\n"
+            "    o = w.options\n"
+        )
+        kii = (
+            '\n\ndef set_kii_rules(w: WotWWorld):\n'
+            '    """Kii (or hard) rules"""\n'
+            "    p = w.player\n"
+            "    o = w.options\n"
+        )
+        kii_glitch = (
+            '\n\ndef set_kii_glitched_rules(w: WotWWorld):\n'
+            '    """Kii (or hard) rules with glitches."""\n'
+            "    p = w.player\n"
+            "    o = w.options\n"
+        )
+        unsafe = (
+            '\n\ndef set_unsafe_rules(w: WotWWorld):\n'
+            '    """Unsafe rules."""\n'
+            "    p = w.player\n"
+            "    o = w.options\n"
+        )
+        unsafe_glitch = (
+            '\n\ndef set_unsafe_glitched_rules(w: WotWWorld):\n'
+            '    """Unsafe rules with glitches."""\n'
+            "    p = w.player\n"
+            "    o = w.options\n"
+        )
+
+        self.is_ut = is_ut
+
+        # Store the parsed text for each difficulty
+        self.list_rules: list[str] = [moki, gorlek, gorlek_glitch, kii, kii_glitch, unsafe, unsafe_glitch]
+        # Store the entrance names
+        self.entrances: list[str] = []
+        # Contain the refill info per region in a tuple: (health, energy, type)
+        self.refills: dict[str, tuple[int, int, int]] = {}
+        self.refill_events: list[str] = []  # Store all the names given to the refill events.
+        self.doors_map: dict[str, int] = {}  # Mapping from door name to door ID
+        self.doors_vanilla: list[tuple[str, str]] = []  # Vanilla connections between the doors
+
+        # Global variables
+        self.anchor = ""  # Name of the current anchor
+        self.glitched = False  # Whether the current path involves glitches
+        self.difficulty = 0  # Difficulty of the path
+        self.req = ""  # Full requirement
+        self.refill_type = ""  # Refill type (energy, health, checkpoint or full)
+        self.path_type = ""  # Type of the path (connection, pickup, refill)
+        self.path_name = ""  # Name of the location/region/event accessed by the path
+
+        self.and_req: list[str] = []  # Stores the requirements form an and chain (i.e. coma separated requirements)
+        self.and_skills: list[str] = []  # Store the skills, events from the `and` chain
+        # Store the requirements that have their own fonction (some glitches, keys, shops...)
+        self.and_other: list[str] = []
+        # Store the requirements that involve resources from the `and` chain
+        self.and_resource: list[tuple[str, any]] = []
+        self.or_req: list[list[str]] = []  # Stores the requirements from each OR chain
+
+        self.or_skills: list[str] = []
+        self.or_resource: list[tuple[str, any]] = []
+        self.or_glitch: list[str] = []
+
+        self.target_area = ""  # Area of the path_name anchor
 
 
-# Note: the code in this section is very messy and hard to understand. I might refactor it at some point to solve that.
-# It is probably best to reach out to me and ask me questions about how this work rather than figuring out yourself.
-
-
-with open("./areas.wotw", "r") as file:
-    source_text = file.readlines()
-
-# Moki, Gorlek, Kii and Unsafe rules respectively
-moki = (
-    header + imports + 'def set_moki_rules(w: WotWWorld):\n'
-    '    """Moki (or easy, default) rules."""\n'
-    "    p = w.player\n"
-    "    o = w.options\n"
-)
-gorlek = (
-    '\n\ndef set_gorlek_rules(w: WotWWorld):\n'
-    '    """Gorlek (or medium) rules."""\n'
-    "    p = w.player\n"
-    "    o = w.options\n"
-)
-gorlek_glitch = (
-    '\n\ndef set_gorlek_glitched_rules(w: WotWWorld):\n'
-    '    """Gorlek (or medium) rules with glitches"""\n'
-    "    p = w.player\n"
-    "    o = w.options\n"
-)
-kii = (
-    '\n\ndef set_kii_rules(w: WotWWorld):\n'
-    '    """Kii (or hard) rules"""\n'
-    "    p = w.player\n"
-    "    o = w.options\n"
-)
-kii_glitch = (
-    '\n\ndef set_kii_glitched_rules(w: WotWWorld):\n'
-    '    """Kii (or hard) rules with glitches."""\n'
-    "    p = w.player\n"
-    "    o = w.options\n"
-)
-unsafe = (
-    '\n\ndef set_unsafe_rules(w: WotWWorld):\n' '    """Unsafe rules."""\n' "    p = w.player\n" "    o = w.options\n"
-)
-unsafe_glitch = (
-    '\n\ndef set_unsafe_glitched_rules(w: WotWWorld):\n'
-    '    """Unsafe rules with glitches."""\n'
-    "    p = w.player\n"
-    "    o = w.options\n"
-)
-
-# Store the parsed text for each difficulty
-list_rules: list[str] = [moki, gorlek, gorlek_glitch, kii, kii_glitch, unsafe, unsafe_glitch]
-# Store the entrance names
-entrances: list[str] = []
-# Contain the refill info per region in a tuple: (health, energy, type)
-refills: dict[str, tuple[int, int, int]] = {}
-refill_events: list[str] = []  # Store all the names given to the refill events.
-doors_map: dict[str, int] = {}  # Mapping from door name to door ID
-doors_vanilla: list[tuple[str, str]] = []  # Vanilla connections between the doors
-
-# Global variables
-indent = 0  # Number of indents
-anchor = ""  # Name of the current anchor
-glitched = False  # Whether the current path involves glitches
-difficulty = 0  # Difficulty of the path
-req = ""  # Full requirement
-req1 = ""  # Requirements from first indent
-req2 = ""  # Requirements from second indent
-req3 = ""  # Requirements from third indent
-req4 = ""  # Requirements from fourth indent
-req5 = ""  # Requirements from fifth indent
-refill_type = ""  # Refill type (energy, health, checkpoint or full)
-path_type = ""  # Type of the path (connection, pickup, refill)
-path_name = ""  # Name of the location/region/event accessed by the path
-should_convert = False  # If True, convert is called to create a rule
-is_door = False  # True while parsing a door
-is_enter = False  # True when in an enter clause (when parsing the door rules)
-door_id = 0
-is_region = False  # True when parsing a region requirement
-and_req: list[str] = []  # Stores the requirements form an and chain (i.e. coma separated requirements)
-and_skills: list[str] = []  # Store the skills, events from the and chain
-and_other: list[str] = []  # Store the requirements that have their own fonction (some glitches, keys, shops...)
-and_resource: list[tuple[str, any]] = []  # Store the requirements that involve resources from the and chain
-or_req: list[list[str]] = []  # Stores the requirements from each OR chain
-
-
-or_skills: list[str] = []
-or_resource: list[tuple[str, any]] = []
-or_glitch: list[str] = []
-
-target_area = ""  # Area of the path_name anchor
-
-convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
-
-for i, line in enumerate(source_text):  # Line number is only used for debug
-    should_convert = False  # Reset the flag to false
-
-    # Parse the line text
-    m = r_comment.search(line)  # Remove the comments
-    if m:
-        line = line[: m.start()]
-    m = r_trailing.search(line)  # Remove the trailing spaces
-    if m:
-        line = line[: m.start()]
-    if line == "":
-        continue
-
-    m = r_indent.match(line)  # Count the indents
-    if m is None:
-        indent = 0
-    else:
-        indent = (m.end() + 1) // 2
-        line = line[m.end() :]  # Remove the indents from the text
-        if is_enter:  # When in parsing a door connection, there is one extra indent, it is easier to remove it there
-            if indent < 3:  # Exited from enter clause, so set it to false
-                is_enter = False
-            else:  # Remove the extra indent to avoid adding new cases
-                indent -= 1
-
-    if indent == 0:  # Always anchor, except for requirement or region (which are ignored)
-        req1, req2, req3, req4, req5 = "", "", "", "", ""
-        is_region = False
-        if "anchor" in line:
-            name = try_group(r_colon, line, 1, -1)  # the space and colon are captured, to remove them with 1, -1
-            s = r_separate.search(name)  # Detect and remove the ` at <coord>` part if it exists.
-            if s:
-                anchor = name[: s.start()]
-            else:
-                anchor = name
-            refills.setdefault(anchor, (0, 0, 0))
-        elif "region" in line:
-            anchor = "Menu"
-            region_name = try_group(r_colon, line, 1, -1)
-            path_name = f"danger_{region_name}"
-            path_type = "conn"
-            is_region = True
-
+    def conv_refill(self) -> None:
+        """Get the refill type (to add before the region name) and update the data tables."""
+        current = self.refills[self.anchor]
+        if "=" in self.path_name:
+            value = int(self.path_name[-1])
+            if self.path_name[:-2] == "Health":
+                if current[0] == 0:
+                    self.refills.update({self.anchor: (value, current[1], current[2])})
+                    self.refill_events.append(f"H.{self.anchor}")
+                self.refill_type = "H."
+            if self.path_name[:-2] == "Energy":
+                if current[1] == 0:
+                    self.refills.update({self.anchor: (current[0], value, current[2])})
+                    self.refill_events.append(f"E.{self.anchor}")
+                self.refill_type = "E."
+        elif self.path_name == "Checkpoint":
+            self.refills.update({self.anchor: (current[0], current[1], 1)})
+            self.refill_events.append(f"C.{self.anchor}")
+            self.refill_type = "C."
+        elif self.path_name == "Full":
+            self.refills.update({self.anchor: (current[0], current[1], 2)})
+            self.refill_events.append(f"F.{self.anchor}")
+            self.refill_type = "F."
         else:
-            anchor = ""
+            raise ValueError(f"{self.path_name} is not a valid refill type (at anchor {self.anchor}).")
 
-    elif indent == 1:
-        req1, req2, req3, req4, req5 = "", "", "", "", ""
-        difficulty = 0  # Reset the difficulty to moki
-        if not anchor:  # Only happens with `requirement:` or `region`, ignore it
-            continue
-        if "nospawn" in line or "tprestriction" in line:
-            continue
-        if line == "door:":
-            path_type = "conn"
-            is_door = True
-            continue
-        is_door = False
+    def convert(self) -> None:
+        """Convert the data from req into lists, and make the calls to append_rules according to the lists' content."""
 
-        if is_region:
-            try:  # Copied from indent 2, by applying it to req1 instead
-                path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
-                difficulty = convert_diff[path_diff]
-                req1 = line[try_end(r_difficulty, line) + 1 :]  # Can be empty
-            except RuntimeError as e:
-                print(f"Failed to find the difficulty in line {i}.\nReason: {e}")
-                difficulty = convert_diff["moki"]
-                req1 = line  # Can be empty
-            if req1:
-                if req1[-1] == ":":
-                    req1 = req1[:-1]
-                else:
-                    should_convert = True
-        else:
-            path_type = try_group(r_type, line, end=-1)  # Connection type
-            if path_type not in ("conn", "state", "pickup", "refill", "quest"):
-                raise ValueError(f'{path_type} (line {i}) is not an appropriate path type.\n"{line}"')
-            if path_type == "refill":
-                if ":" in line:
-                    path_name = try_group(r_name, line, 1, -1)  # Checkpoint, Full, Energy=x...
-                    conv_refill()
-                else:
-                    path_name = try_group(r_refill, line, 1)  # Checkpoint, Full, Energy=x...
-                    conv_refill()
-                    should_convert = True
-                    req1 = "free"
+        # Reset the global values
+        self.and_req = []
+        self.or_req = []
+        self.or_skills = []
+        self.or_resource = []
+        self.or_glitch = []
+        self.and_resource = []
+        self.and_skills = []
+        self.and_other = []
+        self.target_area = ""
+
+        # Get the requirements when entering a new area.
+        if self.path_type == "conn" and "." in self.path_name:
+            dot_position = self.path_name.find(".")
+            f_area = self.path_name[:dot_position]  # Extract the name of the target area
+            if "." in self.anchor:
+                dot_position = self.anchor.find(".")
+                i_area = self.anchor[:dot_position]  # Extract the name of the starting area
             else:
-                path_name = try_group(r_name, line, 1, -1)  # Name
+                i_area = ""
 
-            if "free" in line:
-                should_convert = True
-                req1 = "free"
+            # Apply the region requirements if the regions differ, or if exiting a door (in case door rando is used).
+            # Skip it for some regions as they don't have any danger requirement.
+            if i_area != f_area and f_area not in regions_free:
+                self.target_area = f_area
 
-    elif indent == 2:  # When not a door, this contains the path difficulty
-        req2, req3, req4, req5 = "", "", "", ""
-        if not anchor:  # Only happens with `requirement:` or `region`, ignore it
-            continue
-        if is_door:
-            if "id:" in line:
-                door_id = int(line[4:])
-            elif "target:" in line:
-                path_name = line[8:]
-                path_type = "conn"
-                doors_vanilla.append((anchor + " (Door)", path_name + " (Door)"))
-                doors_map.setdefault(anchor + " (Door)", door_id)
-                create_door_rules()
-                # To connect the anchor to the door, the rest is done in create_door_rules
-                path_name = anchor + " (Door)"
-            elif "free" in line:  # Case of a free door connection
-                should_convert = True
-                req1 = "free"
-                req2 = ""
-            else:  # Case of line == "enter:", the rules are in the next lines
-                is_enter = True
+        if self.path_type == "refill":
+            self.path_name = self.refill_type + self.anchor
+
+        conn_name = f"{self.anchor} -> {self.path_name}"
+        if conn_name not in self.entrances:
+            self.entrances.append(conn_name)
+
+        s_req = self.req.split(", ")
+        for elem in s_req:
+            if " OR " in elem:
+                self.or_req.append(elem.split(" OR "))
+            else:
+                self.and_req.append(elem)
+
+        if len(self.or_req) == 0:
+            self.parse_and()
+            self.append_rule()
+
+        elif len(self.or_req) == 1:  # One `or` chain in the requirements
+            self.order_or(self.or_req[0])
+            self.handle_or_chain()
+
+        elif len(self.or_req) == 2:  # Two chains of or
+            # Swaps the two chains if it is more efficient to split the second chain
+            if len(self.or_req[0]) > len(self.or_req[1]):
+                self.or_req[0], self.or_req[1] = (self.or_req[1], self.or_req[0])
+            self.order_or(self.or_req[1])
+
+            while self.or_req[0]:  # Split the first or chain into the `and` chain
+                self.and_req.append(self.or_req[0][-1])
+                self.or_req[0].pop()
+                self.handle_or_chain()
+                self.and_req.pop()  # Remove the added requirement from the `and` chain
+
+
+    def handle_or_chain(self) -> None:
+        """Split the requirements from or_chain and make the calls to append_rule."""
+        temp_glitch = self.or_glitch.copy()  # Make a copy, so it is safe to empty the list in this scope
+        while temp_glitch:  # If glitches are present, add them one at a time to the `and` chain
+            self.and_req.append(temp_glitch[-1])
+            temp_glitch.pop()
+            self.parse_and()
+            self.append_rule(use_or_resource=False)
+            self.and_req.pop()  # Remove the requirement added above
+        if self.or_skills:
+            self.parse_and()
+            self.append_rule(use_or_resource=False)
+        if self.or_resource:
+            self.parse_and()
+            self.append_rule()
+
+
+    def write_files(self) -> None:
+        """Write the extracted data into output files."""
+        ent_txt = header + "entrance_table: list[str] = [\n"
+        for entrance in self.entrances:
+            ent_txt += f'    "{entrance}",\n'
+        ent_txt = ent_txt[:-2]
+        ent_txt += "\n    ]\n"
+
+        ref_txt = header + (
+            "refills: dict[str, tuple[int, int, int]] = {  "
+            "# key: region name. Tuple: [health restored, energy restored, refill type]\n"
+        )
+        ref_txt += "    # For refill type: 0 is no refill, 1 is Checkpoint, 2 is Full refill.\n"
+        for region, info in self.refills.items():
+            ref_txt += f'    "{region}": {info},\n'
+        ref_txt = ref_txt[:-2]
+        ref_txt += "\n    }\n\n" "refill_events: list[str] = [\n"
+        for refill_name in self.refill_events:
+            ref_txt += f'    "{refill_name}",\n'
+        ref_txt = ref_txt[:-2]
+        ref_txt += "\n    ]\n"
+
+        door_txt = header + "doors_vanilla: list[tuple[str, str]] = [  # Vanilla door connections\n"
+        for door in self.doors_vanilla:
+            door_txt += f"    {door},\n"
+        door_txt = door_txt[:-2]
+        door_txt += "\n    ]\n\n\n"
+        door_txt += "doors_map: dict[str, int] = {  # Mapping to door ID\n"
+        for door, value in self.doors_map.items():
+            door_txt += f'    "{door}": {value},\n'
+        door_txt = door_txt[:-2]
+        door_txt += "\n    }\n"
+
+        with open("Rules.py", "w") as w_file:
+            for j in range(7):
+                w_file.write(self.list_rules[j])
+            print("The file `Rules.py` has been successfully created.")
+        with open("Entrances.py", "w") as w_file:
+            w_file.write(ent_txt)
+            print("The file `Entrances.py` has been successfully created.")
+        with open("Refills.py", "w") as w_file:
+            w_file.write(ref_txt)
+            print("The file `Refills.py` has been successfully created.")
+        with open("DoorData.py", "w") as w_file:
+            w_file.write(door_txt)
+            print("The file `DoorData.py` has been successfully created.")
+
+
+    def parse_and(self) -> None:
+        """Parse the list of requirements in the `and` chain, and put the processed information in the `and` lists."""
+
+        # Reset the global values
+        self.glitched = False
+        self.and_skills = []  # Stores inf_skills
+        self.and_resource = []
+        self.and_other = []
+
+        for requirement in self.and_req:
+            if "=" in requirement:
+                elem, value = requirement.split("=")  # elem: type of path ; value: value associated
+            else:
+                if requirement in name_convert.keys():
+                    requirement = name_convert[requirement]
+                elem = requirement
+                value = "1"
+
+            # Handle the glitches
+            if elem in other_glitches.keys():  # Glitches that use a function
+                self.glitched = True
+                self.and_other.append(elem)
+            elif elem in inf_glitches.keys():  # Glitches that can be used infinitely and only use one skill
+                self.glitched = True
+                current_req = inf_glitches[elem]
+                if current_req not in self.and_skills and current_req != "free":
+                    self.and_skills.append(current_req)
+            elif elem in energy_glitches.keys():
+                self.glitched = True
+                self.and_resource.append(("energy", (energy_glitches[elem], int(value))))
+            elif elem in wall_glitches.keys():
+                self.glitched = True
+                self.and_resource.append(("wall", (wall_glitches[elem], int(value))))
+
+            # Check on requirement and not on elem to catch the energy skills without the =
+            elif requirement in inf_skills:
+                if requirement not in self.and_skills and requirement != "free":
+                    self.and_skills.append(requirement)
+            elif elem in en_skills:
+                self.and_resource.append(("energy", (elem, int(value))))
+            elif elem == "Damage":
+                self.and_resource.append(("db", int(value)))
+            elif elem in ("BreakWall", "Boss"):
+                self.and_resource.append(("wall", (elem, int(value))))
+            elif (
+                "Keystone=" in requirement
+                or "Ore=" in requirement
+                or "SpiritLight=" in requirement
+                or "Danger=" in requirement
+            ):  # Case of a keystone door, or spirit light, or ore, or danger value
+                self.and_other.append(requirement)
+            elif elem == "Combat":
+                self.and_resource += parse_combat(value)
+            else:  # Case of an event
+                self.and_skills.append(elem)
+
+
+    def order_or(self, or_chain: list[str]) -> None:
+        """Parse the list of requirements in the `or` chain, and categorize them between skills and resources."""
+
+        self.or_skills = []  # Store inf_skills (skills that don't require energy to use)
+        self.or_glitch = []  # Store the glitches
+        self.or_resource = []  # Store requirements that need resources
+
+        for requirement in or_chain:
+            if "=" in requirement:
+                elem, value = requirement.split("=")  # elem: type of path ; value: value associated
+            else:
+                if requirement in name_convert.keys():
+                    requirement = name_convert[requirement]
+                elem = requirement
+                value = 0
+
+            # Find the glitches (not parsed here)
+            if (
+                elem in other_glitches.keys()
+                or elem in inf_glitches.keys()
+                or elem in energy_glitches.keys()
+                or elem in wall_glitches.keys()
+            ):
+                self.or_glitch.append(requirement)
+
+            # Check on requirement and not on elem to catch the energy skills without the =
+            elif requirement in inf_skills:
+                if requirement not in self.and_skills and requirement != "free":
+                    self.or_skills.append(requirement)
+            elif elem in en_skills:
+                self.or_resource.append(("energy", (elem, int(value))))
+            elif elem == "Damage":
+                self.or_resource.append(("db", int(value)))
+            elif elem in ("BreakWall", "Boss"):
+                self.or_resource.append(("wall", (elem, int(value))))
+            elif elem == "Combat":
+                self.or_resource += parse_combat(value)
+            else:  # Case of an event
+                self.or_skills.append(elem)
+            # Keystone, Ore and Spirit Light never appear in an `or` chain
+
+
+    def append_rule(self, use_or_resource: bool = True) -> None:
+        """
+        Add the text to the rules list.
+
+        When use_or_resource is set to False, only the resources from the `and` chain are used.
+        This happens when looping through or_glitch or using or_skills.
+        """
+        start_txt = f'    ar(w.get_entrance("{self.anchor} -> {self.path_name}"), lambda s: '
+        req_txt = ""
+
+        if self.and_skills:
+            temp_txt = ""
+            if len(self.and_skills) == 1:
+                temp_txt = f's.has("{self.and_skills[0]}", p)'
+            else:
+                for elem in self.and_skills:
+                    if temp_txt:
+                        temp_txt += f', "{elem}"'
+                    else:
+                        temp_txt += f's.has_all(("{elem}"'
+                temp_txt += "), p)"
+            if req_txt:
+                req_txt += " and " + temp_txt
+            else:
+                req_txt += temp_txt
+
+        if self.and_other:
+            for elem in self.and_other:
+                temp_txt = ""
+                if "Keystone=" in elem:
+                    if self.path_name != "MidnightBurrows.Teleporter":
+                        temp_txt = f'can_open_door("{self.path_name}", s, p, w)'
+                elif "=" in elem:
+                    req_name, amount = elem.split("=")
+                    amount = int(amount)
+                    if req_name == "SpiritLight":
+                        if amount == 1200:  # Case of a shop item
+                            temp_txt = "can_buy_shop(s, p)"
+                        else:  # Case of a map from Lupo
+                            temp_txt = "can_buy_map(s, p)"
+                    elif req_name == "Ore":
+                        temp_txt = f's.count("Gorlek Ore", p) >= {amount}'
+                    elif req_name == "Danger":
+                        temp_txt = f"has_enough_max_health(s, p, o, {amount})"
+                    else:
+                        raise ValueError(f"Invalid input: {elem}")
+                elif elem in other_glitches.keys():
+                    temp_txt = other_glitches[elem]
+                else:
+                    raise ValueError(f"Invalid input: {elem}")
+                if req_txt and temp_txt:
+                    req_txt += " and " + temp_txt
+                else:
+                    req_txt += temp_txt
+
+        if self.or_skills and not use_or_resource:
+            temp_txt = ""
+            if len(self.or_skills) == 1:
+                temp_txt = f's.has("{self.or_skills[0]}", p)'
+            else:
+                for elem in self.or_skills:
+                    if temp_txt:
+                        temp_txt += f', "{elem}"'
+                    else:
+                        temp_txt += f's.has_any(("{elem}"'
+                temp_txt += "), p)"
+            if req_txt:
+                req_txt += " and " + temp_txt
+            else:
+                req_txt += temp_txt
+
+        if self.target_area:  # Entering a new area: check that it can be entered
+            if req_txt:
+                req_txt += " and " + f's.has("danger_{self.target_area}", p)'
+            else:
+                req_txt += f's.has("danger_{self.target_area}", p)'
+
+        if use_or_resource:
+            used_or_res = self.or_resource
+        else:
+            used_or_res = []
+        if self.and_resource or used_or_res:
+            temp_txt = (
+                f'has_enough_resources({self.and_resource}, {used_or_res}, "{self.anchor}", s, p, o, ' f"{bool(self.difficulty == 0)})"
+            )
+            if req_txt:
+                req_txt += " and " + temp_txt
+            else:
+                req_txt += temp_txt
+
+        if req_txt:
+            tot_txt = start_txt + req_txt + ', "or")\n'
+        else:
+            tot_txt = start_txt + 'True, "or")\n'
+
+        if self.glitched:
+            difficulty_index = self.difficulty + 1
+        else:
+            difficulty_index = self.difficulty
+
+        self.list_rules[difficulty_index] += tot_txt
+
+
+    def create_door_rules(self) -> None:
+        """Add to list_rules and the entrances some connection rules for the doors."""
+        dot_position = self.anchor.find(".")
+        area = self.anchor[:dot_position]  # Extract the name of the area
+        # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
+        # Also check for the region requirements when exiting a door
+        if area in regions_free:
+            self.list_rules[0] += f'    ar(w.get_entrance("{self.anchor} (Door) -> {self.anchor}"), lambda s: True, "or")\n'
+        else:
+            self.list_rules[0] += (
+                f'    ar(w.get_entrance("{self.anchor} (Door) -> {self.anchor}"), '
+                f'lambda s: s.has("danger_{area}", p), "or")\n'
+            )
+        self.entrances.append(f"{self.anchor} (Door) -> {self.anchor}")
+
+
+
+
+    def main_loop(self) -> None:  # TODO Doc
+        with open("./areas.wotw", "r") as file:
+            source_text = file.readlines()
+
+
+
+        req1 = ""  # Requirements from first indent
+        req2 = ""  # Requirements from second indent
+        req3 = ""  # Requirements from third indent
+        req4 = ""  # Requirements from fourth indent
+        req5 = ""  # Requirements from fifth indent
+
+        should_convert = False  # If True, convert is called to create a rule
+        is_door = False  # True while parsing a door
+        is_enter = False  # True when in an enter clause (when parsing the door rules)
+        door_id = 0
+
+        is_region = False  # True when parsing a region requirement
+
+        convert_diff = {"moki": 0, "gorlek": 1, "kii": 3, "unsafe": 5}
+
+        for i, line in enumerate(source_text):  # Line number is only used for debug
+            should_convert = False  # Reset the flag to false
+
+            # Parse the line text
+            m = r_comment.search(line)  # Remove the comments
+            if m:
+                line = line[: m.start()]
+            m = r_trailing.search(line)  # Remove the trailing spaces
+            if m:
+                line = line[: m.start()]
+            if line == "":
+                continue
+
+            m = r_indent.match(line)  # Count the indents
+            if m is None:
+                indent = 0
+            else:
+                indent = (m.end() + 1) // 2
+                line = line[m.end() :]  # Remove the indents from the text
+                # When in parsing a door connection, there is one extra indent, it is easier to remove it there
+                if is_enter:
+                    if indent < 3:  # Exited from enter clause, so set it to false
+                        is_enter = False
+                    else:  # Remove the extra indent to avoid adding new cases
+                        indent -= 1
+
+            if indent == 0:  # Always anchor, except for requirement or region (which are ignored)
+                req1, req2, req3, req4, req5 = "", "", "", "", ""
+                is_region = False
+                if "anchor" in line:
+                    # The space and colon are captured, so remove them with 1, -1
+                    name = try_group(r_colon, line, 1, -1)
+                    s = r_separate.search(name)  # Detect and remove the ` at <coord>` part if it exists.
+                    if s:
+                        self.anchor = name[: s.start()]
+                    else:
+                        self.anchor = name
+                    self.refills.setdefault(self.anchor, (0, 0, 0))
+                elif "region" in line:
+                    self.anchor = "Menu"
+                    region_name = try_group(r_colon, line, 1, -1)
+                    self.path_name = f"danger_{region_name}"
+                    self.path_type = "conn"
+                    is_region = True
+
+                else:
+                    self.anchor = ""
+
+            elif indent == 1:
+                req1, req2, req3, req4, req5 = "", "", "", "", ""
+                self.difficulty = 0  # Reset the difficulty to moki
+                if not self.anchor:  # Only happens with `requirement:` or `region`, ignore it
+                    continue
+                if "nospawn" in line or "tprestriction" in line:
+                    continue
+                if line == "door:":
+                    self.path_type = "conn"
+                    is_door = True
+                    continue
                 is_door = False
 
-        elif is_region:  # Copied from indent 3, by applying it to req2 instead
-            if line[-1] == ":":
-                req2 = line[:-1]
-            else:
-                req2 = line
-                should_convert = True
-
-        else:
-            try:
-                path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
-                difficulty = convert_diff[path_diff]
-                req2 = line[try_end(r_difficulty, line) + 1 :]  # Can be empty
-            except RuntimeError as e:
-                print(f"Failed to find the difficulty in line {i}.\nReason: {e}")
-                difficulty = convert_diff["moki"]
-                req2 = line  # Can be empty
-            if req2:
-                if req2[-1] == ":":
-                    req2 = req2[:-1]
+                if is_region:
+                    try:  # Copied from indent 2, by applying it to req1 instead
+                        path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
+                        self.difficulty = convert_diff[path_diff]
+                        req1 = line[try_end(r_difficulty, line) + 1 :]  # Can be empty
+                    except RuntimeError as e:
+                        print(f"Failed to find the difficulty in line {i}.\nReason: {e}")
+                        self.difficulty = convert_diff["moki"]
+                        req1 = line  # Can be empty
+                    if req1:
+                        if req1[-1] == ":":
+                            req1 = req1[:-1]
+                        else:
+                            should_convert = True
                 else:
+                    self.path_type = try_group(r_type, line, end=-1)  # Connection type
+                    if self.path_type not in ("conn", "state", "pickup", "refill", "quest"):
+                        raise ValueError(f'{self.path_type} (line {i}) is not an appropriate path type.\n"{line}"')
+                    if self.path_type == "refill":
+                        if ":" in line:
+                            self.path_name = try_group(r_name, line, 1, -1)  # Checkpoint, Full, Energy=x...
+                            self.conv_refill()
+                        else:
+                            self.path_name = try_group(r_refill, line, 1)  # Checkpoint, Full, Energy=x...
+                            self.conv_refill()
+                            should_convert = True
+                            req1 = "free"
+                    else:
+                        self.path_name = try_group(r_name, line, 1, -1)  # Name
+
+                    if "free" in line:
+                        should_convert = True
+                        req1 = "free"
+
+            elif indent == 2:  # When not a door, this contains the path difficulty
+                req2, req3, req4, req5 = "", "", "", ""
+                if not self.anchor:  # Only happens with `requirement:` or `region`, ignore it
+                    continue
+                if is_door:
+                    if "id:" in line:
+                        door_id = int(line[4:])
+                    elif "target:" in line:
+                        self.path_name = line[8:]
+                        self.path_type = "conn"
+                        self.doors_vanilla.append((self.anchor + " (Door)", self.path_name + " (Door)"))
+                        self.doors_map.setdefault(self.anchor + " (Door)", door_id)
+                        self.create_door_rules()
+                        # To connect the anchor to the door, the rest is done in create_door_rules
+                        self.path_name = self.anchor + " (Door)"
+                    elif "free" in line:  # Case of a free door connection
+                        should_convert = True
+                        req1 = "free"
+                        req2 = ""
+                    else:  # Case of line == "enter:", the rules are in the next lines
+                        is_enter = True
+                        is_door = False
+
+                elif is_region:  # Copied from indent 3, by applying it to req2 instead
+                    if line[-1] == ":":
+                        req2 = line[:-1]
+                    else:
+                        req2 = line
+                        should_convert = True
+
+                else:
+                    try:
+                        path_diff = try_group(r_difficulty, line, end=-1)  # moki, gorlek, kii, unsafe
+                        self.difficulty = convert_diff[path_diff]
+                        req2 = line[try_end(r_difficulty, line) + 1 :]  # Can be empty
+                    except RuntimeError as e:
+                        print(f"Failed to find the difficulty in line {i}.\nReason: {e}")
+                        self.difficulty = convert_diff["moki"]
+                        req2 = line  # Can be empty
+                    if req2:
+                        if req2[-1] == ":":
+                            req2 = req2[:-1]
+                        else:
+                            should_convert = True
+
+            elif indent == 3:
+                req3, req4, req5 = "", "", ""
+                if not self.anchor:  # Only happens with `requirement:` or `region`, ignore it
+                    continue
+                if line[-1] == ":":
+                    req3 = line[:-1]
+                else:
+                    req3 = line
                     should_convert = True
 
-    elif indent == 3:
-        req3, req4, req5 = "", "", ""
-        if not anchor:  # Only happens with `requirement:` or `region`, ignore it
-            continue
-        if line[-1] == ":":
-            req3 = line[:-1]
-        else:
-            req3 = line
-            should_convert = True
+            elif indent == 4:
+                req4, req5 = "", ""
+                if not self.anchor:  # Only happens with `requirement:` or `region`, ignore it
+                    continue
+                if line[-1] == ":":
+                    req4 = line[:-1]
+                else:
+                    req4 = line
+                    should_convert = True
 
-    elif indent == 4:
-        req4, req5 = "", ""
-        if not anchor:  # Only happens with `requirement:` or `region`, ignore it
-            continue
-        if line[-1] == ":":
-            req4 = line[:-1]
-        else:
-            req4 = line
-            should_convert = True
+            elif indent == 5:
+                req5 = ""
+                if not self.anchor:  # Only happens with `requirement:` or `region`, ignore it
+                    continue
+                req5 = line
+                should_convert = True
 
-    elif indent == 5:
-        req5 = ""
-        if not anchor:  # Only happens with `requirement:` or `region`, ignore it
-            continue
-        req5 = line
-        should_convert = True
-
-    else:
-        raise NotImplementedError(f"Too many indents ({indent}) on line {i}.\n{line}")
-
-    if should_convert:
-        req = req1
-        if indent >= 2:
-            if req and req2:  # req1 can be empty, same for req2
-                req += f", {req2}"
-            elif req2:  # Case where req1 empty, req2 non empty
-                req = req2
-        if indent >= 3:
-            if req:
-                req += f", {req3}"
             else:
-                req = req3
-        if indent >= 4:
-            req += f", {req4}"
-        if indent >= 5:
-            req += f", {req5}"
-        req = req.replace(":", ",")  # In some cases, a colon is used in place of a coma, regroup the two cases
-        convert()
+                raise NotImplementedError(f"Too many indents ({indent}) on line {i}.\n{line}")
 
-write_files()
+            if should_convert:
+                self.req = req1
+                if indent >= 2:
+                    if self.req and req2:  # req1 can be empty, same for req2
+                        self.req += f", {req2}"
+                    elif req2:  # Case where req1 empty, req2 non-empty
+                        self.req = req2
+                if indent >= 3:
+                    if self.req:
+                        self.req += f", {req3}"
+                    else:
+                        self.req = req3
+                if indent >= 4:
+                    self.req += f", {req4}"
+                if indent >= 5:
+                    self.req += f", {req5}"
+                self.req = self.req.replace(":", ",")  # In some cases, a colon is used in place of a coma, regroup the two cases
+                self.convert()
 
-# Convert the parsed line into lists of requirements
+        self.write_files()
+
+        # Convert the parsed line into lists of requirements
+
+def generate_rules(is_ut=False):
+    extractor = RuleExtractor(is_ut=is_ut)
+    extractor.main_loop()
