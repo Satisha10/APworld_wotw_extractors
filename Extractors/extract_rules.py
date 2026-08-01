@@ -621,7 +621,7 @@ class RuleExtractor:
             used_or_res = []
         if self.and_resource or used_or_res:
             temp_txt = (
-                f'has_enough_resources({self.and_resource}, {used_or_res}, "{self.anchor}", s, p, o, '
+                f'has_enough_resources({self.and_resource}, {used_or_res}, "{self.anchor}", s, w, '
                 f"{bool(self.difficulty == 0)})"
             )
             if req_txt:
