@@ -202,51 +202,53 @@ class RuleExtractor:
 
     def __init__(self, is_ut: bool = False):
 
+        self.is_ut = is_ut  # Generate output files for UT, which consist in adding the glitched item.
+        suffix = "_ut_glitch" if self.is_ut else ""
+
         # Moki, Gorlek, Kii and Unsafe rules respectively
         moki = (
-            header + imports + "def set_moki_rules(w: WotWWorld):\n"
+            header + imports + f"def set_moki_rules{suffix}(w: WotWWorld):\n"
             '    """Moki (or easy, default) rules."""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
-        gorlek = (
-            "\n\ndef set_gorlek_rules(w: WotWWorld):\n"
+        gorlek = header + imports if self.is_ut else ""
+        gorlek += (
+            f"\n\ndef set_gorlek_rules{suffix}(w: WotWWorld):\n"
             '    """Gorlek (or medium) rules."""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         gorlek_glitch = (
-            "\n\ndef set_gorlek_glitched_rules(w: WotWWorld):\n"
+            f"\n\ndef set_gorlek_glitched_rules{suffix}(w: WotWWorld):\n"
             '    """Gorlek (or medium) rules with glitches"""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         kii = (
-            "\n\ndef set_kii_rules(w: WotWWorld):\n"
+            f"\n\ndef set_kii_rules{suffix}(w: WotWWorld):\n"
             '    """Kii (or hard) rules"""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         kii_glitch = (
-            "\n\ndef set_kii_glitched_rules(w: WotWWorld):\n"
+            f"\n\ndef set_kii_glitched_rules{suffix}(w: WotWWorld):\n"
             '    """Kii (or hard) rules with glitches."""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         unsafe = (
-            "\n\ndef set_unsafe_rules(w: WotWWorld):\n"
+            f"\n\ndef set_unsafe_rules{suffix}(w: WotWWorld):\n"
             '    """Unsafe rules."""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
         unsafe_glitch = (
-            "\n\ndef set_unsafe_glitched_rules(w: WotWWorld):\n"
+            f"\n\ndef set_unsafe_glitched_rules{suffix}(w: WotWWorld):\n"
             '    """Unsafe rules with glitches."""\n'
             "    p = w.player\n"
             "    o = w.options\n"
         )
-
-        self.is_ut = is_ut  # Generate output files for UT, which consist in adding the glitched item.
 
         # Store the parsed text for each difficulty
         self.list_rules: list[str] = [moki, gorlek, gorlek_glitch, kii, kii_glitch, unsafe, unsafe_glitch]
@@ -409,8 +411,8 @@ class RuleExtractor:
         ref_txt += "\n    ]\n"
 
         door_txt = header + "doors_vanilla: list[tuple[str, str]] = [  # Vanilla door connections\n"
-        for door in self.doors_vanilla:
-            door_txt += f"    {door},\n"
+        for door_tuple in self.doors_vanilla:
+            door_txt += f"    {door_tuple},\n"
         door_txt = door_txt[:-2]
         door_txt += "\n    ]\n\n\n"
         door_txt += "doors_map: dict[str, int] = {  # Mapping to door ID\n"
@@ -419,10 +421,13 @@ class RuleExtractor:
         door_txt = door_txt[:-2]
         door_txt += "\n    }\n"
 
-        with open("Rules.py", "w") as w_file:
+        rules_file_name = "RulesUTGlitch.py" if self.is_ut else "Rules.py"
+        with open(rules_file_name, "w") as w_file:
             for j in range(7):
+                if j == 0 and self.is_ut:  # Moki rules are always there, no need to consider ut_glitch for them
+                    continue
                 w_file.write(self.list_rules[j])
-            print("The file `Rules.py` has been successfully created.")
+            print(f"The file `{rules_file_name}` has been successfully created.")
         with open("Entrances.py", "w") as w_file:
             w_file.write(ent_txt)
             print("The file `Entrances.py` has been successfully created.")
@@ -540,6 +545,9 @@ class RuleExtractor:
         start_txt = f'    ar(w.get_entrance("{self.anchor} -> {self.path_name}"), lambda s: '
         req_txt = ""
 
+        if self.is_ut:
+            self.and_skills.append("UTGlitch")
+
         if self.and_skills:
             temp_txt = ""
             if len(self.and_skills) == 1:
@@ -640,9 +648,9 @@ class RuleExtractor:
         # Link the door to the anchor (the connection from anchor to door can have a rule and is done in append_rule)
         # Also check for the region requirements when exiting a door
         if area in regions_free:
-            self.list_rules[
-                0
-            ] += f'    ar(w.get_entrance("{self.anchor} (Door) -> {self.anchor}"), lambda s: True, "or")\n'
+            self.list_rules[0] += (
+                f'    ar(w.get_entrance("{self.anchor} (Door) -> {self.anchor}"), lambda s: True, "or")\n'
+            )
         else:
             self.list_rules[0] += (
                 f'    ar(w.get_entrance("{self.anchor} (Door) -> {self.anchor}"), '
