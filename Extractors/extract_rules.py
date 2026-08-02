@@ -101,7 +101,6 @@ wall_glitches = {"ShurikenBreak": "shuriken", "SentryBreak": "sentry"}
 
 # Glitches that can be used infinitely (and only use one skill)
 inf_glitches = {
-    "RemoveKillPlane": "free",
     "HammerBreak": "Hammer",
     "LaunchSwap": "Launch",
     "FlashSwap": "Flash",
@@ -125,7 +124,8 @@ other_glitches = {
     "GlideBashChain": "can_glidebashchain(s, p)",
     "DoubleJumpBashChain": "can_doublejumpbashchain(s, p)",
     "LaunchBashChain": "can_launchbashchain(s, p)",
-    "PauseFloat": "can_pausefloat(s, p)",
+    "PauseFloat": "can_pausefloat()",
+    "RemoveKillPlane": "can_removekillplane()",
 }
 
 regions_free = {
@@ -379,7 +379,7 @@ class RuleExtractor:
             self.and_req.append(temp_glitch[-1])
             temp_glitch.pop()
             self.parse_and()
-            self.append_rule(use_or_resource=False)
+            self.append_rule(use_or_resource=False, or_glitch_loop=True)
             self.and_req.pop()  # Remove the requirement added above
         if self.or_skills:
             self.parse_and()
@@ -535,12 +535,15 @@ class RuleExtractor:
                 self.or_skills.append(elem)
             # Keystone, Ore and Spirit Light never appear in an `or` chain
 
-    def append_rule(self, use_or_resource: bool = True) -> None:
+    def append_rule(self, use_or_resource: bool = True, or_glitch_loop: bool = False) -> None:
         """
         Add the text to the rules list.
 
         When use_or_resource is set to False, only the resources from the `and` chain are used.
         This happens when looping through or_glitch or using or_skills.
+
+        or_glitch_loop indicates that it is looping through the glitches of the or chain. As such, it will exclude
+        anything else from an or chain (i.e. or_resource and or_skills)
         """
         start_txt = f'    ar(w.get_entrance("{self.anchor} -> {self.path_name}"), lambda s: '
         req_txt = ""
@@ -593,7 +596,7 @@ class RuleExtractor:
                 else:
                     req_txt += temp_txt
 
-        if self.or_skills and not use_or_resource:
+        if self.or_skills and not use_or_resource and not or_glitch_loop:
             temp_txt = ""
             if len(self.or_skills) == 1:
                 temp_txt = f's.has("{self.or_skills[0]}", p)'
@@ -878,3 +881,5 @@ def generate_rules(is_ut=False):
     """Generate the extracted files by running a RuleExtractor instance."""
     extractor = RuleExtractor(is_ut=is_ut)
     extractor.run()
+
+generate_rules()
