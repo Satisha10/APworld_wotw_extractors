@@ -6,7 +6,7 @@ game: Ori and the Will of the Wisps
 requires:
   version: 0.6.3 # Version of Archipelago required for this yaml to work as expected.
   game:
-    Ori and the Will of the Wisps: 0.6.1 # Version of the world required for this yaml to work as expected.
+    Ori and the Will of the Wisps: 0.6.2 # Version of the world required for this yaml to work as expected.
 
 Ori and the Will of the Wisps:
   ################
@@ -241,6 +241,15 @@ Ori and the Will of the Wisps:
 
   skip_cutscenes: 'true'
     # Skip most cutscenes, and makes then skippable in the pause menu.
+
+  ut_config: ['one_level']
+    # Configuration for Universal Tracker glitched logic. This doesn't affect generation.
+    # 
+    # - **one_level**: Add the next logic level.
+    # - **glitch**: Add glitches from the current logic level (and one above if `one_level` is also used).
+    # - **free_region**: Remove requirements on max health and Regenerate for entering an area.
+    # - **free_tp**: Remove skills requirements on some teleporters (same effect as `free_teleporters`).
+    # - **max_logic**: Set the logic to unsafe + unpopular + glitches and remove region/tp requirements.
 
   ###########################
   # Item & Location Options #
