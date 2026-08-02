@@ -881,5 +881,3 @@ def generate_rules(is_ut=False):
     """Generate the extracted files by running a RuleExtractor instance."""
     extractor = RuleExtractor(is_ut=is_ut)
     extractor.run()
-
-generate_rules()
