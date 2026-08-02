@@ -6,7 +6,7 @@ See https://github.com/ori-community/wotw-seedgen/tree/main/wotw_seedgen to get 
 """
 
 import re
-from typing import Pattern
+from typing import Pattern, Any
 
 # %% Data and global variables
 
@@ -153,7 +153,7 @@ imports = (
     "from worlds.generic.Rules import add_rule as ar\n\n"
     "from typing import TYPE_CHECKING\n"
     "if TYPE_CHECKING:\n"
-    "    from . import WotWWorld\n\n\n"
+    "    from .. import WotWWorld\n\n\n"
 )
 
 # %% Helpers
@@ -274,11 +274,11 @@ class RuleExtractor:
         # Store the requirements that have their own fonction (some glitches, keys, shops...)
         self.and_other: list[str] = []
         # Store the requirements that involve resources from the `and` chain
-        self.and_resource: list[tuple[str, any]] = []
+        self.and_resource: list[tuple[str, Any]] = []
         self.or_req: list[list[str]] = []  # Stores the requirements from each OR chain
 
         self.or_skills: list[str] = []
-        self.or_resource: list[tuple[str, any]] = []
+        self.or_resource: list[tuple[str, Any]] = []
         self.or_glitch: list[str] = []
 
         self.target_area = ""  # Area of the path_name anchor
