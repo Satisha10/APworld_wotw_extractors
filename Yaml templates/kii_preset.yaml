@@ -6,7 +6,7 @@ game: Ori and the Will of the Wisps
 requires:
   version: 0.6.3 # Version of Archipelago required for this yaml to work as expected.
   game:
-    Ori and the Will of the Wisps: 0.6.2 # Version of the world required for this yaml to work as expected.
+    Ori and the Will of the Wisps: 0.6.3 # Version of the world required for this yaml to work as expected.
 
 Ori and the Will of the Wisps:
   ################
@@ -83,9 +83,9 @@ Ori and the Will of the Wisps:
     # - **wisps**: All wisps must be collected.
     # - **quests**: All quests have to be finished.
     # - **relics**: Place relics in some areas, all of them must be collected.
-    # - **random**: Choose one goal at random among the other selected ones.
-    #   e.g. [random, trees, wisps] will give trees or wisps.
-    #   If only random is selected, it will choose among all goals.
+    # - **one_random**: Choose one goal at random among the other selected ones.
+    #   e.g. ['one_random', 'trees', 'wisps'] will give trees or wisps.
+    #   If only one_random is selected, it will choose among all goals.
     ['trees']
 
   relic_count: 7
